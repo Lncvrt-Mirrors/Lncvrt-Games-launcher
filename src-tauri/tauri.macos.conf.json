@@ -30,7 +30,7 @@
     "active": true,
     "targets": ["app"],
     "macOS": {
-      "minimumSystemVersion": "13.7.8"
+      "minimumSystemVersion": "15.0"
     },
     "icon": ["icons/icon.icns"]
   }
