@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from './componets/Sidebar'
 import './Globals.css'
 import { DownloadProgress } from './types/DownloadProgress'
@@ -18,11 +18,6 @@ import {
   faWarning,
   faXmark
 } from '@fortawesome/free-solid-svg-icons'
-import {
-  isPermissionGranted,
-  requestPermission,
-  sendNotification
-} from '@tauri-apps/plugin-notification'
 import {
   readNormalConfig,
   readVersionsConfig,
@@ -44,6 +39,11 @@ import { arch, platform } from '@tauri-apps/plugin-os'
 import VersionInfo from './componets/VersionInfo'
 import prettyBytes from 'pretty-bytes'
 import ProgressBar from './componets/ProgressBar'
+import { notifyUser } from './util/Notifications'
+import {
+  isPermissionGranted,
+  requestPermission
+} from '@tauri-apps/plugin-notification'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -57,6 +57,7 @@ export default function RootLayout ({
   const [loading, setLoading] = useState(true)
   const [loadingText, setLoadingText] = useState('Loading...')
   const [outdated, setOutdated] = useState(false)
+  const [version, setVersion] = useState<string | null>(null)
 
   const [serverVersionList, setServerVersionList] =
     useState<null | ServerVersionsResponse>(null)
@@ -92,23 +93,6 @@ export default function RootLayout ({
   }
 
   const pathname = usePathname()
-
-  const notifyUser = useCallback(
-    async (title: string, body: string) => {
-      if (!normalConfig?.settings.allowNotifications) return
-
-      let permissionGranted = await isPermissionGranted()
-      if (!permissionGranted) {
-        const permission = await requestPermission()
-        permissionGranted = permission === 'granted'
-      }
-
-      if (permissionGranted) {
-        sendNotification({ title, body })
-      }
-    },
-    [normalConfig]
-  )
 
   useEffect(() => {
     let unlistenProgress: (() => void) | null = null
@@ -183,17 +167,18 @@ export default function RootLayout ({
       unlistenProgress?.()
       unlistenUninstalled?.()
     }
-  }, [notifyUser])
+  }, [])
 
   useEffect(() => {
     ;(async () => {
+      const client = await app.getVersion()
+      setVersion(client)
       if (process.env.NODE_ENV === 'production') {
         setLoadingText('Checking latest version...')
         try {
           const response = await axios.get(
             'https://games.lncvrt.xyz/api/launcher/latest'
           )
-          const client = await app.getVersion()
           if (response.data !== client) {
             setOutdated(true)
             return
@@ -220,10 +205,8 @@ export default function RootLayout ({
       setNormalConfig(normalConfig)
       setLoading(false)
 
-      let permissionGranted = await isPermissionGranted()
-      if (!permissionGranted) {
-        const permission = await requestPermission()
-        permissionGranted = permission === 'granted'
+      if (!(await isPermissionGranted())) {
+        await requestPermission()
       }
     })()
   }, [])
@@ -336,14 +319,16 @@ export default function RootLayout ({
               : d
           )
         )
-        await notifyUser(
-          'Download Failed',
-          `The download for version ${gameInfo.name} v${info.versionName} has failed.`
-        )
+        if (normalConfig?.settings.allowNotifications)
+          await notifyUser(
+            'Download Failed',
+            `The download for version ${gameInfo.name} v${info.versionName} has failed.`
+          )
       }
     }
 
-    await notifyUser('Downloads Finished', 'All downloads have finished.')
+    if (normalConfig?.settings.allowNotifications)
+      await notifyUser('Downloads Finished', 'All downloads have finished.')
   }
 
   function getVersionsAmountData (gameId: number): {
@@ -439,7 +424,8 @@ export default function RootLayout ({
                 getListOfGames,
                 setSelectedGame,
                 getVersionsAmountData,
-                viewingInfoFromDownloads
+                viewingInfoFromDownloads,
+                version
               }}
             >
               <div

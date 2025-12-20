@@ -19,7 +19,7 @@ use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
 
 #[cfg(target_os = "linux")]
-use std::{os::unix::fs::PermissionsExt};
+use std::os::unix::fs::PermissionsExt;
 #[cfg(target_os = "windows")]
 use tauri_plugin_decorum::WebviewWindowExt;
 
@@ -153,15 +153,15 @@ async fn download(
         downloaded += chunk.len() as u64;
 
         let progress = if total_size > 0 {
-            (downloaded as f64 / total_size as f64) * 100.0
+            ((downloaded as f64) / (total_size as f64)) * 100.0
         } else {
             0.0
         };
 
         let elapsed_secs = start.elapsed().as_secs_f64();
-        let speed = downloaded as f64 / elapsed_secs;
+        let speed = (downloaded as f64) / elapsed_secs;
         let eta_secs = if total_size > downloaded {
-            (total_size - downloaded) as f64 / speed
+            ((total_size - downloaded) as f64) / speed
         } else {
             0.0
         };
@@ -248,7 +248,12 @@ fn launch_game(app: AppHandle, name: String, executable: String) {
     let game_path = game_folder.join(&executable);
     if !game_path.exists() {
         app.dialog()
-            .message(format!("Executable \"{}\" not found.\n\nTry reinstalling the game or make a support request in the Community link on the sidebar.", game_path.display().to_string()))
+            .message(
+                format!(
+                    "Executable \"{}\" not found.\n\nTry reinstalling the game or make a support request in the Community link on the sidebar.",
+                    game_path.display().to_string()
+                )
+            )
             .kind(MessageDialogKind::Error)
             .title("Game not found")
             .show(|_| {});
@@ -324,6 +329,7 @@ async fn open_folder(app: AppHandle, name: String) {
 pub fn run() {
     #[allow(unused_variables)]
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             let _ = app

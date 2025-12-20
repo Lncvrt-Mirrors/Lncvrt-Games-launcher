@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Setting } from '../componets/Setting'
 import { writeNormalConfig } from '../util/BazookaManager'
 import { useGlobal } from '../GlobalProvider'
+import { copyToClipboard } from '../util/Clipboard'
 
 export default function Settings () {
   const [allowNotifications, setAllowNotifications] = useState(false)
@@ -12,7 +13,7 @@ export default function Settings () {
   const [theme, setTheme] = useState(0)
 
   const [loaded, setLoaded] = useState(false)
-  const { normalConfig, setNormalConfig } = useGlobal()
+  const { normalConfig, setNormalConfig, version } = useGlobal()
 
   useEffect(() => {
     ;(async () => {
@@ -117,6 +118,14 @@ export default function Settings () {
           </div>
         </div>
       )}
+      <p
+        className='fixed bottom-1.5 right-1.5 rounded-md cursor-pointer px-1 border z-100 transition-colors btntheme1'
+        onClick={async () => {
+          await copyToClipboard(`v${version}`, normalConfig)
+        }}
+      >
+        v{version}
+      </p>
     </>
   )
 }

@@ -24,6 +24,8 @@
     "fs:allow-applocaldata-read",
     "fs:allow-applocaldata-write",
     "dialog:default",
-    "notification:default"
+    "notification:default",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-write-text"
   ]
 }
