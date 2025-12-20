@@ -212,6 +212,7 @@ export default function RootLayout ({
   }, [])
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') return
     const handler = (e: MouseEvent) => e.preventDefault()
     document.addEventListener('contextmenu', handler)
     return () => document.removeEventListener('contextmenu', handler)
@@ -447,13 +448,13 @@ export default function RootLayout ({
               >
                 <Sidebar />
                 <div
-                  className='relative z-2 ml-[239px] w-[calc(100vw-239px)] border-b border-(--col3) h-[33px] bg-(--col1)'
+                  className='relative z-2 ml-59.75 w-[calc(100vw-239px)] border-b border-(--col3) h-8.25 bg-(--col1)'
                   style={{
                     display: platform() === 'windows' ? 'block' : 'none'
                   }}
                 />
                 <div className='relative z-0'>
-                  <main style={{ marginLeft: '15rem' }}>{children}</main>
+                  <main className='ml-60'>{children}</main>
                 </div>
                 {showPopup && (
                   <div
@@ -500,17 +501,20 @@ export default function RootLayout ({
                             {getSpecialVersionsList(selectedGame).map(
                               (v, i) => (
                                 <div key={i} className='popup-entry'>
-                                  <p className='text-2xl'>
-                                    {getVersionGame(v.game)?.cutOff == null
-                                      ? getVersionGame(v.game)?.name
-                                      : getVersionGame(v.game)?.name.substring(
-                                          0,
-                                          getVersionGame(v.game)?.cutOff ?? 0
-                                        ) + '...'}{' '}
-                                    v{v.versionName}
-                                  </p>
+                                  <div className='flex items-center'>
+                                    <p
+                                      className={`text-2xl truncate ${
+                                        selectedVersionList.includes(v.id)
+                                          ? 'max-w-82.5'
+                                          : 'max-w-90'
+                                      }`}
+                                    >
+                                      {getVersionGame(v.game)?.name} v
+                                      {v.versionName}
+                                    </p>
+                                  </div>
                                   <button
-                                    className='button right-22 bottom-1.5'
+                                    className='button btntheme3 right-22 bottom-1.5'
                                     onClick={() => {
                                       setSelectedVersionList(prev =>
                                         prev.includes(v.id)
@@ -531,7 +535,7 @@ export default function RootLayout ({
                                     )}
                                   </button>
                                   <button
-                                    className='button right-1.5 bottom-1.5'
+                                    className='button btntheme3 right-1.5 bottom-1.5'
                                     onClick={() => {
                                       setManagingVersion(v.id)
                                       setViewingInfoFromDownloads(true)
@@ -555,7 +559,7 @@ export default function RootLayout ({
                               <div key={i} className='popup-entry'>
                                 <p className='text-2xl'>{v.name}</p>
                                 <div className='flex gap-2'>
-                                  <div className='entry-info-item'>
+                                  <div className='entry-info-item btntheme3'>
                                     <p>
                                       {(() => {
                                         const data = getVersionsAmountData(v.id)
@@ -566,7 +570,7 @@ export default function RootLayout ({
                                     </p>
                                   </div>
                                   <div
-                                    className='entry-info-item'
+                                    className='entry-info-item btntheme3'
                                     hidden={!v.official}
                                   >
                                     <FontAwesomeIcon
@@ -576,7 +580,7 @@ export default function RootLayout ({
                                     <p>Official</p>
                                   </div>
                                   <div
-                                    className='entry-info-item'
+                                    className='entry-info-item btntheme3'
                                     hidden={v.official}
                                   >
                                     <FontAwesomeIcon
@@ -591,7 +595,7 @@ export default function RootLayout ({
                                   </div>
                                 </div>
                                 <div
-                                  className='entry-info-item mt-2'
+                                  className='entry-info-item btntheme3 mt-2'
                                   hidden={v.official}
                                 >
                                   <FontAwesomeIcon
@@ -601,7 +605,7 @@ export default function RootLayout ({
                                   <p>Developer: {v.developer}</p>
                                 </div>
                                 <button
-                                  className='button right-2 bottom-2'
+                                  className='button btntheme3 right-2 bottom-2'
                                   onClick={() => setSelectedGame(v.id)}
                                 >
                                   <>
@@ -635,7 +639,7 @@ export default function RootLayout ({
                                     }{' '}
                                     v{getVersionInfo(v.version)?.versionName}
                                   </p>
-                                  <div className='mt-[25px] flex items-center justify-between'>
+                                  <div className='mt-6.25 flex items-center justify-between'>
                                     {v.failed ? (
                                       <>
                                         <div className='flex items-center'>
@@ -643,7 +647,7 @@ export default function RootLayout ({
                                             Download failed
                                           </span>
                                           <button
-                                            className='button ml-30 mb-2'
+                                            className='button btntheme3 ml-30 mb-2'
                                             onClick={() => {
                                               setDownloadProgress(prev =>
                                                 prev.filter(
@@ -723,7 +727,8 @@ export default function RootLayout ({
                             </p>
                             <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
                               <button
-                                className='button'
+                                className='button btntheme2'
+                                disabled={downloadProgress.length != 0}
                                 onClick={() =>
                                   invoke('uninstall_version', {
                                     name: managingVersion
@@ -733,7 +738,7 @@ export default function RootLayout ({
                                 Uninstall
                               </button>
                               <button
-                                className='button'
+                                className='button btntheme2'
                                 onClick={async () =>
                                   invoke('open_folder', {
                                     name: managingVersion
@@ -763,7 +768,7 @@ export default function RootLayout ({
                         serverVersionList != null && (
                           <div className='flex justify-center'>
                             <button
-                              className='button w-fit mt-2 -mb-4'
+                              className='button btntheme1 w-fit mt-2 -mb-4'
                               onClick={() => {
                                 setFadeOut(true)
                                 setTimeout(() => setShowPopup(false), 200)
@@ -774,7 +779,7 @@ export default function RootLayout ({
                               {selectedVersionList.length == 1 ? '' : 's'}
                             </button>
                             <button
-                              className='button w-fit mt-2 ml-2 -mb-4'
+                              className='button btntheme1 w-fit mt-2 ml-2 -mb-4'
                               onClick={() => {
                                 const allIds = getSpecialVersionsList(
                                   selectedGame

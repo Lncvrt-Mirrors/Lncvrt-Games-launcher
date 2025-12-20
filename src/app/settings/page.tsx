@@ -10,6 +10,8 @@ export default function Settings () {
   const [allowNotifications, setAllowNotifications] = useState(false)
   const [alwaysShowGamesInSidebar, setAlwaysShowGamesInSidebar] =
     useState(false)
+  const [useLegacyInteractButtons, setUseLegacyInteractButtons] =
+    useState(false)
   const [theme, setTheme] = useState(0)
 
   const [loaded, setLoaded] = useState(false)
@@ -21,6 +23,9 @@ export default function Settings () {
         setAllowNotifications(normalConfig.settings.allowNotifications)
         setAlwaysShowGamesInSidebar(
           normalConfig.settings.alwaysShowGamesInSidebar
+        )
+        setUseLegacyInteractButtons(
+          normalConfig.settings.useLegacyInteractButtons
         )
         setTheme(normalConfig.settings.theme)
         setLoaded(true)
@@ -76,6 +81,30 @@ export default function Settings () {
                   settings: {
                     ...normalConfig.settings,
                     alwaysShowGamesInSidebar: !alwaysShowGamesInSidebar
+                  }
+                })
+                break
+              }
+            }}
+          />
+          <Setting
+            label='Show Installs/Launch Buttons'
+            value={useLegacyInteractButtons}
+            onChange={async () => {
+              while (normalConfig != null) {
+                setUseLegacyInteractButtons(!useLegacyInteractButtons)
+                setNormalConfig({
+                  ...normalConfig,
+                  settings: {
+                    ...normalConfig.settings,
+                    useLegacyInteractButtons: !useLegacyInteractButtons
+                  }
+                })
+                writeNormalConfig({
+                  ...normalConfig,
+                  settings: {
+                    ...normalConfig.settings,
+                    useLegacyInteractButtons: !useLegacyInteractButtons
                   }
                 })
                 break

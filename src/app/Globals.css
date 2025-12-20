@@ -65,11 +65,19 @@ body {
 }
 
 .button {
-  @apply bg-[#0a6ec8] hover:bg-[#1361ad] disabled:bg-[#124c7e] disabled:hover:bg-[#1b3f63] disabled:text-[#bdbdbd] disabled:hover:text-[#e6e6e6] rounded-md cursor-pointer text-[16px] py-1.5 px-3 transition-colors duration-[0.25s];
+  @apply rounded-md cursor-pointer text-[16px] py-1.5 px-3 transition-colors border;
 }
 
-.button-green {
-  @apply bg-[#28a745] hover:bg-[#218838] disabled:bg-[#1c7430] disabled:hover:bg-[#1a5c24] disabled:text-[#bdbdbd] disabled:hover:text-[#e6e6e6];
+.btntheme1 {
+  @apply bg-(--col2) border-(--col4) hover:bg-(--col4) hover:border-(--col6);
+}
+
+.btntheme2 {
+  @apply bg-(--col3) border-(--col5) hover:bg-(--col5) hover:border-(--col7);
+}
+
+.btntheme3 {
+  @apply bg-(--col4) border-(--col6) hover:bg-(--col6) hover:border-(--col8);
 }
 
 ::-webkit-scrollbar {
@@ -111,7 +119,7 @@ body {
 }
 
 .popup-box {
-  @apply relative w-[600px] h-[480px] rounded-lg bg-(--col1) border border-(--col3) flex flex-col p-6;
+  @apply relative w-150 h-120 rounded-lg bg-(--col1) border border-(--col3) flex flex-col p-6;
 }
 
 .popup-content {
@@ -139,13 +147,5 @@ body {
 }
 
 .entry-info-item {
-  @apply flex flex-row items-center gap-1 bg-(--col1) border border-(--col3) text-gray-300 py-1 px-2 rounded-lg w-fit text-[16px] transition-colors cursor-pointer;
-}
-
-.downloads-entry:hover .entry-info-item {
-  @apply bg-(--col2) border-(--col4);
-}
-
-.popup-content .entry-info-item:hover {
-  @apply bg-(--col3) border-(--col5);
+  @apply flex flex-row items-center gap-1 border text-gray-300 py-1 px-2 rounded-lg w-fit text-[16px] transition-colors cursor-pointer;
 }

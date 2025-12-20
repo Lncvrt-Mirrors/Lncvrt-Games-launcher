@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './Installs.css'
 import { useGlobal } from './GlobalProvider'
 import Link from 'next/link'
@@ -11,6 +11,7 @@ import {
   faWarning
 } from '@fortawesome/free-solid-svg-icons'
 import { platform } from '@tauri-apps/plugin-os'
+import { useRouter } from 'next/navigation'
 
 export default function Installs () {
   const {
@@ -27,6 +28,9 @@ export default function Installs () {
     getVersionsAmountData
   } = useGlobal()
 
+  const router = useRouter()
+  const [hoveredIds, setHoveredIds] = useState<number[]>([])
+
   useEffect(() => {
     if (!showPopup) return
     setSelectedVersionList([])
@@ -37,7 +41,7 @@ export default function Installs () {
       <div className='flex justify-between items-center mb-4'>
         <p className='text-3xl'>Games</p>
         <button
-          className='button text-3xl'
+          className='button btntheme1 text-3xl'
           onClick={() => {
             setSelectedGame(null)
             setPopupMode(0)
@@ -63,11 +67,31 @@ export default function Installs () {
                 return a.id - b.id
               })
               .map(i => (
-                <div key={i.id} className='downloads-entry'>
+                <div
+                  key={i.id}
+                  className={`downloads-entry ${
+                    normalConfig?.settings.useLegacyInteractButtons
+                      ? ''
+                      : 'cursor-pointer'
+                  }`}
+                  title='Click to view game installs'
+                  onClick={() => {
+                    if (normalConfig?.settings.useLegacyInteractButtons) return
+                    router.push('/game?id=' + i.id)
+                  }}
+                  onMouseEnter={() => setHoveredIds(prev => [...prev, i.id])}
+                  onMouseLeave={() =>
+                    setHoveredIds(prev => prev.filter(e => e !== i.id))
+                  }
+                >
                   <div className='flex flex-col'>
                     <p className='text-2xl'>{i.name}</p>
                     <div className='flex gap-2'>
-                      <div className='entry-info-item'>
+                      <div
+                        className={`entry-info-item ${
+                          hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
+                        }`}
+                      >
                         <p>
                           {(() => {
                             const data = getVersionsAmountData(i.id)
@@ -77,11 +101,21 @@ export default function Installs () {
                           versions installed
                         </p>
                       </div>
-                      <div className='entry-info-item' hidden={!i.official}>
+                      <div
+                        className={`entry-info-item ${
+                          hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
+                        }`}
+                        hidden={!i.official}
+                      >
                         <FontAwesomeIcon icon={faCheck} color='#19c84b' />
                         <p>Official</p>
                       </div>
-                      <div className='entry-info-item' hidden={i.official}>
+                      <div
+                        className={`entry-info-item ${
+                          hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
+                        }`}
+                        hidden={i.official}
+                      >
                         <FontAwesomeIcon
                           icon={i.verified ? faShieldHalved : faWarning}
                           color={i.verified ? '#19c84b' : '#ffc800'}
@@ -90,8 +124,16 @@ export default function Installs () {
                       </div>
                     </div>
                   </div>
-                  <div className='flex flex-row items-center gap-2'>
-                    <Link className='button' href={'/game?id=' + i.id}>
+                  <div
+                    className='flex flex-row items-center gap-2'
+                    hidden={!normalConfig?.settings.useLegacyInteractButtons}
+                  >
+                    <Link
+                      className={`button ${
+                        hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
+                      }`}
+                      href={'/game?id=' + i.id}
+                    >
                       Installs
                     </Link>
                   </div>

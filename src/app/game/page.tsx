@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import '../Installs.css'
 import { format } from 'date-fns'
 import { invoke } from '@tauri-apps/api/core'
@@ -25,6 +25,7 @@ export default function Installs () {
   } = useGlobal()
 
   const params = useSearchParams()
+  const [hoveredIds, setHoveredIds] = useState<string[]>([])
 
   useEffect(() => {
     if (!showPopup) return
@@ -36,7 +37,7 @@ export default function Installs () {
       <div className='flex justify-between items-center mb-4'>
         <p className='text-3xl'>Installs</p>
         <button
-          className='button text-3xl'
+          className='button btntheme1 text-3xl'
           onClick={() => {
             setSelectedGame(Number(params.get('id') || 0))
             setPopupMode(0)
@@ -56,7 +57,12 @@ export default function Installs () {
               : 'h-[calc(100vh-84px)]'
           }`}
         >
-          {downloadedVersionsConfig && downloadedVersionsConfig.list.length ? (
+          {downloadedVersionsConfig &&
+          downloadedVersionsConfig.list.filter(v => {
+            const info = getVersionInfo(v)
+            if (!info) return false
+            return info.game === Number(params.get('id') || 0)
+          }).length != 0 ? (
             downloadedVersionsConfig.list
               .sort((a, b) => {
                 const infoA = getVersionInfo(a)
@@ -70,13 +76,38 @@ export default function Installs () {
                 return info.game === Number(params.get('id') || 0)
               })
               .map((entry, i) => (
-                <div key={i} className='downloads-entry'>
+                <div
+                  key={entry}
+                  className={`downloads-entry ${
+                    normalConfig?.settings.useLegacyInteractButtons
+                      ? ''
+                      : 'cursor-pointer'
+                  }`}
+                  title='Click to launch game'
+                  onClick={async () => {
+                    if (normalConfig?.settings.useLegacyInteractButtons) return
+                    const verInfo = getVersionInfo(entry)
+                    if (verInfo == undefined) return
+                    invoke('launch_game', {
+                      name: verInfo.id,
+                      executable: verInfo.executable
+                    })
+                  }}
+                  onMouseEnter={() => setHoveredIds(prev => [...prev, entry])}
+                  onMouseLeave={() =>
+                    setHoveredIds(prev => prev.filter(i => i !== i))
+                  }
+                >
                   <div className='flex flex-col'>
                     <p className='text-2xl'>
                       {getVersionGame(getVersionInfo(entry)?.game)?.name} v
                       {getVersionInfo(entry)?.versionName}
                     </p>
-                    <div className='entry-info-item'>
+                    <div
+                      className={`entry-info-item ${
+                        hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
+                      }`}
+                    >
                       <p>
                         Installed{' '}
                         {format(
@@ -88,8 +119,11 @@ export default function Installs () {
                   </div>
                   <div className='flex flex-row items-center gap-2'>
                     <button
-                      className='button'
-                      onClick={async () => {
+                      className={`button ${
+                        hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
+                      }`}
+                      onClick={e => {
+                        e.stopPropagation()
                         setManagingVersion(entry)
                         setPopupMode(3)
                         setShowPopup(true)
@@ -99,8 +133,11 @@ export default function Installs () {
                       View Info
                     </button>
                     <button
-                      className='button'
-                      onClick={async () => {
+                      className={`button ${
+                        hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
+                      }`}
+                      onClick={e => {
+                        e.stopPropagation()
                         setManagingVersion(entry)
                         setPopupMode(2)
                         setShowPopup(true)
@@ -110,8 +147,11 @@ export default function Installs () {
                       Manage
                     </button>
                     <button
-                      className='button button-green'
-                      onClick={async () => {
+                      className={`button ${
+                        hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
+                      }`}
+                      onClick={e => {
+                        e.stopPropagation()
                         const verInfo = getVersionInfo(entry)
                         if (verInfo == undefined) return
                         invoke('launch_game', {
@@ -119,6 +159,7 @@ export default function Installs () {
                           executable: verInfo.executable
                         })
                       }}
+                      hidden={!normalConfig?.settings.useLegacyInteractButtons}
                     >
                       Launch
                     </button>
@@ -127,7 +168,7 @@ export default function Installs () {
               ))
           ) : (
             <div className='flex justify-center items-center h-full'>
-              <p className='text-3xl'>No games installed</p>
+              <p className='text-3xl'>No versions installed</p>
             </div>
           )}
         </div>

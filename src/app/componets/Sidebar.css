@@ -5,20 +5,20 @@
 }
 
 .sidebar-downloads {
-  @apply text-[#bdbdbd] fixed bottom-3 left-2 bg-(--col2) rounded-lg border border-(--col3) w-55 p-4 cursor-pointer transition-colors duration-[0.25s];
+  @apply text-[#bdbdbd] fixed bottom-2 left-2 bg-(--col2) rounded-lg border border-(--col3) px-4 py-3 text-xl cursor-pointer transition-colors duration-[0.25s] opacity-75;
 }
 
 .sidebar-downloads:hover {
-  @apply text-white;
+  @apply text-white opacity-100;
   @apply bg-(--col3) border-(--col4);
 }
 
 .logo {
-  @apply text-2xl font-bold p-4;
+  @apply flex items-center pl-1 h-14 w-60;
 }
 
 .nav-links {
-  @apply flex flex-col p-4 space-y-1 overflow-y-auto overflow-x-hidden;
+  @apply flex flex-col px-4 space-y-1;
 }
 
 .link {
@@ -36,4 +36,12 @@
 
 .link.active:hover {
   @apply bg-(--col3) border-(--col4);
+}
+
+.sidebar ::-webkit-scrollbar {
+  @apply hidden;
+}
+
+.macos-drag {
+  @apply h-7 fixed top-0 left-0 w-60 -z-10;
 }

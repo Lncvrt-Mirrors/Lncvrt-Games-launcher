@@ -44,7 +44,10 @@ export default function VersionInfo () {
         {getVersionInfo(managingVersion)?.versionName}
       </p>
       <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
-        <div className='entry-info-item' hidden={viewingInfoFromDownloads}>
+        <div
+          className='entry-info-item btntheme2'
+          hidden={viewingInfoFromDownloads}
+        >
           <p>
             Installed{' '}
             {format(
@@ -56,7 +59,7 @@ export default function VersionInfo () {
           </p>
         </div>
         <div
-          className='entry-info-item'
+          className='entry-info-item btntheme2'
           hidden={!versionInfo || versionInfo.releaseDate == 0}
         >
           <p>
@@ -69,23 +72,23 @@ export default function VersionInfo () {
             )}
           </p>
         </div>
-        <div className='entry-info-item' hidden={!gameInfo?.official}>
+        <div className='entry-info-item btntheme2' hidden={!gameInfo?.official}>
           <FontAwesomeIcon icon={faCheck} color='#19c84b' />
           <p>Official</p>
         </div>
-        <div className='entry-info-item' hidden={gameInfo?.official}>
+        <div className='entry-info-item btntheme2' hidden={gameInfo?.official}>
           <FontAwesomeIcon
             icon={gameInfo?.verified ? faShieldHalved : faWarning}
             color={gameInfo?.verified ? '#19c84b' : '#ffc800'}
           />
           <p>{gameInfo?.verified ? 'Verified' : 'Unverified'}</p>
         </div>
-        <div className='entry-info-item' hidden={gameInfo?.official}>
+        <div className='entry-info-item btntheme2' hidden={gameInfo?.official}>
           <FontAwesomeIcon icon={faCode} color='lightgray' />
           <p>Developer: {gameInfo?.developer}</p>
         </div>
         <div
-          className='entry-info-item'
+          className='entry-info-item btntheme2'
           hidden={viewingInfoFromDownloads || versionSize === null}
         >
           <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
@@ -99,7 +102,7 @@ export default function VersionInfo () {
               : 'Loading...'}
           </p>
         </div>
-        <div className='entry-info-item' hidden={!versionInfo}>
+        <div className='entry-info-item btntheme2' hidden={!versionInfo}>
           <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
           <p>
             Size when downloaded (zipped):{' '}
