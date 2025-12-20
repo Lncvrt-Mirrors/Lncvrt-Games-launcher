@@ -1,7 +1,7 @@
 'use client'
 
 import './Sidebar.css'
-import Icon from '../assets/Icon.png'
+import Icon from '@/assets/Icon.png'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
