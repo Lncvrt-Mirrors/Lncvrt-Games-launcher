@@ -7,4 +7,5 @@ export interface GameVersion {
   executable: string
   sha512sum: string
   size: number
+  place: number
 }

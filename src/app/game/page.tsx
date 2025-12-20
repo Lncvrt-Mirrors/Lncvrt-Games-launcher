@@ -58,6 +58,12 @@ export default function Installs () {
         >
           {downloadedVersionsConfig && downloadedVersionsConfig.list.length ? (
             downloadedVersionsConfig.list
+              .sort((a, b) => {
+                const infoA = getVersionInfo(a)
+                const infoB = getVersionInfo(b)
+                if (!infoA || !infoB) return -1
+                return infoB.place - infoA.place
+              })
               .filter(v => {
                 const info = getVersionInfo(v)
                 if (!info) return false
