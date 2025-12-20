@@ -1,7 +1,7 @@
 export class SettingsType {
-  constructor(
+  constructor (
     public allowNotifications: boolean = true,
     public alwaysShowGamesInSidebar: boolean = true,
     public theme: number = 0
-  ) { }
+  ) {}
 }

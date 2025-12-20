@@ -1,5 +1,5 @@
 export class DownloadProgress {
-  constructor(
+  constructor (
     public version: string,
     public progress: number,
     public progressBytes: number,
@@ -9,5 +9,5 @@ export class DownloadProgress {
     public finishing: boolean,
     public speed: number,
     public etaSecs: number
-  ) { }
+  ) {}
 }
