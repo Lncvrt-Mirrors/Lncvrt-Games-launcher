@@ -5,11 +5,11 @@
 }
 
 .setting-checkbox {
-  @apply appearance-none w-full h-full border-2 border-(--col4) rounded-md bg-(--col2) transition-colors duration-200 cursor-pointer;
+  @apply appearance-none w-full h-full border-2 border-(--col4) rounded-md bg-(--col2) transition-colors cursor-pointer;
 }
 
 .setting-checkbox:checked {
-  @apply bg-blue-500 border-blue-600;
+  @apply bg-(--col4) border-(--col6);
 }
 
 .fa-check-icon {
