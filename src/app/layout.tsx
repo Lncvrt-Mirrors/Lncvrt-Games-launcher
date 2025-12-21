@@ -522,6 +522,11 @@ export default function RootLayout ({
                                           : [...prev, v.id]
                                       )
                                     }}
+                                    title={
+                                      selectedVersionList.includes(v.id)
+                                        ? 'This version will be downloaded. Click to remove from the list of versions that will be downloaded.'
+                                        : 'This version will NOT be downloaded. Click to add from the list of versions that will be downloaded.'
+                                    }
                                   >
                                     {selectedVersionList.includes(v.id) ? (
                                       <>
@@ -541,6 +546,7 @@ export default function RootLayout ({
                                       setViewingInfoFromDownloads(true)
                                       setPopupMode(3)
                                     }}
+                                    title='Click to view version info'
                                   >
                                     <FontAwesomeIcon icon={faInfo} /> Info
                                   </button>
@@ -561,7 +567,10 @@ export default function RootLayout ({
                                   {v.name}
                                 </p>
                                 <div className='flex gap-2'>
-                                  <div className='entry-info-item btntheme3'>
+                                  <div
+                                    className='entry-info-item btntheme3'
+                                    title='The amount of versions installed of this game in installed/installable format.'
+                                  >
                                     <p>
                                       {(() => {
                                         const data = getVersionsAmountData(v.id)
@@ -574,6 +583,7 @@ export default function RootLayout ({
                                   <div
                                     className='entry-info-item btntheme3'
                                     hidden={!v.official}
+                                    title='This game is official.'
                                   >
                                     <FontAwesomeIcon
                                       icon={faCheck}
@@ -584,6 +594,11 @@ export default function RootLayout ({
                                   <div
                                     className='entry-info-item btntheme3'
                                     hidden={v.official}
+                                    title={
+                                      v.verified
+                                        ? 'This game is verified to be safe'
+                                        : 'This game is NOT verified to be save. Proceed with caution.'
+                                    }
                                   >
                                     <FontAwesomeIcon
                                       icon={
@@ -599,6 +614,7 @@ export default function RootLayout ({
                                 <div
                                   className='entry-info-item btntheme3 mt-2'
                                   hidden={v.developer == null}
+                                  title={`The developer of ${v.name} is ${v.developer}.`}
                                 >
                                   <FontAwesomeIcon
                                     icon={faCode}
@@ -609,6 +625,11 @@ export default function RootLayout ({
                                 <button
                                   className='button btntheme3 right-2 bottom-2'
                                   onClick={() => setSelectedGame(v.id)}
+                                  title={`Click to download specific versions of the game. You have ${(() => {
+                                    const data = getVersionsAmountData(v.id)
+                                    if (!data) return 'N/A'
+                                    return `${data.installed} of ${data.total}`
+                                  })()} versions downloaded.`}
                                 >
                                   <>
                                     <FontAwesomeIcon icon={faDownload} />{' '}
@@ -657,6 +678,7 @@ export default function RootLayout ({
                                                 )
                                               )
                                             }}
+                                            title='Click to remove this version from this menu.'
                                           >
                                             Cancel
                                           </button>
@@ -736,6 +758,7 @@ export default function RootLayout ({
                                     name: managingVersion
                                   })
                                 }
+                                title='Click to uninstall this game. This will NOT remove any progress or any save files.'
                               >
                                 Uninstall
                               </button>
@@ -746,6 +769,7 @@ export default function RootLayout ({
                                     name: managingVersion
                                   })
                                 }
+                                title="Click to browse the game's files."
                               >
                                 Open Folder
                               </button>
@@ -776,6 +800,11 @@ export default function RootLayout ({
                                 setTimeout(() => setShowPopup(false), 200)
                                 downloadVersions()
                               }}
+                              title={`Click to download ${
+                                selectedVersionList.length
+                              } version${
+                                selectedVersionList.length == 1 ? '' : 's'
+                              } of ${getVersionGame(selectedGame)?.name}`}
                             >
                               Download {selectedVersionList.length} version
                               {selectedVersionList.length == 1 ? '' : 's'}
@@ -790,6 +819,12 @@ export default function RootLayout ({
                                   prev.length === allIds.length ? [] : allIds
                                 )
                               }}
+                              title={
+                                selectedVersionList.length ===
+                                getSpecialVersionsList(selectedGame).length
+                                  ? 'Click to remove all selected versions for download.'
+                                  : 'Click to add all selected versions for download.'
+                              }
                             >
                               {selectedVersionList.length ===
                               getSpecialVersionsList(selectedGame).length

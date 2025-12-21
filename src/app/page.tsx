@@ -95,6 +95,7 @@ export default function Installs () {
                         className={`entry-info-item ${
                           hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
                         }`}
+                        title='The amount of versions installed of this game in installed/installable format.'
                       >
                         <p>
                           {(() => {
@@ -110,6 +111,7 @@ export default function Installs () {
                           hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
                         }`}
                         hidden={!i.official}
+                        title='This game is official.'
                       >
                         <FontAwesomeIcon icon={faCheck} color='#19c84b' />
                         <p>Official</p>
@@ -119,6 +121,11 @@ export default function Installs () {
                           hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
                         }`}
                         hidden={i.official}
+                        title={
+                          i.verified
+                            ? 'This game is verified to be safe'
+                            : 'This game is not verified to be save. Proceed with caution.'
+                        }
                       >
                         <FontAwesomeIcon
                           icon={i.verified ? faShieldHalved : faWarning}

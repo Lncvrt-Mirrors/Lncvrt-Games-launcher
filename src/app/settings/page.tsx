@@ -62,6 +62,7 @@ export default function Settings () {
                 break
               }
             }}
+            title='This setting does as you expect, allow the launcher to send notifications for when stuff like downloading is done.'
           />
           <Setting
             label='Always show games in sidebar'
@@ -86,6 +87,7 @@ export default function Settings () {
                 break
               }
             }}
+            title="This setting will make it so when you are on a page like this, the games won't disappear."
           />
           <Setting
             label='Show Installs/Launch Buttons'
@@ -110,8 +112,9 @@ export default function Settings () {
                 break
               }
             }}
+            title='Enable the legacy method of using the installs/launch buttons. In the future this setting may be removed so try and get used to the new method.'
           />
-          <div>
+          <div title='The theme you want the launcher to use.'>
             <label className='text-lg'>Theme:</label>
             <select
               className='ml-2 bg-(--col2) border border-(--col4) rounded-md'

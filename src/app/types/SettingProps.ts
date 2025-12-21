@@ -3,4 +3,5 @@ export type SettingProps = {
   value: boolean
   onChange: (val: boolean) => void
   className?: string
+  title?: string
 }

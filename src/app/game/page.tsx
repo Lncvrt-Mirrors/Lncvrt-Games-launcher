@@ -111,6 +111,7 @@ export default function Installs () {
                       className={`entry-info-item mt-2 ${
                         hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
                       }`}
+                      title='The date the game was installed in MM/dd/yyyy format'
                     >
                       <p>
                         Installed{' '}
@@ -133,6 +134,7 @@ export default function Installs () {
                         setShowPopup(true)
                         setFadeOut(false)
                       }}
+                      title='Click to view version info'
                     >
                       View Info
                     </button>
@@ -147,6 +149,7 @@ export default function Installs () {
                         setShowPopup(true)
                         setFadeOut(false)
                       }}
+                      title='Click to manage this version install'
                     >
                       Manage
                     </button>
