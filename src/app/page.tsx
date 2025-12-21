@@ -89,15 +89,7 @@ export default function Installs () {
                   }
                 >
                   <div className='flex flex-col'>
-                    <p
-                      className={`text-2xl ${
-                        normalConfig?.settings.useLegacyInteractButtons
-                          ? 'w-[calc(100vw-415px)]'
-                          : 'w-[calc(100vw-335px)]'
-                      } truncate`}
-                    >
-                      {i.name}
-                    </p>
+                    <p className='text-2xl'>{i.name}</p>
                     <div className='flex gap-2 mt-2'>
                       <div
                         className={`entry-info-item ${
@@ -137,7 +129,7 @@ export default function Installs () {
                     </div>
                   </div>
                   <div
-                    className='flex flex-row items-center gap-2'
+                    className='flex flex-row items-center gap-2 mt-auto'
                     hidden={!normalConfig?.settings.useLegacyInteractButtons}
                     title='Click to view game installs'
                   >

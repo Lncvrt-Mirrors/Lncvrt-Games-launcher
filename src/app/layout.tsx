@@ -598,7 +598,7 @@ export default function RootLayout ({
                                 </div>
                                 <div
                                   className='entry-info-item btntheme3 mt-2'
-                                  hidden={v.official}
+                                  hidden={v.developer == null}
                                 >
                                   <FontAwesomeIcon
                                     icon={faCode}

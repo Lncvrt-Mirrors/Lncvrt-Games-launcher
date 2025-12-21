@@ -83,7 +83,10 @@ export default function VersionInfo () {
           />
           <p>{gameInfo?.verified ? 'Verified' : 'Unverified'}</p>
         </div>
-        <div className='entry-info-item btntheme2' hidden={gameInfo?.official}>
+        <div
+          className='entry-info-item btntheme2'
+          hidden={gameInfo?.developer == null}
+        >
           <FontAwesomeIcon icon={faCode} color='lightgray' />
           <p>Developer: {gameInfo?.developer}</p>
         </div>
