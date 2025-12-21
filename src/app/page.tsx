@@ -85,8 +85,16 @@ export default function Installs () {
                   }
                 >
                   <div className='flex flex-col'>
-                    <p className='text-2xl'>{i.name}</p>
-                    <div className='flex gap-2'>
+                    <p
+                      className={`text-2xl ${
+                        normalConfig?.settings.useLegacyInteractButtons
+                          ? 'w-[calc(100vw-415px)]'
+                          : 'w-[calc(100vw-335px)]'
+                      } truncate`}
+                    >
+                      {i.name}
+                    </p>
+                    <div className='flex gap-2 mt-2'>
                       <div
                         className={`entry-info-item ${
                           hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'

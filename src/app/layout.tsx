@@ -505,8 +505,8 @@ export default function RootLayout ({
                                     <p
                                       className={`text-2xl truncate ${
                                         selectedVersionList.includes(v.id)
-                                          ? 'max-w-82.5'
-                                          : 'max-w-90'
+                                          ? 'max-w-80.5'
+                                          : 'max-w-87.5'
                                       }`}
                                     >
                                       {getVersionGame(v.game)?.name} v
@@ -557,7 +557,9 @@ export default function RootLayout ({
                           <div className='popup-content'>
                             {serverVersionList?.games.map((v, i) => (
                               <div key={i} className='popup-entry'>
-                                <p className='text-2xl'>{v.name}</p>
+                                <p className='text-2xl w-[calc(100vw-380px)] truncate'>
+                                  {v.name}
+                                </p>
                                 <div className='flex gap-2'>
                                   <div className='entry-info-item btntheme3'>
                                     <p>

@@ -99,12 +99,18 @@ export default function Installs () {
                   }
                 >
                   <div className='flex flex-col'>
-                    <p className='text-2xl'>
+                    <p
+                      className={`text-2xl ${
+                        normalConfig?.settings.useLegacyInteractButtons
+                          ? 'w-[calc(100vw-605px)]'
+                          : 'w-[calc(100vw-520px)]'
+                      } truncate`}
+                    >
                       {getVersionGame(getVersionInfo(entry)?.game)?.name} v
                       {getVersionInfo(entry)?.versionName}
                     </p>
                     <div
-                      className={`entry-info-item ${
+                      className={`entry-info-item mt-2 ${
                         hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
                       }`}
                     >
