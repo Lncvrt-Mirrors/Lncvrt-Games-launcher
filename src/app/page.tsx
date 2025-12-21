@@ -74,7 +74,11 @@ export default function Installs () {
                       ? ''
                       : 'cursor-pointer'
                   }`}
-                  title='Click to view game installs'
+                  title={
+                    normalConfig?.settings.useLegacyInteractButtons
+                      ? ''
+                      : 'Click to view game installs'
+                  }
                   onClick={() => {
                     if (normalConfig?.settings.useLegacyInteractButtons) return
                     router.push('/game?id=' + i.id)
@@ -135,6 +139,7 @@ export default function Installs () {
                   <div
                     className='flex flex-row items-center gap-2'
                     hidden={!normalConfig?.settings.useLegacyInteractButtons}
+                    title='Click to view game installs'
                   >
                     <Link
                       className={`button ${

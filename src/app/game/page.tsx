@@ -83,7 +83,11 @@ export default function Installs () {
                       ? ''
                       : 'cursor-pointer'
                   }`}
-                  title='Click to launch game'
+                  title={
+                    normalConfig?.settings.useLegacyInteractButtons
+                      ? ''
+                      : 'Click to launch game'
+                  }
                   onClick={async () => {
                     if (normalConfig?.settings.useLegacyInteractButtons) return
                     const verInfo = getVersionInfo(entry)
@@ -166,6 +170,7 @@ export default function Installs () {
                         })
                       }}
                       hidden={!normalConfig?.settings.useLegacyInteractButtons}
+                      title='Click to launch game'
                     >
                       Launch
                     </button>
