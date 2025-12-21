@@ -147,5 +147,5 @@ body {
 }
 
 .entry-info-item {
-  @apply flex flex-row items-center gap-1 border text-gray-300 py-1 px-2 rounded-lg w-fit text-[16px] transition-colors cursor-pointer;
+  @apply flex flex-row items-center gap-1 border text-gray-300 py-1 px-2 rounded-md w-fit text-[16px] transition-colors cursor-pointer;
 }

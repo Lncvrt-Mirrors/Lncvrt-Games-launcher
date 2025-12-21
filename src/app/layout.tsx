@@ -563,9 +563,7 @@ export default function RootLayout ({
                           <div className='popup-content'>
                             {serverVersionList?.games.map((v, i) => (
                               <div key={i} className='popup-entry'>
-                                <p className='text-2xl w-[calc(100vw-380px)] truncate'>
-                                  {v.name}
-                                </p>
+                                <p className='text-2xl'>{v.name}</p>
                                 <div className='flex gap-2'>
                                   <div
                                     className='entry-info-item btntheme3'

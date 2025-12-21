@@ -9,5 +9,5 @@
 }
 
 .downloads-entry {
-  @apply flex justify-between items-center m-2 p-4 rounded-lg text-gray-200 text-lg transition-colors bg-(--col2) hover:bg-(--col3) border border-(--col4) hover:border-(--col5);
+  @apply flex justify-between items-center m-2 p-2 rounded-lg text-gray-200 text-lg transition-colors bg-(--col2) hover:bg-(--col3) border border-(--col4) hover:border-(--col5);
 }
