@@ -49,6 +49,7 @@ export default function Installs () {
             setFadeOut(false)
           }}
           disabled={downloadProgress.length != 0}
+          title='Click to download more games.'
         >
           Download game
         </button>

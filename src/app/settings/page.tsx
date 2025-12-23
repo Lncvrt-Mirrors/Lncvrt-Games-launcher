@@ -155,6 +155,7 @@ export default function Settings () {
         onClick={async () => {
           await copyToClipboard(`v${version}`, normalConfig)
         }}
+        title='The current launcher version.'
       >
         v{version}
       </p>
