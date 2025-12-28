@@ -438,7 +438,7 @@ export default function RootLayout ({
                 tabIndex={0}
                 onKeyDown={e => {
                   if (showPopup && e.key === 'Escape') {
-                    if (popupMode == 0 && selectedGame) {
+                    if (popupMode == 0 && selectedGame && pathname === '/') {
                       setSelectedGame(null)
                       setSelectedVersionList([])
                     } else if (viewingInfoFromDownloads) {
