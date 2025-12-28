@@ -376,6 +376,8 @@ export default function RootLayout ({
               ? 'blue-theme'
               : normalConfig?.settings.theme === 4
               ? 'purple-theme'
+              : normalConfig?.settings.theme === 5
+              ? 'mint-theme'
               : 'dark-theme'
           }
         >

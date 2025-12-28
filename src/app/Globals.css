@@ -64,6 +64,18 @@ body {
   --col8: rgb(140, 128, 152);
 }
 
+.mint-theme {
+  --col0: rgb(8, 32, 16);
+  --col1: rgb(16, 48, 32);
+  --col2: rgb(32, 56, 40);
+  --col3: rgb(48, 72, 48);
+  --col4: rgb(64, 88, 66);
+  --col5: rgb(80, 104, 65);
+  --col6: rgb(96, 120, 80);
+  --col7: rgb(112, 136, 85);
+  --col8: rgb(128, 152, 95);
+}
+
 .button {
   @apply rounded-md cursor-pointer text-[16px] py-1.5 px-3 transition-colors border;
 }

@@ -146,6 +146,7 @@ export default function Settings () {
               <option value={2}>Green</option>
               <option value={3}>Blue</option>
               <option value={4}>Purple</option>
+              <option value={5}>Mint</option>
             </select>
           </div>
         </div>
