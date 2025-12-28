@@ -81,15 +81,15 @@ body {
 }
 
 .btntheme1 {
-  @apply bg-(--col2) border-(--col4) hover:bg-(--col4) hover:border-(--col6);
+  @apply bg-(--col2) border-(--col4) hover:bg-(--col4) hover:border-(--col6) disabled:text-gray-300 disabled:bg-(--col1) disabled:border-(--col5) disabled:hover:text-gray-100 disabled:hover:bg-(--col2) disabled:hover:border-(--col6);
 }
 
 .btntheme2 {
-  @apply bg-(--col3) border-(--col5) hover:bg-(--col5) hover:border-(--col7);
+  @apply bg-(--col3) border-(--col5) hover:bg-(--col5) hover:border-(--col7) disabled:text-gray-300 disabled:bg-(--col2) disabled:border-(--col6) disabled:hover:text-gray-100 disabled:hover:bg-(--col3) disabled:hover:border-(--col7);
 }
 
 .btntheme3 {
-  @apply bg-(--col4) border-(--col6) hover:bg-(--col6) hover:border-(--col8);
+  @apply bg-(--col4) border-(--col6) hover:bg-(--col6) hover:border-(--col8) disabled:text-gray-300 disabled:bg-(--col2) disabled:border-(--col7) disabled:hover:text-gray-100 disabled:hover:bg-(--col4) disabled:hover:border-(--col8);
 }
 
 ::-webkit-scrollbar {
