@@ -15,7 +15,6 @@ import { useRouter } from 'next/navigation'
 
 export default function Installs () {
   const {
-    downloadProgress,
     showPopup,
     setShowPopup,
     setPopupMode,
@@ -48,7 +47,6 @@ export default function Installs () {
             setShowPopup(true)
             setFadeOut(false)
           }}
-          disabled={downloadProgress.length != 0}
           title='Click to download more games.'
         >
           Download game

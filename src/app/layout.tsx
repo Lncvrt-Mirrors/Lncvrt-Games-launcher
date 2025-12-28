@@ -225,6 +225,9 @@ export default function RootLayout ({
       .filter(v => !downloadedVersionsConfig?.list.includes(v.id))
       .filter(v => {
         if (game && v.game != game) return false
+        if (downloadProgress.length != 0) {
+          return !downloadProgress.some(d => d.version === v.id)
+        }
         return true
       })
       .sort((a, b) => {
@@ -800,11 +803,16 @@ export default function RootLayout ({
                                 setTimeout(() => setShowPopup(false), 200)
                                 downloadVersions()
                               }}
-                              title={`Click to download ${
-                                selectedVersionList.length
-                              } version${
-                                selectedVersionList.length == 1 ? '' : 's'
-                              } of ${getVersionGame(selectedGame)?.name}`}
+                              disabled={downloadProgress.length != 0}
+                              title={
+                                downloadProgress.length != 0
+                                  ? "You cannot download the versions as you have another download that hasn't completed."
+                                  : `Click to download ${
+                                      selectedVersionList.length
+                                    } version${
+                                      selectedVersionList.length == 1 ? '' : 's'
+                                    } of ${getVersionGame(selectedGame)?.name}`
+                              }
                             >
                               Download {selectedVersionList.length} version
                               {selectedVersionList.length == 1 ? '' : 's'}
