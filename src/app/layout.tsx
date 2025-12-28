@@ -519,7 +519,7 @@ export default function RootLayout ({
                                     </p>
                                   </div>
                                   <button
-                                    className='button btntheme3 right-22 bottom-1.5'
+                                    className='button btntheme3 right-21.5 bottom-1.25'
                                     onClick={() => {
                                       setSelectedVersionList(prev =>
                                         prev.includes(v.id)
@@ -545,7 +545,7 @@ export default function RootLayout ({
                                     )}
                                   </button>
                                   <button
-                                    className='button btntheme3 right-1.5 bottom-1.5'
+                                    className='button btntheme3 right-1 bottom-1.25'
                                     onClick={() => {
                                       setManagingVersion(v.id)
                                       setViewingInfoFromDownloads(true)
