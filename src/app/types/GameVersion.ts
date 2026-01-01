@@ -8,4 +8,5 @@ export interface GameVersion {
   sha512sum: string
   size: number
   place: number
+  changelog: string
 }

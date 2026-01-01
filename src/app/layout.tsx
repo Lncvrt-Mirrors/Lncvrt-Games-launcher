@@ -44,6 +44,7 @@ import {
   isPermissionGranted,
   requestPermission
 } from '@tauri-apps/plugin-notification'
+import VersionChangelog from './componets/VersionChangelog'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -444,6 +445,8 @@ export default function RootLayout ({
                     } else if (viewingInfoFromDownloads) {
                       setViewingInfoFromDownloads(false)
                       setPopupMode(0)
+                    } else if (popupMode == 4) {
+                      setPopupMode(3)
                     } else {
                       setFadeOut(true)
                       setTimeout(() => setShowPopup(false), 200)
@@ -480,6 +483,8 @@ export default function RootLayout ({
                           } else if (viewingInfoFromDownloads) {
                             setViewingInfoFromDownloads(false)
                             setPopupMode(0)
+                          } else if (popupMode == 4) {
+                            setPopupMode(3)
                           } else {
                             setFadeOut(true)
                             setTimeout(() => setShowPopup(false), 200)
@@ -491,7 +496,8 @@ export default function RootLayout ({
                             (popupMode == 0 &&
                               selectedGame &&
                               pathname === '/') ||
-                            viewingInfoFromDownloads
+                            viewingInfoFromDownloads ||
+                            popupMode == 4
                               ? faChevronLeft
                               : faXmark
                           }
@@ -786,6 +792,14 @@ export default function RootLayout ({
                       ) : popupMode === 3 ? (
                         managingVersion && downloadedVersionsConfig ? (
                           <VersionInfo />
+                        ) : (
+                          <p className='text-xl text-center'>
+                            No version selected
+                          </p>
+                        )
+                      ) : popupMode === 4 ? (
+                        managingVersion && downloadedVersionsConfig ? (
+                          <VersionChangelog />
                         ) : (
                           <p className='text-xl text-center'>
                             No version selected

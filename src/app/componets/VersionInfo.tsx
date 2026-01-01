@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  faArrowUpRightFromSquare,
   faCheck,
   faCode,
   faHardDrive,
@@ -20,7 +21,8 @@ export default function VersionInfo () {
     getVersionInfo,
     managingVersion,
     downloadedVersionsConfig,
-    viewingInfoFromDownloads
+    viewingInfoFromDownloads,
+    setPopupMode
   } = useGlobal()
   if (!managingVersion || !downloadedVersionsConfig) return <></>
 
@@ -39,9 +41,7 @@ export default function VersionInfo () {
   return (
     <>
       <p className='text-xl text-center'>
-        Viewing info for{' '}
-        {getVersionGame(getVersionInfo(managingVersion)?.game)?.name} v
-        {getVersionInfo(managingVersion)?.versionName}
+        Viewing info for {gameInfo?.name} v{versionInfo?.versionName}
       </p>
       <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
         <div
@@ -116,6 +116,14 @@ export default function VersionInfo () {
                 })
               : 'Loading...'}
           </p>
+        </div>
+        <div
+          className='entry-info-item btntheme2'
+          onClick={() => setPopupMode(4)}
+          hidden={!versionInfo?.changelog}
+        >
+          <p>View Changelog</p>
+          <FontAwesomeIcon icon={faArrowUpRightFromSquare} color='lightgray' />
         </div>
       </div>
     </>
