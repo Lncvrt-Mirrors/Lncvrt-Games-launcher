@@ -14,7 +14,7 @@
 }
 
 .logo {
-  @apply flex items-center pl-1 h-14 w-60;
+  @apply flex items-center pl-2 h-10 w-60 pt-2;
 }
 
 .nav-links {

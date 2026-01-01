@@ -17,6 +17,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { Lexend } from 'next/font/google'
+
+const lexend = Lexend({
+  subsets: ['latin']
+})
 
 export default function Sidebar () {
   const {
@@ -63,64 +68,62 @@ export default function Sidebar () {
           }
         }}
       >
-        <Image draggable={false} src={Icon} width={48} height={48} alt='' />
-        <p className='ml-1 text-[17px] whitespace-nowrap'>
+        <Image draggable={false} src={Icon} width={36} height={36} alt='' />
+        <p className={`ml-1 text-[16px] whitespace-nowrap ${lexend.className}`}>
           Lncvrt Games Launcher
         </p>
       </div>
-      <div className='overflow-auto'>
-        <nav className='nav-links'>
-          <Link
-            draggable={false}
-            href='/'
-            className={`link relative flex items-center ${
-              pathname === '/' || pathname === '/game' ? 'active' : ''
-            }`}
-          >
-            <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Games
-          </Link>
-          {getListOfGames()
-            .sort((a, b) => {
-              return a.id - b.id
-            })
-            .map(i => (
-              <Link
-                key={i.id}
-                draggable={false}
-                href={'/game?id=' + i.id}
-                className={`link ${
-                  pathname === '/game' && Number(params.get('id') || 0) == i.id
-                    ? 'active'
-                    : ''
-                } ml-auto w-50 ${
-                  normalConfig?.settings.alwaysShowGamesInSidebar ||
-                  pathname === '/' ||
-                  pathname === '/game'
-                    ? ''
-                    : 'hidden'
-                }`}
-              >
-                <div className='flex items-center'>
-                  <FontAwesomeIcon icon={faGamepad} className='mr-1' />
-                  <span className='truncate max-w-full'>{i.name}</span>
-                </div>
-              </Link>
-            ))}
-          <Link
-            draggable={false}
-            href='/settings'
-            className={`link ${pathname === '/settings' ? 'active' : ''}`}
-          >
-            <FontAwesomeIcon icon={faCog} className='mr-1' /> Settings
-          </Link>
-          <button
-            onClick={() => openUrl('https://games.lncvrt.xyz/discord')}
-            className='link mr-auto'
-          >
-            <FontAwesomeIcon icon={faDiscord} className='mr-1' /> Community
-          </button>
-        </nav>
-      </div>
+      <nav className='nav-links overflow-auto pt-2'>
+        <Link
+          draggable={false}
+          href='/'
+          className={`link relative flex items-center ${
+            pathname === '/' || pathname === '/game' ? 'active' : ''
+          }`}
+        >
+          <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Games
+        </Link>
+        {getListOfGames()
+          .sort((a, b) => {
+            return a.id - b.id
+          })
+          .map(i => (
+            <Link
+              key={i.id}
+              draggable={false}
+              href={'/game?id=' + i.id}
+              className={`link ${
+                pathname === '/game' && Number(params.get('id') || 0) == i.id
+                  ? 'active'
+                  : ''
+              } ml-auto w-50 ${
+                normalConfig?.settings.alwaysShowGamesInSidebar ||
+                pathname === '/' ||
+                pathname === '/game'
+                  ? ''
+                  : 'hidden'
+              }`}
+            >
+              <div className='flex items-center'>
+                <FontAwesomeIcon icon={faGamepad} className='mr-1' />
+                <span className='truncate max-w-full'>{i.name}</span>
+              </div>
+            </Link>
+          ))}
+        <Link
+          draggable={false}
+          href='/settings'
+          className={`link ${pathname === '/settings' ? 'active' : ''}`}
+        >
+          <FontAwesomeIcon icon={faCog} className='mr-1' /> Settings
+        </Link>
+        <button
+          onClick={() => openUrl('https://games.lncvrt.xyz/discord')}
+          className='link mr-auto'
+        >
+          <FontAwesomeIcon icon={faDiscord} className='mr-1' /> Community
+        </button>
+      </nav>
       <div
         className='sidebar-downloads'
         hidden={downloadProgress.length == 0}
