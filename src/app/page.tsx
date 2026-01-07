@@ -135,20 +135,16 @@ export default function Installs () {
                       </div>
                     </div>
 
-                    <div
-                      className='flex gap-2 absolute right-0 bottom-0'
+                    <Link
+                      className={`button absolute right-0 bottom-0 ${
+                        hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
+                      }`}
+                      href={'/game?id=' + i.id}
                       hidden={!normalConfig?.settings.useLegacyInteractButtons}
                       title='Click to view game installs'
                     >
-                      <Link
-                        className={`button ${
-                          hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
-                        }`}
-                        href={'/game?id=' + i.id}
-                      >
-                        Installs
-                      </Link>
-                    </div>
+                      Installs
+                    </Link>
                   </div>
                 </div>
               ))
