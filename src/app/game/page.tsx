@@ -101,13 +101,14 @@ export default function Installs () {
                     setHoveredIds(prev => prev.filter(i => i !== i))
                   }
                 >
-                  <div className='flex flex-col'>
+                  <div className='h-18 w-screen relative'>
                     <p className='text-2xl'>
                       {getVersionGame(getVersionInfo(entry)?.game)?.name} v
                       {getVersionInfo(entry)?.versionName}
                     </p>
+
                     <div
-                      className={`entry-info-item mt-2 ${
+                      className={`entry-info-item absolute left-0 bottom-0 ${
                         hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
                       }`}
                       title='The date the game was installed in MM/dd/yyyy format'
@@ -120,56 +121,59 @@ export default function Installs () {
                         )}
                       </p>
                     </div>
-                  </div>
-                  <div className='flex flex-row items-center gap-2 mt-auto'>
-                    <button
-                      className={`button ${
-                        hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
-                      }`}
-                      onClick={e => {
-                        e.stopPropagation()
-                        setManagingVersion(entry)
-                        setPopupMode(3)
-                        setShowPopup(true)
-                        setFadeOut(false)
-                      }}
-                      title='Click to view version info'
-                    >
-                      View Info
-                    </button>
-                    <button
-                      className={`button ${
-                        hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
-                      }`}
-                      onClick={e => {
-                        e.stopPropagation()
-                        setManagingVersion(entry)
-                        setPopupMode(2)
-                        setShowPopup(true)
-                        setFadeOut(false)
-                      }}
-                      title='Click to manage this version install'
-                    >
-                      Manage
-                    </button>
-                    <button
-                      className={`button ${
-                        hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
-                      }`}
-                      onClick={e => {
-                        e.stopPropagation()
-                        const verInfo = getVersionInfo(entry)
-                        if (verInfo == undefined) return
-                        invoke('launch_game', {
-                          name: verInfo.id,
-                          executable: verInfo.executable
-                        })
-                      }}
-                      hidden={!normalConfig?.settings.useLegacyInteractButtons}
-                      title='Click to launch game'
-                    >
-                      Launch
-                    </button>
+
+                    <div className='flex gap-2 absolute right-0 bottom-0'>
+                      <button
+                        className={`button ${
+                          hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
+                        }`}
+                        onClick={e => {
+                          e.stopPropagation()
+                          setManagingVersion(entry)
+                          setPopupMode(3)
+                          setShowPopup(true)
+                          setFadeOut(false)
+                        }}
+                        title='Click to view version info'
+                      >
+                        View Info
+                      </button>
+                      <button
+                        className={`button ${
+                          hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
+                        }`}
+                        onClick={e => {
+                          e.stopPropagation()
+                          setManagingVersion(entry)
+                          setPopupMode(2)
+                          setShowPopup(true)
+                          setFadeOut(false)
+                        }}
+                        title='Click to manage this version install'
+                      >
+                        Manage
+                      </button>
+                      <button
+                        className={`button ${
+                          hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
+                        }`}
+                        onClick={e => {
+                          e.stopPropagation()
+                          const verInfo = getVersionInfo(entry)
+                          if (verInfo == undefined) return
+                          invoke('launch_game', {
+                            name: verInfo.id,
+                            executable: verInfo.executable
+                          })
+                        }}
+                        hidden={
+                          !normalConfig?.settings.useLegacyInteractButtons
+                        }
+                        title='Click to launch game'
+                      >
+                        Launch
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))

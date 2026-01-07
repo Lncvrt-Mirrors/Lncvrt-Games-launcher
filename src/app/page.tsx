@@ -87,9 +87,10 @@ export default function Installs () {
                     setHoveredIds(prev => prev.filter(e => e !== i.id))
                   }
                 >
-                  <div className='flex flex-col'>
+                  <div className='h-18 w-screen relative'>
                     <p className='text-2xl'>{i.name}</p>
-                    <div className='flex gap-2 mt-2'>
+
+                    <div className='flex gap-2 absolute left-0 bottom-0'>
                       <div
                         className={`entry-info-item ${
                           hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
@@ -133,20 +134,21 @@ export default function Installs () {
                         <p>{i.verified ? 'Verified' : 'Unverified'}</p>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    className='flex flex-row items-center gap-2 mt-auto'
-                    hidden={!normalConfig?.settings.useLegacyInteractButtons}
-                    title='Click to view game installs'
-                  >
-                    <Link
-                      className={`button ${
-                        hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
-                      }`}
-                      href={'/game?id=' + i.id}
+
+                    <div
+                      className='flex gap-2 absolute right-0 bottom-0'
+                      hidden={!normalConfig?.settings.useLegacyInteractButtons}
+                      title='Click to view game installs'
                     >
-                      Installs
-                    </Link>
+                      <Link
+                        className={`button ${
+                          hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
+                        }`}
+                        href={'/game?id=' + i.id}
+                      >
+                        Installs
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))
