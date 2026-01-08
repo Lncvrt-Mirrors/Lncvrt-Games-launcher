@@ -39,7 +39,7 @@ export default function Installs () {
       <div className='flex justify-between items-center mb-4'>
         <p className='text-3xl'>Games</p>
         <button
-          className='button btntheme1 text-3xl'
+          className='button btntheme1'
           onClick={() => {
             setSelectedGame(null)
             setPopupMode(0)
