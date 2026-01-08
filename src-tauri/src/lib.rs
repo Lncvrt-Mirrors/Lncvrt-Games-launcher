@@ -15,6 +15,7 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_os::platform;
+use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
 
@@ -182,9 +183,26 @@ async fn download(
 
     app.emit("download-hash-checking", format!("{}", &name))
         .unwrap();
-    let mut hasher = Sha512::new();
-    hasher.update(&tokio::fs::read(download_part_path.clone()).await.unwrap());
-    let download_hash = format!("{:x}", hasher.finalize());
+
+    let download_hash = {
+        let mut file = tokio::fs::File::open(download_part_path.clone())
+            .await
+            .unwrap();
+        let mut hasher = Sha512::new();
+        {
+            let mut buffer = [0; 8192];
+            loop {
+                let bytes_read = file.read(&mut buffer).await.unwrap();
+                if bytes_read == 0 {
+                    break;
+                }
+                hasher.update(&buffer[..bytes_read]);
+            }
+        }
+        drop(file);
+        format!("{:x}", hasher.finalize())
+    };
+
     if hash != download_hash {
         tokio::fs::remove_file(download_part_path.clone())
             .await
