@@ -19,8 +19,6 @@ use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
 
-#[cfg(target_os = "linux")]
-use std::os::unix::fs::PermissionsExt;
 #[cfg(target_os = "windows")]
 use tauri_plugin_decorum::WebviewWindowExt;
 
@@ -223,33 +221,29 @@ async fn download(
         return "-1".to_string();
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
     {
-        let executable_path = game_path.join(&name).join(&executable);
+        use std::{fs, os::unix::fs::PermissionsExt};
+
+        let executable_path = if cfg!(target_os = "linux") {
+            game_path.join(&name).join(&executable)
+        } else {
+            game_path
+                .join(&name)
+                .join(&executable)
+                .join("Contents")
+                .join("MacOS")
+                .join(
+                    &executable
+                        .chars()
+                        .take(executable.chars().count() - 4)
+                        .collect::<String>(),
+                )
+        };
+
         let mut perms = fs::metadata(&executable_path).unwrap().permissions();
         perms.set_mode(0o755);
-        fs::set_permissions(executable_path, perms).unwrap();
-    }
-    #[cfg(target_os = "macos")]
-    {
-        use std::fs;
-        use std::os::unix::fs::PermissionsExt;
-
-        let macos_app_path = game_path
-            .join(&name)
-            .join(&executable)
-            .join("Contents")
-            .join("MacOS")
-            .join(
-                &executable
-                    .chars()
-                    .take(executable.chars().count() - 4)
-                    .collect::<String>(),
-            );
-
-        let mut perms = fs::metadata(&macos_app_path).unwrap().permissions();
-        perms.set_mode(0o755);
-        fs::set_permissions(&macos_app_path, perms).unwrap();
+        fs::set_permissions(&executable_path, perms).unwrap();
     }
     return "1".to_string();
 }
@@ -263,41 +257,26 @@ fn launch_game(app: AppHandle, name: String, executable: String) {
         .unwrap()
         .join("game")
         .join(&name);
-    let game_path = game_folder.join(&executable);
-    if !game_path.exists() {
-        app.dialog()
-            .message(
-                format!(
-                    "Executable \"{}\" not found.\n\nTry reinstalling the game or make a support request in the Community link on the sidebar.",
-                    game_path.display().to_string()
-                )
-            )
-            .kind(MessageDialogKind::Error)
-            .title("Game not found")
-            .show(|_| {});
-        return;
-    }
-    if is_running_by_path(&game_path) {
-        app.dialog()
-            .message(format!("The version {} is already running.", name))
-            .kind(MessageDialogKind::Error)
-            .title("Game already running")
-            .show(|_| {});
+    if !game_folder.exists() {
         return;
     }
 
     if platform() == "macos" {
         Command::new("open")
-            .arg(&game_path)
+            .arg(&executable)
             .current_dir(&game_folder)
             .spawn()
             .unwrap();
-    } else {
-        Command::new(&game_path)
+    } else if platform() == "linux" {
+        Command::new(format!("./{}", &executable))
             .current_dir(&game_folder)
             .spawn()
             .unwrap();
-    }
+    } else if platform() == "windows" {
+        Command::new(&game_folder.join(&executable))
+            .current_dir(&game_folder)
+            .spawn()
+            .unwrap();
 }
 
 #[tauri::command]
