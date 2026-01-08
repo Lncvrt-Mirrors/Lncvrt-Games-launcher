@@ -77,7 +77,7 @@ body {
 }
 
 .button {
-  @apply rounded-md cursor-pointer text-[16px] py-1.5 px-3 transition-colors border;
+  @apply rounded-md cursor-pointer text-[16px] py-1 px-2 transition-colors border;
 }
 
 .btntheme1 {

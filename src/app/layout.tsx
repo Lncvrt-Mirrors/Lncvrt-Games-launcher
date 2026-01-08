@@ -45,7 +45,7 @@ import {
   requestPermission
 } from '@tauri-apps/plugin-notification'
 import VersionChangelog from './componets/VersionChangelog'
-import { BaseDirectory, remove } from '@tauri-apps/plugin-fs'
+import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -125,6 +125,52 @@ export default function RootLayout ({
     })
 
     return Array.from(gamesMap.values())
+  }
+
+  function getVersionsAmountData (gameId: number): {
+    installed: number
+    total: number
+  } | null {
+    if (!downloadedVersionsConfig || !serverVersionList) return null
+
+    const installed = downloadedVersionsConfig.list.filter(
+      v => getGameInfo(getVersionInfo(v)?.game)?.id === gameId
+    ).length
+
+    const total = serverVersionList.versions.filter(
+      v => getGameInfo(v?.game)?.id === gameId
+    ).length
+
+    return { installed, total }
+  }
+
+  function formatEtaSmart (seconds: number) {
+    if (seconds < 60) return `${Math.floor(seconds)}s`
+    if (seconds < 3600)
+      return `${Math.floor(seconds / 60)}m ${Math.floor(seconds % 60)}s`
+    if (seconds < 86400) {
+      const h = Math.floor(seconds / 3600)
+      const m = Math.floor((seconds % 3600) / 60)
+      return `${h}h ${m}m`
+    }
+    const d = Math.floor(seconds / 86400)
+    const h = Math.floor((seconds % 86400) / 3600)
+    return `${d}d ${h}h`
+  }
+
+  function closePopup () {
+    if (popupMode == 0 && selectedGame && pathname === '/') {
+      setSelectedGame(null)
+      setSelectedVersionList([])
+    } else if (viewingInfoFromDownloads) {
+      setViewingInfoFromDownloads(false)
+      setPopupMode(0)
+    } else if (popupMode == 4) {
+      setPopupMode(3)
+    } else {
+      setFadeOut(true)
+      setTimeout(() => setShowPopup(false), 200)
+    }
   }
 
   useEffect(() => {
@@ -301,52 +347,6 @@ export default function RootLayout ({
       await notifyUser('Downloads Finished', 'All downloads have finished.')
   }
 
-  function getVersionsAmountData (gameId: number): {
-    installed: number
-    total: number
-  } | null {
-    if (!downloadedVersionsConfig || !serverVersionList) return null
-
-    const installed = downloadedVersionsConfig.list.filter(
-      v => getGameInfo(getVersionInfo(v)?.game)?.id === gameId
-    ).length
-
-    const total = serverVersionList.versions.filter(
-      v => getGameInfo(v?.game)?.id === gameId
-    ).length
-
-    return { installed, total }
-  }
-
-  function formatEtaSmart (seconds: number) {
-    if (seconds < 60) return `${Math.floor(seconds)}s`
-    if (seconds < 3600)
-      return `${Math.floor(seconds / 60)}m ${Math.floor(seconds % 60)}s`
-    if (seconds < 86400) {
-      const h = Math.floor(seconds / 3600)
-      const m = Math.floor((seconds % 3600) / 60)
-      return `${h}h ${m}m`
-    }
-    const d = Math.floor(seconds / 86400)
-    const h = Math.floor((seconds % 86400) / 3600)
-    return `${d}d ${h}h`
-  }
-
-  function closePopup () {
-    if (popupMode == 0 && selectedGame && pathname === '/') {
-      setSelectedGame(null)
-      setSelectedVersionList([])
-    } else if (viewingInfoFromDownloads) {
-      setViewingInfoFromDownloads(false)
-      setPopupMode(0)
-    } else if (popupMode == 4) {
-      setPopupMode(3)
-    } else {
-      setFadeOut(true)
-      setTimeout(() => setShowPopup(false), 200)
-    }
-  }
-
   return (
     <>
       <html lang='en' className={roboto.className}>
@@ -477,8 +477,8 @@ export default function RootLayout ({
                                     <p
                                       className={`text-2xl truncate ${
                                         selectedVersionList.includes(v.id)
-                                          ? 'max-w-80.5'
-                                          : 'max-w-87.5'
+                                          ? 'max-w-84.5'
+                                          : 'max-w-91.5'
                                       }`}
                                     >
                                       {getGameInfo(v.game)?.name} v
@@ -486,7 +486,7 @@ export default function RootLayout ({
                                     </p>
                                   </div>
                                   <button
-                                    className='button btntheme3 right-21.5 bottom-1.25'
+                                    className='button btntheme3 right-20.75 bottom-1.75'
                                     onClick={() => {
                                       setSelectedVersionList(prev =>
                                         prev.includes(v.id)
@@ -512,7 +512,7 @@ export default function RootLayout ({
                                     )}
                                   </button>
                                   <button
-                                    className='button btntheme3 right-1 bottom-1.25'
+                                    className='button btntheme3 right-1.5 bottom-1.75'
                                     onClick={() => {
                                       setManagingVersion(v.id)
                                       setViewingInfoFromDownloads(true)
@@ -723,7 +723,7 @@ export default function RootLayout ({
                               <button
                                 className='button btntheme2'
                                 disabled={downloadProgress.length != 0}
-                                onClick={() => {
+                                onClick={async () => {
                                   closePopup()
 
                                   setDownloadedVersionsConfig(prev => {
@@ -749,10 +749,15 @@ export default function RootLayout ({
                                     return updatedConfig
                                   })
 
-                                  remove('game/' + managingVersion, {
-                                    baseDir: BaseDirectory.AppLocalData,
-                                    recursive: true
-                                  })
+                                  if (
+                                    await exists('game/' + managingVersion, {
+                                      baseDir: BaseDirectory.AppLocalData
+                                    })
+                                  )
+                                    await remove('game/' + managingVersion, {
+                                      baseDir: BaseDirectory.AppLocalData,
+                                      recursive: true
+                                    })
                                 }}
                                 title='Click to uninstall this game. This will NOT remove any progress or any save files.'
                               >

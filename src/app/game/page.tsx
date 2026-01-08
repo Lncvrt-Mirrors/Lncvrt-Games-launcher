@@ -85,7 +85,7 @@ export default function Installs () {
                   title={
                     normalConfig?.settings.useLegacyInteractButtons
                       ? ''
-                      : 'Click to launch game'
+                      : 'Click to launch game. Right-click to manage this version install'
                   }
                   onClick={async () => {
                     if (normalConfig?.settings.useLegacyInteractButtons) return
@@ -98,6 +98,13 @@ export default function Installs () {
                       executable: verInfo.executable,
                       displayName: `${gameInfo.name} v${verInfo.versionName}`
                     })
+                  }}
+                  onContextMenu={e => {
+                    e.preventDefault()
+                    setManagingVersion(entry)
+                    setPopupMode(2)
+                    setShowPopup(true)
+                    setFadeOut(false)
                   }}
                   onMouseEnter={() => setHoveredIds(prev => [...prev, entry])}
                   onMouseLeave={() =>
@@ -145,6 +152,9 @@ export default function Installs () {
                         className={`button ${
                           hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
                         }`}
+                        hidden={
+                          !normalConfig?.settings.useLegacyInteractButtons
+                        }
                         onClick={e => {
                           e.stopPropagation()
                           setManagingVersion(entry)

@@ -90,7 +90,7 @@ export default function Settings () {
             title="This setting will make it so when you are on a page like this, the games won't disappear."
           />
           <Setting
-            label='Show Installs/Launch Buttons'
+            label='Show Installs/Launch/Manage Buttons'
             value={useLegacyInteractButtons}
             onChange={async () => {
               while (normalConfig != null) {
@@ -112,7 +112,7 @@ export default function Settings () {
                 break
               }
             }}
-            title='Enable the legacy method of using the installs/launch buttons. In the future this setting may be removed so try and get used to the new method.'
+            title='Enable the legacy method of using the installs/launch/manage buttons. In the future this setting may be removed so try and get used to the new method.'
           />
           <div title='The theme you want the launcher to use.'>
             <label className='text-lg'>Theme:</label>
