@@ -24,7 +24,6 @@ export default function Installs () {
   } = useGlobal()
 
   const params = useSearchParams()
-  const [hoveredIds, setHoveredIds] = useState<string[]>([])
 
   useEffect(() => {
     if (!showPopup) return
@@ -106,10 +105,6 @@ export default function Installs () {
                     setShowPopup(true)
                     setFadeOut(false)
                   }}
-                  onMouseEnter={() => setHoveredIds(prev => [...prev, entry])}
-                  onMouseLeave={() =>
-                    setHoveredIds(prev => prev.filter(i => i !== i))
-                  }
                 >
                   <div className='h-18 w-screen relative'>
                     <p className='text-2xl'>
@@ -118,9 +113,7 @@ export default function Installs () {
                     </p>
 
                     <div
-                      className={`entry-info-item absolute left-0 bottom-0 ${
-                        hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
-                      }`}
+                      className='entry-info-item absolute left-0 bottom-0'
                       title='The date the game was installed in MM/dd/yyyy format'
                     >
                       <p>
@@ -134,9 +127,7 @@ export default function Installs () {
 
                     <div className='flex gap-2 absolute right-0 bottom-0'>
                       <button
-                        className={`button ${
-                          hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
-                        }`}
+                        className='button'
                         onClick={e => {
                           e.stopPropagation()
                           setManagingVersion(entry)
@@ -149,9 +140,7 @@ export default function Installs () {
                         View Info
                       </button>
                       <button
-                        className={`button ${
-                          hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
-                        }`}
+                        className='button'
                         hidden={
                           !normalConfig?.settings.useLegacyInteractButtons
                         }
@@ -167,9 +156,7 @@ export default function Installs () {
                         Manage
                       </button>
                       <button
-                        className={`button ${
-                          hoveredIds.includes(entry) ? 'btntheme3' : 'btntheme2'
-                        }`}
+                        className='button'
                         onClick={e => {
                           e.stopPropagation()
                           const verInfo = getVersionInfo(entry)

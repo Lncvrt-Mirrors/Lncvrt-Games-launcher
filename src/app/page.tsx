@@ -28,7 +28,6 @@ export default function Installs () {
   } = useGlobal()
 
   const router = useRouter()
-  const [hoveredIds, setHoveredIds] = useState<number[]>([])
 
   useEffect(() => {
     if (!showPopup) return
@@ -82,19 +81,13 @@ export default function Installs () {
                     if (normalConfig?.settings.useLegacyInteractButtons) return
                     router.push('/game?id=' + i.id)
                   }}
-                  onMouseEnter={() => setHoveredIds(prev => [...prev, i.id])}
-                  onMouseLeave={() =>
-                    setHoveredIds(prev => prev.filter(e => e !== i.id))
-                  }
                 >
                   <div className='h-18 w-screen relative'>
                     <p className='text-2xl'>{i.name}</p>
 
                     <div className='flex gap-2 absolute left-0 bottom-0'>
                       <div
-                        className={`entry-info-item ${
-                          hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
-                        }`}
+                        className='entry-info-item'
                         title='The amount of versions installed of this game in installed/installable format.'
                       >
                         <p>
@@ -107,9 +100,7 @@ export default function Installs () {
                         </p>
                       </div>
                       <div
-                        className={`entry-info-item ${
-                          hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
-                        }`}
+                        className='entry-info-item'
                         hidden={!i.official}
                         title='This game is official.'
                       >
@@ -117,9 +108,7 @@ export default function Installs () {
                         <p>Official</p>
                       </div>
                       <div
-                        className={`entry-info-item ${
-                          hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
-                        }`}
+                        className='entry-info-item'
                         hidden={i.official}
                         title={
                           i.verified
@@ -136,9 +125,7 @@ export default function Installs () {
                     </div>
 
                     <Link
-                      className={`button absolute right-0 bottom-0 ${
-                        hoveredIds.includes(i.id) ? 'btntheme3' : 'btntheme2'
-                      }`}
+                      className='button absolute right-0 bottom-0'
                       href={'/game?id=' + i.id}
                       hidden={!normalConfig?.settings.useLegacyInteractButtons}
                       title='Click to view game installs'
