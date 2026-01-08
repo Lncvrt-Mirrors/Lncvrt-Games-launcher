@@ -4,7 +4,7 @@ import { useGlobal } from '../GlobalProvider'
 
 export default function VersionChangelog () {
   const {
-    getVersionGame,
+    getGameInfo,
     getVersionInfo,
     managingVersion,
     downloadedVersionsConfig
@@ -12,7 +12,7 @@ export default function VersionChangelog () {
   if (!managingVersion || !downloadedVersionsConfig) return <></>
 
   const versionInfo = getVersionInfo(managingVersion)
-  const gameInfo = getVersionGame(versionInfo?.game)
+  const gameInfo = getGameInfo(versionInfo?.game)
 
   return (
     <>

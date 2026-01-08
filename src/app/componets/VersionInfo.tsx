@@ -17,7 +17,7 @@ import prettyBytes from 'pretty-bytes'
 
 export default function VersionInfo () {
   const {
-    getVersionGame,
+    getGameInfo,
     getVersionInfo,
     managingVersion,
     downloadedVersionsConfig,
@@ -27,7 +27,7 @@ export default function VersionInfo () {
   if (!managingVersion || !downloadedVersionsConfig) return <></>
 
   const versionInfo = getVersionInfo(managingVersion)
-  const gameInfo = getVersionGame(versionInfo?.game)
+  const gameInfo = getGameInfo(versionInfo?.game)
   const [versionSize, setVersionSize] = useState<number | null>(null)
 
   useEffect(() => {

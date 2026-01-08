@@ -242,7 +242,7 @@ export default function RootLayout ({
     return serverVersionList?.versions.find(v => v.id === id)
   }
 
-  function getVersionGame (game: number | undefined): Game | undefined {
+  function getGameInfo (game: number | undefined): Game | undefined {
     if (!game) return undefined
     return serverVersionList?.games.find(g => g.id === game)
   }
@@ -255,7 +255,7 @@ export default function RootLayout ({
     downloadedVersionsConfig.list.forEach(i => {
       const version = getVersionInfo(i)
       if (!version) return
-      const game = getVersionGame(version.game)
+      const game = getGameInfo(version.game)
       if (!game) return
       gamesMap.set(game.id, game)
     })
@@ -282,7 +282,7 @@ export default function RootLayout ({
         )
         return
       }
-      const gameInfo = getVersionGame(info.game)
+      const gameInfo = getGameInfo(info.game)
       if (!gameInfo) {
         setDownloadProgress(prev =>
           prev.filter(d => d.version !== download.version)
@@ -343,11 +343,11 @@ export default function RootLayout ({
     if (!downloadedVersionsConfig || !serverVersionList) return null
 
     const installed = downloadedVersionsConfig.list.filter(
-      v => getVersionGame(getVersionInfo(v)?.game)?.id === gameId
+      v => getGameInfo(getVersionInfo(v)?.game)?.id === gameId
     ).length
 
     const total = serverVersionList.versions.filter(
-      v => getVersionGame(v?.game)?.id === gameId
+      v => getGameInfo(v?.game)?.id === gameId
     ).length
 
     return { installed, total }
@@ -427,7 +427,7 @@ export default function RootLayout ({
                 managingVersion,
                 setManagingVersion,
                 getVersionInfo,
-                getVersionGame,
+                getGameInfo,
                 getListOfGames,
                 setSelectedGame,
                 getVersionsAmountData,
@@ -520,7 +520,7 @@ export default function RootLayout ({
                                           : 'max-w-87.5'
                                       }`}
                                     >
-                                      {getVersionGame(v.game)?.name} v
+                                      {getGameInfo(v.game)?.name} v
                                       {v.versionName}
                                     </p>
                                   </div>
@@ -665,7 +665,7 @@ export default function RootLayout ({
                                 >
                                   <p className='text-2xl text-center'>
                                     {
-                                      getVersionGame(
+                                      getGameInfo(
                                         getVersionInfo(v.version)?.game
                                       )?.name
                                     }{' '}
@@ -752,7 +752,7 @@ export default function RootLayout ({
                             <p className='text-xl text-center'>
                               Manage{' '}
                               {
-                                getVersionGame(
+                                getGameInfo(
                                   getVersionInfo(managingVersion)?.game
                                 )?.name
                               }{' '}
@@ -825,7 +825,7 @@ export default function RootLayout ({
                                       selectedVersionList.length
                                     } version${
                                       selectedVersionList.length == 1 ? '' : 's'
-                                    } of ${getVersionGame(selectedGame)?.name}`
+                                    } of ${getGameInfo(selectedGame)?.name}`
                               }
                             >
                               Download {selectedVersionList.length} version

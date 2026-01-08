@@ -19,7 +19,7 @@ export default function Installs () {
     normalConfig,
     setManagingVersion,
     getVersionInfo,
-    getVersionGame,
+    getGameInfo,
     setSelectedGame
   } = useGlobal()
 
@@ -103,7 +103,7 @@ export default function Installs () {
                 >
                   <div className='h-18 w-screen relative'>
                     <p className='text-2xl'>
-                      {getVersionGame(getVersionInfo(entry)?.game)?.name} v
+                      {getGameInfo(getVersionInfo(entry)?.game)?.name} v
                       {getVersionInfo(entry)?.versionName}
                     </p>
 

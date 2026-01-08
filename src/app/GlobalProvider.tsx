@@ -28,7 +28,7 @@ type GlobalCtxType = {
   setManagingVersion: (v: string | null) => void
   setSelectedGame: (v: number | null) => void
   getVersionInfo: (id: string | undefined) => GameVersion | undefined
-  getVersionGame: (id: number | undefined) => Game | undefined
+  getGameInfo: (id: number | undefined) => Game | undefined
   getListOfGames: () => Game[]
   getVersionsAmountData: (gameId: number) => {
     installed: number
