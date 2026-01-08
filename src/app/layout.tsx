@@ -449,7 +449,7 @@ export default function RootLayout ({
                   >
                     <div className='popup-box'>
                       <button
-                        className='close-button'
+                        className='close-button btntheme1'
                         onClick={() => closePopup()}
                       >
                         <FontAwesomeIcon
