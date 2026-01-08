@@ -614,97 +614,89 @@ export default function RootLayout ({
                         <>
                           <p className='text-xl text-center'>Downloads</p>
                           <div className='popup-content'>
-                            {downloadProgress.length === 0 ? (
-                              <p className='text-center mt-6'>
-                                No more downloads!
-                              </p>
-                            ) : (
-                              downloadProgress.map((v, i) => (
-                                <div
-                                  key={i}
-                                  className='popup-entry flex flex-col justify-between'
-                                >
-                                  <p className='text-2xl text-center'>
-                                    {
-                                      getGameInfo(
-                                        getVersionInfo(v.version)?.game
-                                      )?.name
-                                    }{' '}
-                                    v{getVersionInfo(v.version)?.versionName}
-                                  </p>
-                                  <div className='mt-6.25 flex items-center justify-between'>
-                                    {v.failed ? (
-                                      <>
-                                        <div className='flex items-center'>
-                                          <span className='text-red-500 inline-block w-full text-center'>
-                                            Download failed
-                                          </span>
-                                          <button
-                                            className='button btntheme3 ml-30 mb-2'
-                                            onClick={() => {
-                                              setDownloadProgress(prev =>
-                                                prev.filter(
-                                                  d => d.version !== v.version
-                                                )
-                                              )
-                                            }}
-                                            title='Click to remove this version from this menu.'
-                                          >
-                                            Cancel
-                                          </button>
-                                        </div>
-                                      </>
-                                    ) : v.queued ? (
-                                      <span className='text-yellow-500 inline-block w-full text-center'>
-                                        Queued…
-                                      </span>
-                                    ) : v.queued ? (
-                                      <span className='text-yellow-500 inline-block w-full text-center'>
-                                        Queued…
-                                      </span>
-                                    ) : v.hash_checking ? (
-                                      <span className='text-blue-500 inline-block w-full text-center'>
-                                        Checking hash...
-                                      </span>
-                                    ) : v.finishing ? (
-                                      <span className='text-green-500 inline-block w-full text-center'>
-                                        Finishing...
-                                      </span>
-                                    ) : (
-                                      <div className='flex flex-col gap-1 w-full'>
-                                        <span className='text-center'>
-                                          Downloaded{' '}
-                                          {prettyBytes(v.progressBytes, {
-                                            minimumFractionDigits: 1,
-                                            maximumFractionDigits: 1
-                                          })}{' '}
-                                          of{' '}
-                                          {prettyBytes(
-                                            getVersionInfo(v.version)?.size ??
-                                              0,
-                                            {
-                                              minimumFractionDigits: 1,
-                                              maximumFractionDigits: 1
-                                            }
-                                          )}{' '}
-                                          (ETA: {formatEtaSmart(v.etaSecs)}{' '}
-                                          &bull; Speed:{' '}
-                                          {prettyBytes(v.speed, {
-                                            minimumFractionDigits: 1,
-                                            maximumFractionDigits: 1
-                                          })}
-                                          /s)
+                            {downloadProgress.map((v, i) => (
+                              <div
+                                key={i}
+                                className='popup-entry flex flex-col justify-between'
+                              >
+                                <p className='text-2xl text-center'>
+                                  {
+                                    getGameInfo(getVersionInfo(v.version)?.game)
+                                      ?.name
+                                  }{' '}
+                                  v{getVersionInfo(v.version)?.versionName}
+                                </p>
+                                <div className='mt-6.25 flex items-center justify-between'>
+                                  {v.failed ? (
+                                    <>
+                                      <div className='flex items-center'>
+                                        <span className='text-red-500 inline-block w-full text-center'>
+                                          Download failed
                                         </span>
-                                        <ProgressBar
-                                          progress={v.progress}
-                                          className='w-full'
-                                        />
+                                        <button
+                                          className='button btntheme3 ml-30 mb-2'
+                                          onClick={() => {
+                                            setDownloadProgress(prev =>
+                                              prev.filter(
+                                                d => d.version !== v.version
+                                              )
+                                            )
+                                          }}
+                                          title='Click to remove this version from this menu.'
+                                        >
+                                          Cancel
+                                        </button>
                                       </div>
-                                    )}
-                                  </div>
+                                    </>
+                                  ) : v.queued ? (
+                                    <span className='text-yellow-500 inline-block w-full text-center'>
+                                      Queued…
+                                    </span>
+                                  ) : v.queued ? (
+                                    <span className='text-yellow-500 inline-block w-full text-center'>
+                                      Queued…
+                                    </span>
+                                  ) : v.hash_checking ? (
+                                    <span className='text-blue-500 inline-block w-full text-center'>
+                                      Checking hash...
+                                    </span>
+                                  ) : v.finishing ? (
+                                    <span className='text-green-500 inline-block w-full text-center'>
+                                      Finishing...
+                                    </span>
+                                  ) : (
+                                    <div className='flex flex-col gap-1 w-full'>
+                                      <span className='text-center'>
+                                        Downloaded{' '}
+                                        {prettyBytes(v.progressBytes, {
+                                          minimumFractionDigits: 1,
+                                          maximumFractionDigits: 1
+                                        })}{' '}
+                                        of{' '}
+                                        {prettyBytes(
+                                          getVersionInfo(v.version)?.size ?? 0,
+                                          {
+                                            minimumFractionDigits: 1,
+                                            maximumFractionDigits: 1
+                                          }
+                                        )}{' '}
+                                        (ETA: {formatEtaSmart(v.etaSecs)} &bull;
+                                        Speed:{' '}
+                                        {prettyBytes(v.speed, {
+                                          minimumFractionDigits: 1,
+                                          maximumFractionDigits: 1
+                                        })}
+                                        /s)
+                                      </span>
+                                      <ProgressBar
+                                        progress={v.progress}
+                                        className='w-full'
+                                      />
+                                    </div>
+                                  )}
                                 </div>
-                              ))
-                            )}
+                              </div>
+                            ))}
                           </div>
                         </>
                       ) : popupMode === 2 ? (
