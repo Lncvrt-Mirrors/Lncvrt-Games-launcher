@@ -91,9 +91,12 @@ export default function Installs () {
                     if (normalConfig?.settings.useLegacyInteractButtons) return
                     const verInfo = getVersionInfo(entry)
                     if (verInfo == undefined) return
+                    const gameInfo = getGameInfo(verInfo.game)
+                    if (gameInfo == undefined) return
                     invoke('launch_game', {
                       name: verInfo.id,
-                      executable: verInfo.executable
+                      executable: verInfo.executable,
+                      displayName: `${gameInfo.name} v${verInfo.versionName}`
                     })
                   }}
                   onMouseEnter={() => setHoveredIds(prev => [...prev, entry])}

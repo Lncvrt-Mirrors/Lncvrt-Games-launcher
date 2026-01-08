@@ -22,14 +22,18 @@ use zip::ZipArchive;
 #[cfg(target_os = "windows")]
 use tauri_plugin_decorum::WebviewWindowExt;
 
-fn is_running_by_path(path: &PathBuf) -> bool {
+#[allow(unused)]
+fn is_running_by_path(path: &Path) -> bool {
     let sys = System::new_all();
+    let target = path.canonicalize().ok();
+    if target.is_none() {
+        return false;
+    }
+    let target = target.unwrap();
     sys.processes().values().any(|proc| {
-        if let Some(exe) = proc.exe() {
-            exe == path
-        } else {
-            false
-        }
+        proc.exe()
+            .and_then(|exe| exe.canonicalize().ok())
+            .map_or(false, |exe| exe == target)
     })
 }
 
@@ -245,12 +249,13 @@ async fn download(
         perms.set_mode(0o755);
         fs::set_permissions(&executable_path, perms).unwrap();
     }
+
     return "1".to_string();
 }
 
 #[allow(unused_variables)]
 #[tauri::command]
-fn launch_game(app: AppHandle, name: String, executable: String) {
+fn launch_game(app: AppHandle, name: String, executable: String, display_name: String) {
     let game_folder = app
         .path()
         .app_local_data_dir()
@@ -259,6 +264,21 @@ fn launch_game(app: AppHandle, name: String, executable: String) {
         .join(&name);
     if !game_folder.exists() {
         return;
+    }
+
+    //if already running on macos, it'll auto take the user to that proccess
+    #[cfg(any(target_os = "windows", target_os = "linux"))]
+    {
+        if is_running_by_path(&game_folder.join(&executable)) {
+            app.dialog()
+                .message(format!(
+                    "{} is already running, if this doesn't seem true, try to kill the proccess.",
+                    display_name
+                ))
+                .kind(MessageDialogKind::Error)
+                .title("Game already running")
+                .show(|_| {});
+        }
     }
 
     if platform() == "macos" {
@@ -277,24 +297,6 @@ fn launch_game(app: AppHandle, name: String, executable: String) {
             .current_dir(&game_folder)
             .spawn()
             .unwrap();
-}
-
-#[tauri::command]
-async fn uninstall_version(app: AppHandle, name: String) {
-    let game_path = app
-        .path()
-        .app_local_data_dir()
-        .unwrap()
-        .join("game")
-        .join(&name);
-    if game_path.exists() {
-        if let Err(_) = tokio::fs::remove_dir_all(&game_path).await {
-            app.emit("version-failed", &name).unwrap();
-        } else {
-            app.emit("version-uninstalled", &name).unwrap();
-        }
-    } else {
-        app.emit("version-uninstalled", &name).unwrap();
     }
 }
 
@@ -342,7 +344,6 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             download,
             launch_game,
-            uninstall_version,
             open_folder,
             folder_size
         ])
