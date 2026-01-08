@@ -1,6 +1,6 @@
 [package]
 name = "lncvrt-games-launcher"
-version = "1.4.0"
+version = "1.5.0"
 authors = ["Lncvrt"]
 edition = "2024"
 
