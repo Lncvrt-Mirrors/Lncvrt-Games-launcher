@@ -81,20 +81,51 @@ export default function RootLayout ({
     useState<boolean>(false)
   const [selectedGame, setSelectedGame] = useState<number | null>(null)
 
-  function handleOverlayClick (e: React.MouseEvent<HTMLDivElement>) {
-    if (e.target === e.currentTarget) {
-      if (viewingInfoFromDownloads) {
-        setPopupMode(0)
-        setViewingInfoFromDownloads(false)
-        setManagingVersion(null)
-        setSelectedGame(null)
-      }
-      setFadeOut(true)
-      setTimeout(() => setShowPopup(false), 200)
-    }
+  const pathname = usePathname()
+
+  function getSpecialVersionsList (game?: number): GameVersion[] {
+    if (!normalConfig || !serverVersionList) return []
+
+    return serverVersionList.versions
+      .filter(v => !downloadedVersionsConfig?.list.includes(v.id))
+      .filter(v => {
+        if (game && v.game != game) return false
+        if (downloadProgress.length != 0) {
+          return !downloadProgress.some(d => d.version === v.id)
+        }
+        return true
+      })
+      .sort((a, b) => {
+        if (b.game !== a.game) return a.game - b.game
+        return 0
+      })
   }
 
-  const pathname = usePathname()
+  function getVersionInfo (id: string | undefined): GameVersion | undefined {
+    if (!id) return undefined
+    return serverVersionList?.versions.find(v => v.id === id)
+  }
+
+  function getGameInfo (game: number | undefined): Game | undefined {
+    if (!game) return undefined
+    return serverVersionList?.games.find(g => g.id === game)
+  }
+
+  function getListOfGames (): Game[] {
+    if (!downloadedVersionsConfig?.list) return []
+
+    const gamesMap = new Map<number, Game>()
+
+    downloadedVersionsConfig.list.forEach(i => {
+      const version = getVersionInfo(i)
+      if (!version) return
+      const game = getGameInfo(version.game)
+      if (!game) return
+      gamesMap.set(game.id, game)
+    })
+
+    return Array.from(gamesMap.values())
+  }
 
   useEffect(() => {
     let unlistenProgress: (() => void) | null = null
@@ -196,50 +227,6 @@ export default function RootLayout ({
     document.addEventListener('contextmenu', handler)
     return () => document.removeEventListener('contextmenu', handler)
   }, [])
-
-  function getSpecialVersionsList (game?: number): GameVersion[] {
-    if (!normalConfig || !serverVersionList) return []
-
-    return serverVersionList.versions
-      .filter(v => !downloadedVersionsConfig?.list.includes(v.id))
-      .filter(v => {
-        if (game && v.game != game) return false
-        if (downloadProgress.length != 0) {
-          return !downloadProgress.some(d => d.version === v.id)
-        }
-        return true
-      })
-      .sort((a, b) => {
-        if (b.game !== a.game) return a.game - b.game
-        return 0
-      })
-  }
-
-  function getVersionInfo (id: string | undefined): GameVersion | undefined {
-    if (!id) return undefined
-    return serverVersionList?.versions.find(v => v.id === id)
-  }
-
-  function getGameInfo (game: number | undefined): Game | undefined {
-    if (!game) return undefined
-    return serverVersionList?.games.find(g => g.id === game)
-  }
-
-  function getListOfGames (): Game[] {
-    if (!downloadedVersionsConfig?.list) return []
-
-    const gamesMap = new Map<number, Game>()
-
-    downloadedVersionsConfig.list.forEach(i => {
-      const version = getVersionInfo(i)
-      if (!version) return
-      const game = getGameInfo(version.game)
-      if (!game) return
-      gamesMap.set(game.id, game)
-    })
-
-    return Array.from(gamesMap.values())
-  }
 
   async function downloadVersions (): Promise<void> {
     const list = selectedVersionList
@@ -447,7 +434,18 @@ export default function RootLayout ({
                 {showPopup && (
                   <div
                     className={`popup-overlay ${fadeOut ? 'fade-out' : ''}`}
-                    onClick={handleOverlayClick}
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                      if (e.target === e.currentTarget) {
+                        if (viewingInfoFromDownloads) {
+                          setPopupMode(0)
+                          setViewingInfoFromDownloads(false)
+                          setManagingVersion(null)
+                          setSelectedGame(null)
+                        }
+                        setFadeOut(true)
+                        setTimeout(() => setShowPopup(false), 200)
+                      }
+                    }}
                   >
                     <div className='popup-box'>
                       <button
