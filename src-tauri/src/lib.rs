@@ -278,6 +278,7 @@ fn launch_game(app: AppHandle, name: String, executable: String, display_name: S
                 .kind(MessageDialogKind::Error)
                 .title("Game already running")
                 .show(|_| {});
+            return;
         }
     }
 
@@ -287,12 +288,7 @@ fn launch_game(app: AppHandle, name: String, executable: String, display_name: S
             .current_dir(&game_folder)
             .spawn()
             .unwrap();
-    } else if platform() == "linux" {
-        Command::new(format!("./{}", &executable))
-            .current_dir(&game_folder)
-            .spawn()
-            .unwrap();
-    } else if platform() == "windows" {
+    } else {
         Command::new(&game_folder.join(&executable))
             .current_dir(&game_folder)
             .spawn()
