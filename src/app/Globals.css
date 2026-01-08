@@ -147,7 +147,7 @@ body {
 }
 
 .close-button {
-  @apply flex justify-center items-center absolute bg-(--col3) hover:bg-(--col4) text-2xl cursor-pointer text-gray-300 hover:text-white h-12 w-12 p-3 rounded-xl left-2 top-2 transition-colors border border-(--col4) hover:border-(--col5);
+  @apply flex justify-center items-center absolute bg-(--col3) hover:bg-(--col4) text-2xl cursor-pointer text-gray-300 hover:text-white h-12 w-12 p-3 rounded-lg left-2 top-2 transition-colors border border-(--col4) hover:border-(--col5);
 }
 
 *:focus {
