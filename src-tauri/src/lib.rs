@@ -255,7 +255,14 @@ async fn download(
 
 #[allow(unused_variables)]
 #[tauri::command]
-fn launch_game(app: AppHandle, name: String, executable: String, display_name: String) {
+fn launch_game(
+    app: AppHandle,
+    name: String,
+    executable: String,
+    display_name: String,
+    use_wine: bool,
+    wine_command: String,
+) {
     let game_folder = app
         .path()
         .app_local_data_dir()
@@ -266,10 +273,12 @@ fn launch_game(app: AppHandle, name: String, executable: String, display_name: S
         return;
     }
 
+    let exe_path = game_folder.join(&executable);
+
     //if already running on macos, it'll auto take the user to that proccess
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     {
-        if is_running_by_path(&game_folder.join(&executable)) {
+        if !use_wine && is_running_by_path(&exe_path) {
             app.dialog()
                 .message(format!(
                     "{} is already running, if this doesn't seem true, try to kill the proccess.",
@@ -282,6 +291,23 @@ fn launch_game(app: AppHandle, name: String, executable: String, display_name: S
         }
     }
 
+    #[cfg(target_os = "linux")]
+    {
+        if use_wine {
+            let quoted_path = format!("\"{}\"", exe_path.to_string_lossy());
+            let cmd = wine_command.replace("%path%", &quoted_path);
+
+            Command::new("bash")
+                .arg("-c")
+                .arg(cmd)
+                .current_dir(&game_folder)
+                .spawn()
+                .unwrap();
+
+            return;
+        }
+    }
+
     if platform() == "macos" {
         Command::new("open")
             .arg(&executable)
@@ -289,7 +315,7 @@ fn launch_game(app: AppHandle, name: String, executable: String, display_name: S
             .spawn()
             .unwrap();
     } else {
-        Command::new(&game_folder.join(&executable))
+        Command::new(&exe_path)
             .current_dir(&game_folder)
             .spawn()
             .unwrap();

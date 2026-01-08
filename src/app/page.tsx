@@ -89,6 +89,7 @@ export default function Installs () {
                       <div
                         className='entry-info-item'
                         title='The amount of versions installed of this game in installed/installable format.'
+                        onClick={e => e.stopPropagation()}
                       >
                         <p>
                           {(() => {
@@ -103,6 +104,7 @@ export default function Installs () {
                         className='entry-info-item'
                         hidden={!i.official}
                         title='This game is official.'
+                        onClick={e => e.stopPropagation()}
                       >
                         <FontAwesomeIcon icon={faCheck} color='#19c84b' />
                         <p>Official</p>
@@ -115,6 +117,7 @@ export default function Installs () {
                             ? 'This game is verified to be safe'
                             : 'This game is not verified to be save. Proceed with caution.'
                         }
+                        onClick={e => e.stopPropagation()}
                       >
                         <FontAwesomeIcon
                           icon={i.verified ? faShieldHalved : faWarning}

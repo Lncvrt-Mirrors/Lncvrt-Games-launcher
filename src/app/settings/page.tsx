@@ -5,6 +5,7 @@ import { Setting } from '../componets/Setting'
 import { writeNormalConfig } from '../util/BazookaManager'
 import { useGlobal } from '../GlobalProvider'
 import { copyToClipboard } from '../util/Clipboard'
+import { platform } from '@tauri-apps/plugin-os'
 
 export default function Settings () {
   const [allowNotifications, setAllowNotifications] = useState(false)
@@ -12,6 +13,8 @@ export default function Settings () {
     useState(false)
   const [useLegacyInteractButtons, setUseLegacyInteractButtons] =
     useState(false)
+  const [useWineOnUnixWhenNeeded, setUseWineOnUnixWhenNeeded] = useState(false)
+  const [wineOnUnixCommand, setWineOnUnixCommand] = useState('wine %path%')
   const [theme, setTheme] = useState(0)
 
   const [loaded, setLoaded] = useState(false)
@@ -27,6 +30,10 @@ export default function Settings () {
         setUseLegacyInteractButtons(
           normalConfig.settings.useLegacyInteractButtons
         )
+        setUseWineOnUnixWhenNeeded(
+          normalConfig.settings.useWineOnUnixWhenNeeded
+        )
+        setWineOnUnixCommand(normalConfig.settings.wineOnUnixCommand)
         setTheme(normalConfig.settings.theme)
         setLoaded(true)
         break
@@ -114,6 +121,38 @@ export default function Settings () {
             }}
             title='Enable the legacy method of using the installs/launch/manage buttons. In the future this setting may be removed so try and get used to the new method.'
           />
+          <Setting
+            label='Use wine when needed to launch games'
+            value={useWineOnUnixWhenNeeded}
+            onChange={async () => {
+              while (normalConfig != null) {
+                setUseWineOnUnixWhenNeeded(!useWineOnUnixWhenNeeded)
+                normalConfig.settings.useWineOnUnixWhenNeeded =
+                  !useWineOnUnixWhenNeeded
+                await writeNormalConfig(normalConfig)
+                break
+              }
+            }}
+            className={platform() == 'linux' ? '' : 'hidden'}
+          />
+          <p hidden={!(platform() == 'linux' && useWineOnUnixWhenNeeded)}>
+            Wine Command:
+          </p>
+          <input
+            type='text'
+            value={wineOnUnixCommand}
+            onChange={async e => {
+              while (normalConfig != null) {
+                setWineOnUnixCommand(e.target.value)
+                normalConfig.settings.wineOnUnixCommand = e.target.value
+                await writeNormalConfig(normalConfig)
+                break
+              }
+            }}
+            className={`input-field my-1 ${
+              platform() == 'linux' && useWineOnUnixWhenNeeded ? '' : 'hidden'
+            }`}
+          ></input>
           <div title='The theme you want the launcher to use.'>
             <label className='text-lg'>Theme:</label>
             <select

@@ -89,6 +89,13 @@ export default function RootLayout ({
     return serverVersionList.versions
       .filter(v => !downloadedVersionsConfig?.list.includes(v.id))
       .filter(v => {
+        if (
+          platform() === 'linux' &&
+          v.wine &&
+          !normalConfig.settings.useWineOnUnixWhenNeeded
+        )
+          return false
+
         if (game && v.game != game) return false
         if (downloadProgress.length != 0) {
           return !downloadProgress.some(d => d.version === v.id)
@@ -133,13 +140,21 @@ export default function RootLayout ({
   } | null {
     if (!downloadedVersionsConfig || !serverVersionList) return null
 
-    const installed = downloadedVersionsConfig.list.filter(
-      v => getGameInfo(getVersionInfo(v)?.game)?.id === gameId
-    ).length
+    const allowWine =
+      platform() !== 'linux' || normalConfig?.settings.useWineOnUnixWhenNeeded
 
-    const total = serverVersionList.versions.filter(
-      v => getGameInfo(v?.game)?.id === gameId
-    ).length
+    const installed = downloadedVersionsConfig.list.filter(v => {
+      const info = getVersionInfo(v)
+      if (!info) return false
+      if (info.wine && !allowWine) return false
+      return getGameInfo(info.game)?.id === gameId
+    }).length
+
+    const total = serverVersionList.versions.filter(v => {
+      if (!v) return false
+      if (v.wine && !allowWine) return false
+      return getGameInfo(v.game)?.id === gameId
+    }).length
 
     return { installed, total }
   }

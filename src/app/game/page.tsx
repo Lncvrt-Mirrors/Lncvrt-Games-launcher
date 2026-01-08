@@ -7,6 +7,8 @@ import { invoke } from '@tauri-apps/api/core'
 import { useGlobal } from '../GlobalProvider'
 import { useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
+import { faWarning } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default function Installs () {
   const {
@@ -71,6 +73,12 @@ export default function Installs () {
               .filter(v => {
                 const info = getVersionInfo(v)
                 if (!info) return false
+                if (
+                  platform() === 'linux' &&
+                  info.wine &&
+                  !normalConfig?.settings.useWineOnUnixWhenNeeded
+                )
+                  return false
                 return info.game === Number(params.get('id') || 0)
               })
               .map((entry, i) => (
@@ -95,11 +103,19 @@ export default function Installs () {
                     invoke('launch_game', {
                       name: verInfo.id,
                       executable: verInfo.executable,
-                      displayName: `${gameInfo.name} v${verInfo.versionName}`
+                      displayName: `${gameInfo.name} v${verInfo.versionName}`,
+                      useWine: !!(
+                        platform() === 'linux' &&
+                        verInfo.wine &&
+                        normalConfig?.settings.useWineOnUnixWhenNeeded
+                      ),
+                      wineCommand: normalConfig?.settings.wineOnUnixCommand
                     })
                   }}
                   onContextMenu={e => {
                     e.preventDefault()
+                    if (normalConfig?.settings.useLegacyInteractButtons) return
+
                     setManagingVersion(entry)
                     setPopupMode(2)
                     setShowPopup(true)
@@ -112,17 +128,36 @@ export default function Installs () {
                       {getVersionInfo(entry)?.versionName}
                     </p>
 
-                    <div
-                      className='entry-info-item absolute left-0 bottom-0'
-                      title='The date the game was installed in MM/dd/yyyy format'
-                    >
-                      <p>
-                        Installed{' '}
-                        {format(
-                          new Date(downloadedVersionsConfig.timestamps[entry]),
-                          'MM/dd/yyyy'
-                        )}
-                      </p>
+                    <div className='flex gap-2 absolute left-0 bottom-0'>
+                      <div
+                        className='entry-info-item'
+                        title='The date the game was installed in MM/dd/yyyy format'
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <p>
+                          Installed{' '}
+                          {format(
+                            new Date(
+                              downloadedVersionsConfig.timestamps[entry]
+                            ),
+                            'MM/dd/yyyy'
+                          )}
+                        </p>
+                      </div>
+                      <div
+                        className='entry-info-item'
+                        title='This version is using wine. It cannot be guarenteed to work fully and might not work at all.'
+                        hidden={
+                          !(
+                            platform() === 'linux' &&
+                            getVersionInfo(entry)?.wine
+                          )
+                        }
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <FontAwesomeIcon icon={faWarning} color='#ffc800' />
+                        <p>Uses wine</p>
+                      </div>
                     </div>
 
                     <div className='flex gap-2 absolute right-0 bottom-0'>

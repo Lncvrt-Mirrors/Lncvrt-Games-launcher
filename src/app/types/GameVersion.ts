@@ -9,4 +9,5 @@ export interface GameVersion {
   size: number
   place: number
   changelog: string
+  wine: number | undefined
 }

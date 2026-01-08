@@ -155,7 +155,7 @@ body {
 }
 
 .input-field {
-  @apply border-2 border-(--col4) rounded-md bg-(--col2) p-2 px-4 focus:border-blue-600 transition-colors;
+  @apply border-2 border-(--col4) rounded-md bg-(--col2) py-1 px-2 focus:bg-(--col3) focus:border-(--col6) transition-colors w-full;
 }
 
 .entry-info-item {
