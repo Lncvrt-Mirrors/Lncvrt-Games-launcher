@@ -45,6 +45,7 @@ import {
   requestPermission
 } from '@tauri-apps/plugin-notification'
 import VersionChangelog from './componets/VersionChangelog'
+import { BaseDirectory, remove } from '@tauri-apps/plugin-fs'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -97,7 +98,6 @@ export default function RootLayout ({
 
   useEffect(() => {
     let unlistenProgress: (() => void) | null = null
-    let unlistenUninstalled: (() => void) | null = null
 
     listen<string>('download-progress', event => {
       const [versionName, progStr, totalSizeStr, speedStr, etaSecsStr] =
@@ -143,30 +143,8 @@ export default function RootLayout ({
       })
     }).then(f => (unlistenProgress = f))
 
-    listen<string>('version-uninstalled', event => {
-      const versionName = event.payload
-      setDownloadedVersionsConfig(prev => {
-        if (!prev) return prev
-        const updatedList = prev.list.filter(v => v !== versionName)
-        const updatedTimestamps = Object.fromEntries(
-          Object.entries(prev.timestamps).filter(([k]) => k !== versionName)
-        )
-        const updatedConfig = {
-          ...prev,
-          list: updatedList,
-          timestamps: updatedTimestamps
-        }
-        writeVersionsConfig(updatedConfig)
-        setManagingVersion(null)
-        setFadeOut(true)
-        setTimeout(() => setShowPopup(false), 200)
-        return updatedConfig
-      })
-    }).then(f => (unlistenUninstalled = f))
-
     return () => {
       unlistenProgress?.()
-      unlistenUninstalled?.()
     }
   }, [])
 
@@ -367,6 +345,21 @@ export default function RootLayout ({
     return `${d}d ${h}h`
   }
 
+  function closePopup () {
+    if (popupMode == 0 && selectedGame && pathname === '/') {
+      setSelectedGame(null)
+      setSelectedVersionList([])
+    } else if (viewingInfoFromDownloads) {
+      setViewingInfoFromDownloads(false)
+      setPopupMode(0)
+    } else if (popupMode == 4) {
+      setPopupMode(3)
+    } else {
+      setFadeOut(true)
+      setTimeout(() => setShowPopup(false), 200)
+    }
+  }
+
   return (
     <>
       <html lang='en' className={roboto.className}>
@@ -438,20 +431,7 @@ export default function RootLayout ({
               <div
                 tabIndex={0}
                 onKeyDown={e => {
-                  if (showPopup && e.key === 'Escape') {
-                    if (popupMode == 0 && selectedGame && pathname === '/') {
-                      setSelectedGame(null)
-                      setSelectedVersionList([])
-                    } else if (viewingInfoFromDownloads) {
-                      setViewingInfoFromDownloads(false)
-                      setPopupMode(0)
-                    } else if (popupMode == 4) {
-                      setPopupMode(3)
-                    } else {
-                      setFadeOut(true)
-                      setTimeout(() => setShowPopup(false), 200)
-                    }
-                  }
+                  if (showPopup && e.key === 'Escape') closePopup()
                 }}
               >
                 <Sidebar />
@@ -472,24 +452,7 @@ export default function RootLayout ({
                     <div className='popup-box'>
                       <button
                         className='close-button'
-                        onClick={() => {
-                          if (
-                            popupMode == 0 &&
-                            selectedGame &&
-                            pathname === '/'
-                          ) {
-                            setSelectedGame(null)
-                            setSelectedVersionList([])
-                          } else if (viewingInfoFromDownloads) {
-                            setViewingInfoFromDownloads(false)
-                            setPopupMode(0)
-                          } else if (popupMode == 4) {
-                            setPopupMode(3)
-                          } else {
-                            setFadeOut(true)
-                            setTimeout(() => setShowPopup(false), 200)
-                          }
-                        }}
+                        onClick={() => closePopup()}
                       >
                         <FontAwesomeIcon
                           icon={
@@ -762,11 +725,37 @@ export default function RootLayout ({
                               <button
                                 className='button btntheme2'
                                 disabled={downloadProgress.length != 0}
-                                onClick={() =>
-                                  invoke('uninstall_version', {
-                                    name: managingVersion
+                                onClick={() => {
+                                  closePopup()
+
+                                  setDownloadedVersionsConfig(prev => {
+                                    if (!prev) return prev
+                                    const updatedList = prev.list.filter(
+                                      v => v !== managingVersion
+                                    )
+                                    const updatedTimestamps =
+                                      Object.fromEntries(
+                                        Object.entries(prev.timestamps).filter(
+                                          ([k]) => k !== managingVersion
+                                        )
+                                      )
+                                    const updatedConfig = {
+                                      ...prev,
+                                      list: updatedList,
+                                      timestamps: updatedTimestamps
+                                    }
+                                    writeVersionsConfig(updatedConfig)
+                                    setManagingVersion(null)
+                                    setFadeOut(true)
+                                    setTimeout(() => setShowPopup(false), 200)
+                                    return updatedConfig
                                   })
-                                }
+
+                                  remove('game/' + managingVersion, {
+                                    baseDir: BaseDirectory.AppLocalData,
+                                    recursive: true
+                                  })
+                                }}
                                 title='Click to uninstall this game. This will NOT remove any progress or any save files.'
                               >
                                 Uninstall

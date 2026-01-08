@@ -21,11 +21,17 @@
     "core:window:allow-toggle-maximize",
     "decorum:allow-show-snap-overlay",
     "fs:default",
-    "fs:allow-applocaldata-read",
-    "fs:allow-applocaldata-write",
     "dialog:default",
     "notification:default",
     "clipboard-manager:default",
-    "clipboard-manager:allow-write-text"
+    "clipboard-manager:allow-write-text",
+    "fs:allow-applocaldata-read",
+    "fs:allow-applocaldata-write",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        { "path": "$APPLOCALDATA/game/**" }
+      ]
+    }
   ]
 }
