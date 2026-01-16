@@ -11,13 +11,3 @@
 .downloads-entry {
   @apply flex justify-between items-center m-2 p-2 rounded-lg text-gray-200 text-lg transition-colors bg-(--col2) hover:bg-(--col3) border border-(--col4) hover:border-(--col5);
 }
-
-.downloads-entry .entry-info-item,
-.downloads-entry .button {
-  @apply bg-(--col3) border-(--col5) hover:bg-(--col5) hover:border-(--col7) disabled:text-gray-300 disabled:bg-(--col2) disabled:border-(--col6) disabled:hover:text-gray-100 disabled:hover:bg-(--col3) disabled:hover:border-(--col7);
-}
-
-.downloads-entry:hover .entry-info-item,
-.downloads-entry:hover .button {
-  @apply bg-(--col4) border-(--col6) hover:bg-(--col6) hover:border-(--col8) disabled:text-gray-300 disabled:bg-(--col2) disabled:border-(--col7) disabled:hover:text-gray-100 disabled:hover:bg-(--col4) disabled:hover:border-(--col8);
-}
