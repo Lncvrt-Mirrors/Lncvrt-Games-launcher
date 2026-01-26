@@ -350,6 +350,7 @@ async fn open_folder(app: AppHandle, name: String) {
 pub fn run() {
     #[allow(unused_variables)]
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
