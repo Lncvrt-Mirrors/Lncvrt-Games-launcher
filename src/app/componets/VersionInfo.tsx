@@ -9,7 +9,6 @@ import {
   faWarning
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { format } from 'date-fns'
 import { useGlobal } from '../GlobalProvider'
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
@@ -50,11 +49,8 @@ export default function VersionInfo () {
         >
           <p>
             Installed{' '}
-            {format(
-              new Date(
-                downloadedVersionsConfig.timestamps[managingVersion] ?? 0
-              ),
-              'MM/dd/yyyy'
+            {new Intl.DateTimeFormat(undefined).format(
+              downloadedVersionsConfig.timestamps[managingVersion] ?? 0
             )}
           </p>
         </div>
@@ -64,11 +60,8 @@ export default function VersionInfo () {
         >
           <p>
             Released{' '}
-            {format(
-              new Date(
-                versionInfo?.releaseDate ? versionInfo.releaseDate * 1000 : 0
-              ),
-              'MM/dd/yyyy'
+            {new Intl.DateTimeFormat(undefined).format(
+              versionInfo?.releaseDate ? versionInfo.releaseDate * 1000 : 0
             )}
           </p>
         </div>

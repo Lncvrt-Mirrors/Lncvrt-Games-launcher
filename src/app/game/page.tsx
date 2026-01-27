@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import '../Installs.css'
-import { format } from 'date-fns'
 import { invoke } from '@tauri-apps/api/core'
 import { useGlobal } from '../GlobalProvider'
 import { useSearchParams } from 'next/navigation'
@@ -214,16 +213,13 @@ export default function Installs () {
                     <div className='flex gap-2 absolute left-0 bottom-0'>
                       <div
                         className='entry-info-item'
-                        title='The date the game was installed in MM/dd/yyyy format'
+                        title='The date the game was installed.'
                         onClick={e => e.stopPropagation()}
                       >
                         <p>
                           Installed{' '}
-                          {format(
-                            new Date(
-                              downloadedVersionsConfig.timestamps[entry]
-                            ),
-                            'MM/dd/yyyy'
+                          {new Intl.DateTimeFormat(undefined).format(
+                            downloadedVersionsConfig.timestamps[entry]
                           )}
                         </p>
                       </div>
