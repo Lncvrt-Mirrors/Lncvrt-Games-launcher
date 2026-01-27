@@ -129,7 +129,7 @@ export default function Installs () {
                     <button
                       className='button absolute right-0 bottom-0'
                       hidden={!normalConfig?.settings.useLegacyInteractButtons}
-                      title='Click to view game installs'
+                      title='Click to view category'
                       onClick={() => setCategory(Number(key))}
                     >
                       Installs
