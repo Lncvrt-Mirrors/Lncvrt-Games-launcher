@@ -10,4 +10,6 @@ export interface GameVersion {
   place: number
   changelog: string
   wine: number | undefined
+  subcategory: number
+  lastRevision: number
 }

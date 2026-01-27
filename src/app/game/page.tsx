@@ -22,10 +22,17 @@ export default function Installs () {
     setManagingVersion,
     getVersionInfo,
     getGameInfo,
-    setSelectedGame
+    setSelectedGame,
+    serverVersionList
   } = useGlobal()
 
   const params = useSearchParams()
+  const [category, setCategory] = useState<number>(-1)
+
+  const id = Number(params.get('id') || 0)
+  if (!id) return <p>Invalid game</p>
+  const game = serverVersionList?.games.find(g => g.id === id)
+  if (!game) return <p>Invalid game</p>
 
   useEffect(() => {
     if (!showPopup) return
@@ -36,18 +43,30 @@ export default function Installs () {
     <div className='mx-4 mt-4'>
       <div className='flex justify-between items-center mb-4'>
         <p className='text-3xl'>Installs</p>
-        <button
-          className='button btntheme1'
-          onClick={() => {
-            setSelectedGame(Number(params.get('id') || 0))
-            setPopupMode(0)
-            setShowPopup(true)
-            setFadeOut(false)
-          }}
-          title='Click to download more versions of this game.'
-        >
-          Download versions
-        </button>
+        <div className='flex gap-2'>
+          <button
+            className='button btntheme1'
+            onClick={() => {
+              setCategory(-1)
+            }}
+            title='Click to go up a level.'
+            hidden={category == -1}
+          >
+            Back
+          </button>
+          <button
+            className='button btntheme1'
+            onClick={() => {
+              setSelectedGame(id)
+              setPopupMode(0)
+              setShowPopup(true)
+              setFadeOut(false)
+            }}
+            title='Click to download more versions of this game.'
+          >
+            Download versions
+          </button>
+        </div>
       </div>
       <div className='downloads-container'>
         <div
@@ -57,13 +76,74 @@ export default function Installs () {
               : 'h-[calc(100vh-84px)]'
           }`}
         >
-          {downloadedVersionsConfig &&
-          downloadedVersionsConfig.list.filter(v => {
+          {category == -1 &&
+            Object.entries(game.subcategoryNames).map(([key, value]) => {
+              return (
+                <div
+                  key={crypto.randomUUID()}
+                  className={`downloads-entry ${
+                    normalConfig?.settings.useLegacyInteractButtons
+                      ? ''
+                      : 'cursor-pointer'
+                  }`}
+                  title={
+                    normalConfig?.settings.useLegacyInteractButtons
+                      ? ''
+                      : 'Click to view category'
+                  }
+                  onClick={() => {
+                    if (normalConfig?.settings.useLegacyInteractButtons) return
+                    setCategory(Number(key))
+                  }}
+                >
+                  <div className='h-18 w-screen relative'>
+                    <p className='text-2xl'>{value}</p>
+
+                    <div
+                      className='entry-info-item flex absolute left-0 bottom-0'
+                      title='The amount of versions installed of this game in installed/installable format.'
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <p>
+                        {(() => {
+                          const count =
+                            downloadedVersionsConfig?.list.filter(v => {
+                              const info = getVersionInfo(v)
+                              if (!info) return false
+                              if (
+                                platform() === 'linux' &&
+                                info.wine &&
+                                !normalConfig?.settings.useWineOnUnixWhenNeeded
+                              )
+                                return false
+                              return (
+                                info.game === id &&
+                                info.subcategory == Number(key)
+                              )
+                            }).length ?? 0
+                          return `${count} install${count === 1 ? '' : 's'}`
+                        })()}
+                      </p>
+                    </div>
+
+                    <button
+                      className='button absolute right-0 bottom-0'
+                      hidden={!normalConfig?.settings.useLegacyInteractButtons}
+                      title='Click to view game installs'
+                      onClick={() => setCategory(Number(key))}
+                    >
+                      Installs
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          {downloadedVersionsConfig?.list.filter(v => {
             const info = getVersionInfo(v)
             if (!info) return false
-            return info.game === Number(params.get('id') || 0)
+            return info.game === id
           }).length != 0 ? (
-            downloadedVersionsConfig.list
+            downloadedVersionsConfig?.list
               .sort((a, b) => {
                 const infoA = getVersionInfo(a)
                 const infoB = getVersionInfo(b)
@@ -79,7 +159,12 @@ export default function Installs () {
                   !normalConfig?.settings.useWineOnUnixWhenNeeded
                 )
                   return false
-                return info.game === Number(params.get('id') || 0)
+                return (
+                  info.game === id &&
+                  (category == -1
+                    ? info.subcategory == -1
+                    : info.subcategory == category)
+                )
               })
               .map((entry, i) => (
                 <div
