@@ -1,6 +1,6 @@
 export interface GameVersion {
   id: string
-  versionName: string
+  displayName: string
   releaseDate: number
   game: number
   downloadUrl: string
@@ -10,6 +10,6 @@ export interface GameVersion {
   place: number
   changelog: string
   wine: number | undefined
-  subcategory: number
+  category: number
   lastRevision: number
 }

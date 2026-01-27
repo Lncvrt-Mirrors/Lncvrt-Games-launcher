@@ -41,7 +41,7 @@ export default function VersionInfo () {
   return (
     <>
       <p className='text-xl text-center'>
-        Viewing info for {gameInfo?.name} v{versionInfo?.versionName}
+        Viewing info for {versionInfo?.displayName}
       </p>
       <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
         <div

@@ -4,5 +4,5 @@ export interface Game {
   official: boolean
   verified: boolean
   developer: string | null
-  subcategoryNames: Record<string, string>
+  categoryNames: Record<string, string>
 }

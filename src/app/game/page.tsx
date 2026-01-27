@@ -77,7 +77,7 @@ export default function Installs () {
           }`}
         >
           {category == -1 &&
-            Object.entries(game.subcategoryNames).map(([key, value]) => {
+            Object.entries(game.categoryNames).map(([key, value]) => {
               return (
                 <div
                   key={crypto.randomUUID()}
@@ -117,8 +117,7 @@ export default function Installs () {
                               )
                                 return false
                               return (
-                                info.game === id &&
-                                info.subcategory == Number(key)
+                                info.game === id && info.category == Number(key)
                               )
                             }).length ?? 0
                           return `${count} install${count === 1 ? '' : 's'}`
@@ -162,8 +161,8 @@ export default function Installs () {
                 return (
                   info.game === id &&
                   (category == -1
-                    ? info.subcategory == -1
-                    : info.subcategory == category)
+                    ? info.category == -1
+                    : info.category == category)
                 )
               })
               .map((entry, i) => (
@@ -188,7 +187,7 @@ export default function Installs () {
                     invoke('launch_game', {
                       name: verInfo.id,
                       executable: verInfo.executable,
-                      displayName: `${gameInfo.name} v${verInfo.versionName}`,
+                      displayName: verInfo.displayName,
                       useWine: !!(
                         platform() === 'linux' &&
                         verInfo.wine &&
@@ -209,8 +208,7 @@ export default function Installs () {
                 >
                   <div className='h-18 w-screen relative'>
                     <p className='text-2xl'>
-                      {getGameInfo(getVersionInfo(entry)?.game)?.name} v
-                      {getVersionInfo(entry)?.versionName}
+                      {getVersionInfo(entry)?.displayName}
                     </p>
 
                     <div className='flex gap-2 absolute left-0 bottom-0'>

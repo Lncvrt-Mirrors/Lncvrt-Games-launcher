@@ -17,7 +17,7 @@ export default function VersionChangelog () {
   return (
     <>
       <p className='text-xl text-center'>
-        Viewing changelog for {gameInfo?.name} v{versionInfo?.versionName}
+        Viewing changelog for {versionInfo?.displayName}
       </p>
       <div className='popup-content text-center p-2'>
         <span

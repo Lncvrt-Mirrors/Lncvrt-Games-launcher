@@ -192,14 +192,14 @@ export default function RootLayout ({
     let unlistenProgress: (() => void) | null = null
 
     listen<string>('download-progress', event => {
-      const [versionName, progStr, totalSizeStr, speedStr, etaSecsStr] =
+      const [displayName, progStr, totalSizeStr, speedStr, etaSecsStr] =
         event.payload.split(':')
       const prog = Number(progStr)
       const progBytes = Number(totalSizeStr)
       const speed = Number(speedStr)
       const etaSecs = Number(etaSecsStr)
       setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === versionName)
+        const i = prev.findIndex(d => d.version === displayName)
         if (i === -1) return prev
         const copy = [...prev]
         copy[i] = {
@@ -214,9 +214,9 @@ export default function RootLayout ({
     }).then(f => (unlistenProgress = f))
 
     listen<string>('download-hash-checking', event => {
-      const versionName = event.payload
+      const displayName = event.payload
       setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === versionName)
+        const i = prev.findIndex(d => d.version === displayName)
         if (i === -1) return prev
         const copy = [...prev]
         copy[i] = { ...copy[i], hash_checking: true }
@@ -225,9 +225,9 @@ export default function RootLayout ({
     }).then(f => (unlistenProgress = f))
 
     listen<string>('download-finishing', event => {
-      const versionName = event.payload
+      const displayName = event.payload
       setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === versionName)
+        const i = prev.findIndex(d => d.version === displayName)
         if (i === -1) return prev
         const copy = [...prev]
         copy[i] = { ...copy[i], hash_checking: false, finishing: true }
@@ -353,7 +353,7 @@ export default function RootLayout ({
         if (normalConfig?.settings.allowNotifications)
           await notifyUser(
             'Download Failed',
-            `The download for version ${gameInfo.name} v${info.versionName} has failed.`
+            `The download for version ${info.displayName} has failed.`
           )
       }
     }
@@ -496,8 +496,7 @@ export default function RootLayout ({
                                           : 'max-w-91.5'
                                       }`}
                                     >
-                                      {getGameInfo(v.game)?.name} v
-                                      {v.versionName}
+                                      {v.displayName}
                                     </p>
                                   </div>
                                   <button
@@ -635,11 +634,7 @@ export default function RootLayout ({
                                 className='popup-entry flex flex-col justify-between'
                               >
                                 <p className='text-2xl text-center'>
-                                  {
-                                    getGameInfo(getVersionInfo(v.version)?.game)
-                                      ?.name
-                                  }{' '}
-                                  v{getVersionInfo(v.version)?.versionName}
+                                  {getVersionInfo(v.version)?.displayName}
                                 </p>
                                 <div className='mt-6.25 flex items-center justify-between'>
                                   {v.failed ? (
@@ -719,12 +714,7 @@ export default function RootLayout ({
                           <>
                             <p className='text-xl text-center'>
                               Manage{' '}
-                              {
-                                getGameInfo(
-                                  getVersionInfo(managingVersion)?.game
-                                )?.name
-                              }{' '}
-                              v{getVersionInfo(managingVersion)?.versionName}
+                              {getVersionInfo(managingVersion)?.displayName}
                             </p>
                             <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
                               <button
