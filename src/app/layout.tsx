@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Sidebar from './componets/Sidebar'
 import './Globals.css'
 import { DownloadProgress } from './types/DownloadProgress'
@@ -82,6 +82,7 @@ export default function RootLayout ({
   const [selectedGame, setSelectedGame] = useState<number | null>(null)
 
   const pathname = usePathname()
+  const revisionCheck = useRef(false)
 
   function getSpecialVersionsList (game?: number): GameVersion[] {
     if (!normalConfig || !serverVersionList) return []
@@ -276,7 +277,6 @@ export default function RootLayout ({
       const versionsConfig = await readVersionsConfig()
       setDownloadedVersionsConfig(versionsConfig)
       setNormalConfig(normalConfig)
-      setLoadingText('Finishing...')
       setLoading(false)
 
       if (!(await isPermissionGranted())) {
@@ -292,8 +292,11 @@ export default function RootLayout ({
     return () => document.removeEventListener('contextmenu', handler)
   }, [])
 
-  async function downloadVersions (): Promise<void> {
-    const list = selectedVersionList
+  async function downloadVersions (
+    list: string[],
+    currentConfig: VersionsConfig
+  ): Promise<void> {
+    if (list.length === 0) return
     setSelectedVersionList([])
 
     const newDownloads = list.map(
@@ -309,41 +312,41 @@ export default function RootLayout ({
         setDownloadProgress(prev =>
           prev.filter(d => d.version !== download.version)
         )
-        return
+        continue
       }
+
       const gameInfo = getGameInfo(info.game)
       if (!gameInfo) {
         setDownloadProgress(prev =>
           prev.filter(d => d.version !== download.version)
         )
-        return
+        continue
       }
+
       setDownloadProgress(prev =>
         prev.map(d =>
           d.version === download.version ? { ...d, queued: false } : d
         )
       )
+
       const res = await invoke<string>('download', {
         url: info.downloadUrl,
         name: info.id,
         executable: info.executable,
         hash: info.sha512sum
       })
-      if (res == '1') {
+
+      if (res === '1') {
         setDownloadProgress(prev =>
           prev.filter(d => d.version !== download.version)
         )
-        let data = downloadedVersionsConfig
-        if (!data) {
-          setDownloadProgress(prev =>
-            prev.filter(d => d.version !== download.version)
-          )
-          return
-        }
         const date = Date.now()
-        data.list = { ...data.list, [download.version]: date }
-        setDownloadedVersionsConfig(data)
-        writeVersionsConfig(data)
+        const newConfig = {
+          ...currentConfig,
+          list: { ...currentConfig.list, [download.version]: date }
+        }
+        setDownloadedVersionsConfig(newConfig)
+        writeVersionsConfig(newConfig)
       } else {
         setDownloadProgress(prev =>
           prev.map(d =>
@@ -362,7 +365,40 @@ export default function RootLayout ({
 
     if (normalConfig?.settings.allowNotifications)
       await notifyUser('Downloads Finished', 'All downloads have finished.')
+
+    setFadeOut(true)
+    setTimeout(() => setShowPopup(false), 200)
   }
+
+  useEffect(() => {
+    if (revisionCheck.current) return
+    if (!serverVersionList || !downloadedVersionsConfig) return
+    revisionCheck.current = true
+    ;(async () => {
+      const newConfig = {
+        ...downloadedVersionsConfig,
+        list: { ...downloadedVersionsConfig.list }
+      }
+      const versionsToSelect: string[] = []
+
+      for (const [key, value] of Object.entries(
+        downloadedVersionsConfig.list
+      )) {
+        const verInfo = serverVersionList.versions.find(item => item.id === key)
+
+        if (!verInfo || value / 1000 <= verInfo.lastRevision) {
+          delete newConfig.list[key]
+          versionsToSelect.push(key)
+        }
+      }
+
+      setDownloadedVersionsConfig(newConfig)
+      writeVersionsConfig(newConfig)
+      setSelectedVersionList(prev => [...prev, ...versionsToSelect])
+
+      await downloadVersions(versionsToSelect, newConfig)
+    })()
+  }, [serverVersionList, downloadedVersionsConfig])
 
   return (
     <>
@@ -801,7 +837,11 @@ export default function RootLayout ({
                               onClick={() => {
                                 setFadeOut(true)
                                 setTimeout(() => setShowPopup(false), 200)
-                                downloadVersions()
+                                if (downloadedVersionsConfig)
+                                  downloadVersions(
+                                    selectedVersionList,
+                                    downloadedVersionsConfig
+                                  )
                               }}
                               disabled={downloadProgress.length != 0}
                               title={
