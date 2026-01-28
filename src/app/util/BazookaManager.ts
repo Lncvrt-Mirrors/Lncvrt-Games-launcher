@@ -83,22 +83,8 @@ export async function readVersionsConfig (): Promise<VersionsConfig> {
     }
     const config = await readTextFile('versions.json', options)
     const raw = JSON.parse(config)
-    if (
-      raw.version &&
-      raw.list &&
-      raw.timestamps &&
-      (raw.version == '1.0.0' ||
-        raw.version == '1.1.0' ||
-        raw.version == '1.1.1' ||
-        raw.version == '1.1.2' ||
-        raw.version == '1.2.0' ||
-        raw.version == '1.3.0' ||
-        raw.version == '1.3.1' ||
-        raw.version == '1.4.0' ||
-        raw.version == '1.5.0')
-    ) {
+    if (raw.version && raw.list && raw.timestamps) {
       raw.version = version
-      delete raw.list
       raw.list = raw.timestamps
       delete raw.timestamps
 
