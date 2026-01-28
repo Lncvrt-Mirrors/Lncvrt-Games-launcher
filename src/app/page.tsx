@@ -59,7 +59,8 @@ export default function Installs () {
               : 'h-[calc(100vh-84px)]'
           }`}
         >
-          {downloadedVersionsConfig && downloadedVersionsConfig.list.length ? (
+          {downloadedVersionsConfig &&
+          Object.keys(downloadedVersionsConfig.list).length ? (
             getListOfGames()
               .sort((a, b) => {
                 return a.id - b.id
