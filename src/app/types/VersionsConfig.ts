@@ -1,20 +1,17 @@
-type VersionsConfigData = {
+export type VersionsConfigData = {
   version: string
-  list: string[]
-  timestamps: Record<string, number>
+  list: Record<string, number>
 }
 
 export class VersionsConfig {
   constructor (
     public version: string,
-    public list: string[] = [],
-    public timestamps: Record<string, number> = {}
+    public list: Record<string, number> = {}
   ) {}
 
   static import (data: VersionsConfigData) {
     const cfg = new VersionsConfig(data.version)
-    cfg.list = [...data.list]
-    cfg.timestamps = { ...data.timestamps }
+    cfg.list = { ...data.list }
     return cfg
   }
 }

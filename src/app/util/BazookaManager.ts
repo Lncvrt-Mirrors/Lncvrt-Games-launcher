@@ -8,7 +8,7 @@ import {
   readTextFile,
   writeFile
 } from '@tauri-apps/plugin-fs'
-import { VersionsConfig } from '../types/VersionsConfig'
+import { VersionsConfig, VersionsConfigData } from '../types/VersionsConfig'
 
 export async function readNormalConfig (): Promise<NormalConfig> {
   const version = await app.getVersion()
@@ -82,7 +82,33 @@ export async function readVersionsConfig (): Promise<VersionsConfig> {
       return new VersionsConfig(version)
     }
     const config = await readTextFile('versions.json', options)
-    return VersionsConfig.import(JSON.parse(config))
+    const raw = JSON.parse(config)
+    if (
+      raw.version &&
+      raw.list &&
+      raw.timestamps &&
+      (raw.version == '1.0.0' ||
+        raw.version == '1.1.0' ||
+        raw.version == '1.1.1' ||
+        raw.version == '1.1.2' ||
+        raw.version == '1.2.0' ||
+        raw.version == '1.3.0' ||
+        raw.version == '1.3.1' ||
+        raw.version == '1.4.0' ||
+        raw.version == '1.5.0')
+    ) {
+      raw.version = version
+      delete raw.list
+      raw.list = raw.timestamps
+      delete raw.timestamps
+
+      await writeFile(
+        'versions.json',
+        new TextEncoder().encode(JSON.stringify(raw, null, 2)),
+        options
+      )
+    }
+    return VersionsConfig.import(raw)
   } catch {
     return new VersionsConfig(version)
   }

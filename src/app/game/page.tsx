@@ -106,7 +106,9 @@ export default function Installs () {
                       <p>
                         {(() => {
                           const count =
-                            downloadedVersionsConfig?.list.filter(v => {
+                            Object.keys(
+                              downloadedVersionsConfig?.list ?? []
+                            ).filter(v => {
                               const info = getVersionInfo(v)
                               if (!info) return false
                               if (
@@ -136,12 +138,12 @@ export default function Installs () {
                 </div>
               )
             })}
-          {downloadedVersionsConfig?.list.filter(v => {
+          {Object.keys(downloadedVersionsConfig?.list ?? []).filter(v => {
             const info = getVersionInfo(v)
             if (!info) return false
             return info.game === id
           }).length != 0 ? (
-            downloadedVersionsConfig?.list
+            Object.keys(downloadedVersionsConfig?.list ?? [])
               .sort((a, b) => {
                 const infoA = getVersionInfo(a)
                 const infoB = getVersionInfo(b)
@@ -219,7 +221,7 @@ export default function Installs () {
                         <p>
                           Installed{' '}
                           {new Intl.DateTimeFormat(undefined).format(
-                            downloadedVersionsConfig.timestamps[entry]
+                            downloadedVersionsConfig?.list[entry]
                           )}
                         </p>
                       </div>

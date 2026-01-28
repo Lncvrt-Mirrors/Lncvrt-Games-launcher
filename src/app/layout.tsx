@@ -87,7 +87,9 @@ export default function RootLayout ({
     if (!normalConfig || !serverVersionList) return []
 
     return serverVersionList.versions
-      .filter(v => !downloadedVersionsConfig?.list.includes(v.id))
+      .filter(
+        v => !Object.keys(downloadedVersionsConfig?.list ?? []).includes(v.id)
+      )
       .filter(v => {
         if (
           platform() === 'linux' &&
@@ -123,7 +125,7 @@ export default function RootLayout ({
 
     const gamesMap = new Map<number, Game>()
 
-    downloadedVersionsConfig.list.forEach(i => {
+    Object.keys(downloadedVersionsConfig.list).forEach(i => {
       const version = getVersionInfo(i)
       if (!version) return
       const game = getGameInfo(version.game)
@@ -143,7 +145,7 @@ export default function RootLayout ({
     const allowWine =
       platform() !== 'linux' || normalConfig?.settings.useWineOnUnixWhenNeeded
 
-    const installed = downloadedVersionsConfig.list.filter(v => {
+    const installed = Object.keys(downloadedVersionsConfig.list).filter(v => {
       const info = getVersionInfo(v)
       if (!info) return false
       if (info.wine && !allowWine) return false
@@ -274,6 +276,7 @@ export default function RootLayout ({
       const versionsConfig = await readVersionsConfig()
       setDownloadedVersionsConfig(versionsConfig)
       setNormalConfig(normalConfig)
+      setLoadingText('Finishing...')
       setLoading(false)
 
       if (!(await isPermissionGranted())) {
@@ -338,8 +341,7 @@ export default function RootLayout ({
           return
         }
         const date = Date.now()
-        data.list = [...data.list, download.version]
-        data.timestamps = { ...data.timestamps, [download.version]: date }
+        data.list = { ...data.list, [download.version]: date }
         setDownloadedVersionsConfig(data)
         writeVersionsConfig(data)
       } else {
@@ -725,19 +727,14 @@ export default function RootLayout ({
 
                                   setDownloadedVersionsConfig(prev => {
                                     if (!prev) return prev
-                                    const updatedList = prev.list.filter(
-                                      v => v !== managingVersion
-                                    )
-                                    const updatedTimestamps =
-                                      Object.fromEntries(
-                                        Object.entries(prev.timestamps).filter(
-                                          ([k]) => k !== managingVersion
-                                        )
+                                    const updatedList = Object.fromEntries(
+                                      Object.entries(prev.list).filter(
+                                        ([k]) => k !== managingVersion
                                       )
+                                    )
                                     const updatedConfig = {
                                       ...prev,
-                                      list: updatedList,
-                                      timestamps: updatedTimestamps
+                                      list: updatedList
                                     }
                                     writeVersionsConfig(updatedConfig)
                                     setManagingVersion(null)

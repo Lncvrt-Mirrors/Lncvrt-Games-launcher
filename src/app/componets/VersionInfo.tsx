@@ -50,7 +50,7 @@ export default function VersionInfo () {
           <p>
             Installed{' '}
             {new Intl.DateTimeFormat(undefined).format(
-              downloadedVersionsConfig.timestamps[managingVersion] ?? 0
+              downloadedVersionsConfig.list[managingVersion] ?? 0
             )}
           </p>
         </div>
