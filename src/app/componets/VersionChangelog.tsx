@@ -16,7 +16,7 @@ export default function VersionChangelog () {
       </p>
       <div className='popup-content text-center p-2'>
         <span
-          className='whitespace-pre-wrap'
+          className='whitespace-pre-wrap select-text'
           dangerouslySetInnerHTML={{
             __html: versionInfo?.changelog ? atob(versionInfo.changelog) : ''
           }}
