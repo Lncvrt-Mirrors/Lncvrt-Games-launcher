@@ -1,6 +1,6 @@
 [package]
 name = "lncvrt-games-launcher"
-version = "1.5.2"
+version = "1.5.3"
 authors = ["Lncvrt"]
 edition = "2024"
 
@@ -9,10 +9,10 @@ name = "lncvrt_games_launcher_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.5.3", features = [] }
+tauri-build = { version = "2.5.4", features = [] }
 
 [dependencies]
-tauri = { version = "2.9.5", features = ["macos-private-api"] }
+tauri = { version = "2.10.1", features = ["macos-private-api"] }
 tauri-plugin-opener = "2.5.3"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"

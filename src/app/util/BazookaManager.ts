@@ -8,7 +8,7 @@ import {
   readTextFile,
   writeFile
 } from '@tauri-apps/plugin-fs'
-import { VersionsConfig, VersionsConfigData } from '../types/VersionsConfig'
+import { VersionsConfig } from '../types/VersionsConfig'
 
 export async function readNormalConfig (): Promise<NormalConfig> {
   const version = await app.getVersion()

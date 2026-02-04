@@ -329,6 +329,12 @@ export default function RootLayout ({
         )
       )
 
+      try {
+        await axios.get(
+          'https://games.lncvrt.xyz/api/launcher/download?id=' + info.id
+        )
+      } catch {}
+
       const res = await invoke<string>('download', {
         url: info.downloadUrl,
         name: info.id,

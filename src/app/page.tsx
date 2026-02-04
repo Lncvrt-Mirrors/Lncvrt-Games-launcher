@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import './Installs.css'
 import { useGlobal } from './GlobalProvider'
 import Link from 'next/link'

@@ -166,7 +166,7 @@ export default function Installs () {
                     : info.category == category)
                 )
               })
-              .map((entry, i) => (
+              .map(entry => (
                 <div
                   key={entry}
                   className={`downloads-entry ${
