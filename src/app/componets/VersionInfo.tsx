@@ -23,10 +23,6 @@ export default function VersionInfo () {
     viewingInfoFromDownloads,
     setPopupMode
   } = useGlobal()
-  if (!managingVersion || !downloadedVersionsConfig) return <></>
-
-  const versionInfo = getVersionInfo(managingVersion)
-  const gameInfo = getGameInfo(versionInfo?.game)
   const [versionSize, setVersionSize] = useState<number | null>(null)
 
   useEffect(() => {
@@ -36,6 +32,11 @@ export default function VersionInfo () {
       setVersionSize(parseInt(size, 10))
     })
   }, [managingVersion, setVersionSize])
+
+  if (!managingVersion || !downloadedVersionsConfig) return <></>
+
+  const versionInfo = getVersionInfo(managingVersion)
+  const gameInfo = getGameInfo(versionInfo?.game)
 
   return (
     <>

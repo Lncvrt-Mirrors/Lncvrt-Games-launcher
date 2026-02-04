@@ -43,9 +43,11 @@ export default function Sidebar () {
         hidden={platform() != 'macos'}
         onMouseDown={e => {
           if (e.buttons === 1) {
-            e.detail === 2
-              ? getCurrentWindow().toggleMaximize()
-              : getCurrentWindow().startDragging()
+            if (e.detail === 2) {
+              getCurrentWindow().toggleMaximize()
+            } else {
+              getCurrentWindow().startDragging()
+            }
           }
         }}
       ></div>
@@ -62,9 +64,11 @@ export default function Sidebar () {
         onMouseDown={e => {
           if (platform() != 'macos') return
           if (e.buttons === 1) {
-            e.detail === 2
-              ? getCurrentWindow().toggleMaximize()
-              : getCurrentWindow().startDragging()
+            if (e.detail === 2) {
+              getCurrentWindow().toggleMaximize()
+            } else {
+              getCurrentWindow().startDragging()
+            }
           }
         }}
       >

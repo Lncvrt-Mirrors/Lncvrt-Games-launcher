@@ -26,17 +26,24 @@ export default function Installs () {
   } = useGlobal()
 
   const params = useSearchParams()
-  const [category, setCategory] = useState<number>(-1)
 
   const id = Number(params.get('id') || 0)
-  if (!id) return <p>Invalid game</p>
   const game = serverVersionList?.games.find(g => g.id === id)
-  if (!game) return <p>Invalid game</p>
+
+  const [category, setCategory] = useState<number>(-1)
+  const [lastId, setLastId] = useState(id)
 
   useEffect(() => {
     if (!showPopup) return
     setSelectedVersionList([])
   }, [normalConfig, setSelectedVersionList, showPopup])
+
+  if (!id || !game) return <p>Invalid game</p>
+
+  if (lastId !== id) {
+    setLastId(id)
+    setCategory(-1)
+  }
 
   return (
     <div className='mx-4 mt-4'>
@@ -76,68 +83,94 @@ export default function Installs () {
           }`}
         >
           {category == -1 &&
-            Object.entries(game.categoryNames).map(([key, value]) => {
-              return (
-                <div
-                  key={crypto.randomUUID()}
-                  className={`downloads-entry ${
-                    normalConfig?.settings.useLegacyInteractButtons
-                      ? ''
-                      : 'cursor-pointer'
-                  }`}
-                  title={
-                    normalConfig?.settings.useLegacyInteractButtons
-                      ? ''
-                      : 'Click to view category'
-                  }
-                  onClick={() => {
-                    if (normalConfig?.settings.useLegacyInteractButtons) return
-                    setCategory(Number(key))
-                  }}
-                >
-                  <div className='h-18 w-screen relative'>
-                    <p className='text-2xl'>{value}</p>
+            Object.entries(game.categoryNames)
+              .sort(([a], [b]) => Number(b) - Number(a))
+              .filter(([key]) => {
+                const count = Object.keys(
+                  downloadedVersionsConfig?.list ?? {}
+                ).filter(v => {
+                  const info = getVersionInfo(v)
+                  if (!info) return false
 
-                    <div
-                      className='entry-info-item flex absolute left-0 bottom-0'
-                      title='The amount of versions installed of this game in installed/installable format.'
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <p>
-                        {(() => {
-                          const count =
-                            Object.keys(
-                              downloadedVersionsConfig?.list ?? []
-                            ).filter(v => {
-                              const info = getVersionInfo(v)
-                              if (!info) return false
-                              if (
-                                platform() === 'linux' &&
-                                info.wine &&
-                                !normalConfig?.settings.useWineOnUnixWhenNeeded
-                              )
-                                return false
-                              return (
-                                info.game === id && info.category == Number(key)
-                              )
-                            }).length ?? 0
-                          return `${count} install${count === 1 ? '' : 's'}`
-                        })()}
-                      </p>
+                  if (
+                    platform() === 'linux' &&
+                    info.wine &&
+                    !normalConfig?.settings.useWineOnUnixWhenNeeded
+                  )
+                    return false
+
+                  return info.game === id && info.category === Number(key)
+                }).length
+
+                return count >= 1
+              })
+              .map(([key, value]) => {
+                return (
+                  <div
+                    key={value}
+                    className={`downloads-entry ${
+                      normalConfig?.settings.useLegacyInteractButtons
+                        ? ''
+                        : 'cursor-pointer'
+                    }`}
+                    title={
+                      normalConfig?.settings.useLegacyInteractButtons
+                        ? ''
+                        : 'Click to view category'
+                    }
+                    onClick={() => {
+                      if (normalConfig?.settings.useLegacyInteractButtons)
+                        return
+                      setCategory(Number(key))
+                    }}
+                  >
+                    <div className='h-18 w-screen relative'>
+                      <p className='text-2xl'>{value}</p>
+
+                      <div
+                        className='entry-info-item flex absolute left-0 bottom-0'
+                        title='The amount of versions installed of this game in installed/installable format.'
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <p>
+                          {(() => {
+                            const count =
+                              Object.keys(
+                                downloadedVersionsConfig?.list ?? []
+                              ).filter(v => {
+                                const info = getVersionInfo(v)
+                                if (!info) return false
+                                if (
+                                  platform() === 'linux' &&
+                                  info.wine &&
+                                  !normalConfig?.settings
+                                    .useWineOnUnixWhenNeeded
+                                )
+                                  return false
+                                return (
+                                  info.game === id &&
+                                  info.category == Number(key)
+                                )
+                              }).length ?? 0
+                            return `${count} install${count === 1 ? '' : 's'}`
+                          })()}
+                        </p>
+                      </div>
+
+                      <button
+                        className='button absolute right-0 bottom-0'
+                        hidden={
+                          !normalConfig?.settings.useLegacyInteractButtons
+                        }
+                        title='Click to view category'
+                        onClick={() => setCategory(Number(key))}
+                      >
+                        Installs
+                      </button>
                     </div>
-
-                    <button
-                      className='button absolute right-0 bottom-0'
-                      hidden={!normalConfig?.settings.useLegacyInteractButtons}
-                      title='Click to view category'
-                      onClick={() => setCategory(Number(key))}
-                    >
-                      Installs
-                    </button>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
           {Object.keys(downloadedVersionsConfig?.list ?? []).filter(v => {
             const info = getVersionInfo(v)
             if (!info) return false
@@ -277,9 +310,19 @@ export default function Installs () {
                           e.stopPropagation()
                           const verInfo = getVersionInfo(entry)
                           if (verInfo == undefined) return
+                          const gameInfo = getGameInfo(verInfo.game)
+                          if (gameInfo == undefined) return
                           invoke('launch_game', {
                             name: verInfo.id,
-                            executable: verInfo.executable
+                            executable: verInfo.executable,
+                            displayName: verInfo.displayName,
+                            useWine: !!(
+                              platform() === 'linux' &&
+                              verInfo.wine &&
+                              normalConfig?.settings.useWineOnUnixWhenNeeded
+                            ),
+                            wineCommand:
+                              normalConfig?.settings.wineOnUnixCommand
                           })
                         }}
                         hidden={
