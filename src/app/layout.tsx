@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Sidebar from './componets/Sidebar'
 import './Globals.css'
 import { DownloadProgress } from './types/DownloadProgress'
@@ -111,15 +111,21 @@ export default function RootLayout ({
       })
   }
 
-  function getVersionInfo (id: string | undefined): GameVersion | undefined {
-    if (!id) return undefined
-    return serverVersionList?.versions.find(v => v.id === id)
-  }
+  const getVersionInfo = useCallback(
+    (id: string | undefined): GameVersion | undefined => {
+      if (!id) return undefined
+      return serverVersionList?.versions.find(v => v.id === id)
+    },
+    [serverVersionList]
+  )
 
-  function getGameInfo (game: number | undefined): Game | undefined {
-    if (!game) return undefined
-    return serverVersionList?.games.find(g => g.id === game)
-  }
+  const getGameInfo = useCallback(
+    (game: number | undefined): Game | undefined => {
+      if (!game) return undefined
+      return serverVersionList?.games.find(g => g.id === game)
+    },
+    [serverVersionList]
+  )
 
   function getListOfGames (): Game[] {
     if (!downloadedVersionsConfig?.list) return []
@@ -292,89 +298,89 @@ export default function RootLayout ({
     return () => document.removeEventListener('contextmenu', handler)
   }, [])
 
-  async function downloadVersions (
-    list: string[],
-    currentConfig: VersionsConfig
-  ): Promise<void> {
-    if (list.length === 0) return
-    setSelectedVersionList([])
+  const downloadVersions = useCallback(
+    async (list: string[], currentConfig: VersionsConfig): Promise<void> => {
+      if (list.length === 0) return
+      setSelectedVersionList([])
 
-    const newDownloads = list.map(
-      version =>
-        new DownloadProgress(version, 0, 0, false, true, false, false, 0, 0)
-    )
-
-    setDownloadProgress(newDownloads)
-
-    for (const download of newDownloads) {
-      const info = getVersionInfo(download.version)
-      if (!info) {
-        setDownloadProgress(prev =>
-          prev.filter(d => d.version !== download.version)
-        )
-        continue
-      }
-
-      const gameInfo = getGameInfo(info.game)
-      if (!gameInfo) {
-        setDownloadProgress(prev =>
-          prev.filter(d => d.version !== download.version)
-        )
-        continue
-      }
-
-      setDownloadProgress(prev =>
-        prev.map(d =>
-          d.version === download.version ? { ...d, queued: false } : d
-        )
+      const newDownloads = list.map(
+        version =>
+          new DownloadProgress(version, 0, 0, false, true, false, false, 0, 0)
       )
 
-      try {
-        await axios.get(
-          'https://games.lncvrt.xyz/api/launcher/download?id=' + info.id
-        )
-      } catch {}
+      setDownloadProgress(newDownloads)
 
-      const res = await invoke<string>('download', {
-        url: info.downloadUrl,
-        name: info.id,
-        executable: info.executable,
-        hash: info.sha512sum
-      })
-
-      if (res === '1') {
-        setDownloadProgress(prev =>
-          prev.filter(d => d.version !== download.version)
-        )
-        const date = Date.now()
-        const newConfig = {
-          ...currentConfig,
-          list: { ...currentConfig.list, [download.version]: date }
+      for (const download of newDownloads) {
+        const info = getVersionInfo(download.version)
+        if (!info) {
+          setDownloadProgress(prev =>
+            prev.filter(d => d.version !== download.version)
+          )
+          continue
         }
-        setDownloadedVersionsConfig(newConfig)
-        writeVersionsConfig(newConfig)
-      } else {
+
+        const gameInfo = getGameInfo(info.game)
+        if (!gameInfo) {
+          setDownloadProgress(prev =>
+            prev.filter(d => d.version !== download.version)
+          )
+          continue
+        }
+
         setDownloadProgress(prev =>
           prev.map(d =>
-            d.version === download.version
-              ? { ...d, queued: false, failed: true, progress: 0 }
-              : d
+            d.version === download.version ? { ...d, queued: false } : d
           )
         )
-        if (normalConfig?.settings.allowNotifications)
-          await notifyUser(
-            'Download Failed',
-            `The download for version ${info.displayName} has failed.`
+
+        try {
+          await axios.get(
+            'https://games.lncvrt.xyz/api/launcher/download?id=' + info.id
           )
+        } catch {}
+
+        const res = await invoke<string>('download', {
+          url: info.downloadUrl,
+          name: info.id,
+          executable: info.executable,
+          hash: info.sha512sum
+        })
+
+        if (res === '1') {
+          setDownloadProgress(prev =>
+            prev.filter(d => d.version !== download.version)
+          )
+          const date = Date.now()
+          const newConfig = {
+            ...currentConfig,
+            list: { ...currentConfig.list, [download.version]: date }
+          }
+          setDownloadedVersionsConfig(newConfig)
+          writeVersionsConfig(newConfig)
+        } else {
+          setDownloadProgress(prev =>
+            prev.map(d =>
+              d.version === download.version
+                ? { ...d, queued: false, failed: true, progress: 0 }
+                : d
+            )
+          )
+          if (normalConfig?.settings.allowNotifications)
+            await notifyUser(
+              'Download Failed',
+              `The download for version ${info.displayName} has failed.`
+            )
+        }
       }
-    }
 
-    if (normalConfig?.settings.allowNotifications)
-      await notifyUser('Downloads Finished', 'All downloads have finished.')
+      if (normalConfig?.settings.allowNotifications)
+        await notifyUser('Downloads Finished', 'All downloads have finished.')
 
-    setFadeOut(true)
-    setTimeout(() => setShowPopup(false), 200)
-  }
+      setFadeOut(true)
+      setTimeout(() => setShowPopup(false), 200)
+    },
+    [getGameInfo, getVersionInfo, normalConfig]
+  )
 
   useEffect(() => {
     if (revisionCheck.current) return
@@ -404,7 +410,7 @@ export default function RootLayout ({
 
       await downloadVersions(versionsToSelect, newConfig)
     })()
-  }, [serverVersionList, downloadedVersionsConfig])
+  }, [serverVersionList, downloadedVersionsConfig, downloadVersions])
 
   return (
     <>

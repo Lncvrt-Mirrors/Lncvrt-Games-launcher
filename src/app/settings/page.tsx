@@ -50,24 +50,22 @@ export default function Settings () {
             label='Allow sending notifications'
             value={allowNotifications}
             onChange={async () => {
-              while (normalConfig != null) {
-                setAllowNotifications(!allowNotifications)
-                setNormalConfig({
-                  ...normalConfig,
-                  settings: {
-                    ...normalConfig.settings,
-                    allowNotifications: !allowNotifications
-                  }
-                })
-                writeNormalConfig({
-                  ...normalConfig,
-                  settings: {
-                    ...normalConfig.settings,
-                    allowNotifications: !allowNotifications
-                  }
-                })
-                break
-              }
+              if (!normalConfig) return
+              setAllowNotifications(!allowNotifications)
+              setNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  allowNotifications: !allowNotifications
+                }
+              })
+              await writeNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  allowNotifications: !allowNotifications
+                }
+              })
             }}
             title='This setting does as you expect, allow the launcher to send notifications for when stuff like downloading is done.'
           />
@@ -75,24 +73,22 @@ export default function Settings () {
             label='Always show games in sidebar'
             value={alwaysShowGamesInSidebar}
             onChange={async () => {
-              while (normalConfig != null) {
-                setAlwaysShowGamesInSidebar(!alwaysShowGamesInSidebar)
-                setNormalConfig({
-                  ...normalConfig,
-                  settings: {
-                    ...normalConfig.settings,
-                    alwaysShowGamesInSidebar: !alwaysShowGamesInSidebar
-                  }
-                })
-                writeNormalConfig({
-                  ...normalConfig,
-                  settings: {
-                    ...normalConfig.settings,
-                    alwaysShowGamesInSidebar: !alwaysShowGamesInSidebar
-                  }
-                })
-                break
-              }
+              if (!normalConfig) return
+              setAlwaysShowGamesInSidebar(!alwaysShowGamesInSidebar)
+              setNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  alwaysShowGamesInSidebar: !alwaysShowGamesInSidebar
+                }
+              })
+              await writeNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  alwaysShowGamesInSidebar: !alwaysShowGamesInSidebar
+                }
+              })
             }}
             title="This setting will make it so when you are on a page like this, the games won't disappear."
           />
@@ -100,24 +96,22 @@ export default function Settings () {
             label='Show Installs/Launch/Manage Buttons'
             value={useLegacyInteractButtons}
             onChange={async () => {
-              while (normalConfig != null) {
-                setUseLegacyInteractButtons(!useLegacyInteractButtons)
-                setNormalConfig({
-                  ...normalConfig,
-                  settings: {
-                    ...normalConfig.settings,
-                    useLegacyInteractButtons: !useLegacyInteractButtons
-                  }
-                })
-                writeNormalConfig({
-                  ...normalConfig,
-                  settings: {
-                    ...normalConfig.settings,
-                    useLegacyInteractButtons: !useLegacyInteractButtons
-                  }
-                })
-                break
-              }
+              if (!normalConfig) return
+              setUseLegacyInteractButtons(!useLegacyInteractButtons)
+              setNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  useLegacyInteractButtons: !useLegacyInteractButtons
+                }
+              })
+              await writeNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  useLegacyInteractButtons: !useLegacyInteractButtons
+                }
+              })
             }}
             title='Enable the legacy method of using the installs/launch/manage buttons. In the future this setting may be removed so try and get used to the new method.'
           />
@@ -125,13 +119,22 @@ export default function Settings () {
             label='Use wine when needed to launch games'
             value={useWineOnUnixWhenNeeded}
             onChange={async () => {
-              while (normalConfig != null) {
-                setUseWineOnUnixWhenNeeded(!useWineOnUnixWhenNeeded)
-                normalConfig.settings.useWineOnUnixWhenNeeded =
-                  !useWineOnUnixWhenNeeded
-                await writeNormalConfig(normalConfig)
-                break
-              }
+              if (!normalConfig) return
+              setUseWineOnUnixWhenNeeded(!useWineOnUnixWhenNeeded)
+              setNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  useWineOnUnixWhenNeeded: !useWineOnUnixWhenNeeded
+                }
+              })
+              await writeNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  useWineOnUnixWhenNeeded: !useWineOnUnixWhenNeeded
+                }
+              })
             }}
             className={platform() == 'linux' ? '' : 'hidden'}
           />
@@ -142,12 +145,22 @@ export default function Settings () {
             type='text'
             value={wineOnUnixCommand}
             onChange={async e => {
-              while (normalConfig != null) {
-                setWineOnUnixCommand(e.target.value)
-                normalConfig.settings.wineOnUnixCommand = e.target.value
-                await writeNormalConfig(normalConfig)
-                break
-              }
+              if (!normalConfig) return
+              setWineOnUnixCommand(e.target.value)
+              setNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  wineOnUnixCommand: e.target.value
+                }
+              })
+              await writeNormalConfig({
+                ...normalConfig,
+                settings: {
+                  ...normalConfig.settings,
+                  wineOnUnixCommand: e.target.value
+                }
+              })
             }}
             className={`input-field my-1 ${
               platform() == 'linux' && useWineOnUnixWhenNeeded ? '' : 'hidden'
@@ -159,25 +172,23 @@ export default function Settings () {
               className='ml-2 bg-(--col2) border border-(--col4) rounded-md'
               value={theme}
               onChange={async e => {
+                if (!normalConfig) return
                 const newTheme = parseInt(e.target.value)
-                while (normalConfig != null) {
-                  setTheme(newTheme)
-                  setNormalConfig({
-                    ...normalConfig,
-                    settings: {
-                      ...normalConfig.settings,
-                      theme: newTheme
-                    }
-                  })
-                  writeNormalConfig({
-                    ...normalConfig,
-                    settings: {
-                      ...normalConfig.settings,
-                      theme: newTheme
-                    }
-                  })
-                  break
-                }
+                setTheme(newTheme)
+                setNormalConfig({
+                  ...normalConfig,
+                  settings: {
+                    ...normalConfig.settings,
+                    theme: newTheme
+                  }
+                })
+                await writeNormalConfig({
+                  ...normalConfig,
+                  settings: {
+                    ...normalConfig.settings,
+                    theme: newTheme
+                  }
+                })
               }}
             >
               <option value={0}>Dark (default)</option>
