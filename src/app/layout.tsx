@@ -299,7 +299,7 @@ export default function RootLayout ({
   }, [])
 
   const downloadVersions = useCallback(
-    async (list: string[], currentConfig: VersionsConfig): Promise<void> => {
+    async (list: string[]): Promise<void> => {
       if (list.length === 0) return
       setSelectedVersionList([])
 
@@ -350,13 +350,20 @@ export default function RootLayout ({
           setDownloadProgress(prev =>
             prev.filter(d => d.version !== download.version)
           )
-          const date = Date.now()
-          const newConfig = {
-            ...currentConfig,
-            list: { ...currentConfig.list, [download.version]: date }
-          }
-          setDownloadedVersionsConfig(newConfig)
-          writeVersionsConfig(newConfig)
+          setDownloadedVersionsConfig(prev => {
+            if (!prev) return prev
+
+            const updated = {
+              ...prev,
+              list: {
+                ...prev.list,
+                [download.version]: Date.now()
+              }
+            }
+
+            writeVersionsConfig(updated)
+            return updated
+          })
         } else {
           setDownloadProgress(prev =>
             prev.map(d =>
@@ -408,7 +415,7 @@ export default function RootLayout ({
       writeVersionsConfig(newConfig)
       setSelectedVersionList(prev => [...prev, ...versionsToSelect])
 
-      await downloadVersions(versionsToSelect, newConfig)
+      await downloadVersions(versionsToSelect)
     })()
   }, [serverVersionList, downloadedVersionsConfig, downloadVersions])
 
@@ -862,10 +869,7 @@ export default function RootLayout ({
                                 setFadeOut(true)
                                 setTimeout(() => setShowPopup(false), 200)
                                 if (downloadedVersionsConfig)
-                                  downloadVersions(
-                                    selectedVersionList,
-                                    downloadedVersionsConfig
-                                  )
+                                  downloadVersions(selectedVersionList)
                               }}
                               disabled={downloadProgress.length != 0}
                               title={
