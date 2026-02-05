@@ -193,10 +193,8 @@ export default function Settings () {
             >
               <option value={0}>Dark (default)</option>
               <option value={1}>Red</option>
-              <option value={2}>Green</option>
-              <option value={3}>Blue</option>
-              <option value={4}>Purple</option>
-              <option value={5}>Mint</option>
+              <option value={2}>Blue</option>
+              <option value={3}>Purple</option>
             </select>
           </div>
         </div>
