@@ -826,6 +826,49 @@ export default function RootLayout ({
                               </button>
                               <button
                                 className='button btntheme2'
+                                disabled={downloadProgress.length != 0}
+                                onClick={async () => {
+                                  //uninstall
+                                  closePopup()
+
+                                  setDownloadedVersionsConfig(prev => {
+                                    if (!prev) return prev
+                                    const updatedList = Object.fromEntries(
+                                      Object.entries(prev.list).filter(
+                                        ([k]) => k !== managingVersion
+                                      )
+                                    )
+                                    const updatedConfig = {
+                                      ...prev,
+                                      list: updatedList
+                                    }
+                                    writeVersionsConfig(updatedConfig)
+                                    setManagingVersion(null)
+                                    setFadeOut(true)
+                                    setTimeout(() => setShowPopup(false), 200)
+                                    return updatedConfig
+                                  })
+
+                                  if (
+                                    await exists('game/' + managingVersion, {
+                                      baseDir: BaseDirectory.AppLocalData
+                                    })
+                                  )
+                                    await remove('game/' + managingVersion, {
+                                      baseDir: BaseDirectory.AppLocalData,
+                                      recursive: true
+                                    })
+
+                                  //reinstall
+                                  setSelectedVersionList([managingVersion])
+                                  downloadVersions([managingVersion])
+                                }}
+                                title="Click to reinstall this game. This will NOT remove any progress or any save files. This WILL uninstall any modifications to the game's executable files."
+                              >
+                                Reinstall
+                              </button>
+                              <button
+                                className='button btntheme2'
                                 onClick={async () =>
                                   invoke('open_folder', {
                                     name: managingVersion
