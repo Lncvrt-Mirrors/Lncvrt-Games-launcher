@@ -22,6 +22,9 @@ use zip::ZipArchive;
 #[cfg(target_os = "windows")]
 use tauri_plugin_decorum::WebviewWindowExt;
 
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
 #[allow(unused)]
 fn is_running_by_path(path: &Path) -> bool {
     let sys = System::new_all();
@@ -43,17 +46,28 @@ async fn unzip_to_dir(zip_path: PathBuf, out_dir: PathBuf) -> String {
         let mut archive = ZipArchive::new(BufReader::new(file))?;
 
         for i in 0..archive.len() {
-            let mut file = archive.by_index(i)?;
-            let outpath = out_dir.join(file.name());
+            let mut entry = archive.by_index(i)?;
+            let outpath = out_dir.join(entry.name());
 
-            if file.is_dir() {
+            if entry.is_dir() {
                 create_dir_all(&outpath)?;
+
+                #[cfg(unix)]
+                if let Some(mode) = entry.unix_mode() {
+                    std::fs::set_permissions(&outpath, std::fs::Permissions::from_mode(mode))?;
+                }
             } else {
                 if let Some(parent) = outpath.parent() {
                     create_dir_all(parent)?;
                 }
+
                 let mut outfile = File::create(&outpath)?;
-                copy(&mut file, &mut outfile)?;
+                copy(&mut entry, &mut outfile)?;
+
+                #[cfg(unix)]
+                if let Some(mode) = entry.unix_mode() {
+                    std::fs::set_permissions(&outpath, std::fs::Permissions::from_mode(mode))?;
+                }
             }
         }
 
@@ -223,31 +237,6 @@ async fn download(
         .unwrap();
     if unzip_res == "-1" {
         return "-1".to_string();
-    }
-
-    #[cfg(any(target_os = "linux", target_os = "macos"))]
-    {
-        use std::{fs, os::unix::fs::PermissionsExt};
-
-        let executable_path = if cfg!(target_os = "linux") {
-            game_path.join(&name).join(&executable)
-        } else {
-            game_path
-                .join(&name)
-                .join(&executable)
-                .join("Contents")
-                .join("MacOS")
-                .join(
-                    &executable
-                        .chars()
-                        .take(executable.chars().count() - 4)
-                        .collect::<String>(),
-                )
-        };
-
-        let mut perms = fs::metadata(&executable_path).unwrap().permissions();
-        perms.set_mode(0o755);
-        fs::set_permissions(&executable_path, perms).unwrap();
     }
 
     return "1".to_string();
