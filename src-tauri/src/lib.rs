@@ -40,6 +40,13 @@ fn is_running_by_path(path: &Path) -> bool {
     })
 }
 
+fn should_skip(name: &str) -> bool {
+    name.starts_with("__MACOSX/")
+        || name == "__MACOSX"
+        || name.ends_with("/.DS_Store")
+        || name.ends_with(".DS_Store")
+}
+
 async fn unzip_to_dir(zip_path: PathBuf, out_dir: PathBuf) -> String {
     let res = tauri::async_runtime::spawn_blocking(move || {
         let file = File::open(zip_path)?;
@@ -47,7 +54,13 @@ async fn unzip_to_dir(zip_path: PathBuf, out_dir: PathBuf) -> String {
 
         for i in 0..archive.len() {
             let mut entry = archive.by_index(i)?;
-            let outpath = out_dir.join(entry.name());
+            let name = entry.name();
+
+            if should_skip(name) {
+                continue;
+            }
+
+            let outpath = out_dir.join(name);
 
             if entry.is_dir() {
                 create_dir_all(&outpath)?;
