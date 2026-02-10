@@ -1,7 +1,7 @@
 {
   "name": "lncvrt-games-launcher",
   "private": true,
-  "version": "1.5.7",
+  "version": "1.5.8",
   "type": "module",
   "scripts": {
     "dev": "next dev",
@@ -11,9 +11,9 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "7.1.0",
-    "@fortawesome/free-brands-svg-icons": "7.1.0",
-    "@fortawesome/free-solid-svg-icons": "7.1.0",
+    "@fortawesome/fontawesome-svg-core": "7.2.0",
+    "@fortawesome/free-brands-svg-icons": "7.2.0",
+    "@fortawesome/free-solid-svg-icons": "7.2.0",
     "@fortawesome/react-fontawesome": "3.2.0",
     "@tauri-apps/api": "2.10.1",
     "@tauri-apps/plugin-clipboard-manager": "2.3.2",
@@ -34,7 +34,7 @@
     "@tailwindcss/postcss": "4.1.18",
     "@tauri-apps/cli": "2.10.0",
     "@types/crypto-js": "4.2.2",
-    "@types/node": "25.2.2",
+    "@types/node": "25.2.3",
     "@types/react": "19.2.13",
     "@types/react-dom": "19.2.3",
     "crypto-js": "4.2.0",

@@ -5,9 +5,9 @@
     "": {
       "name": "lncvrt-games-launcher",
       "dependencies": {
-        "@fortawesome/fontawesome-svg-core": "7.1.0",
-        "@fortawesome/free-brands-svg-icons": "7.1.0",
-        "@fortawesome/free-solid-svg-icons": "7.1.0",
+        "@fortawesome/fontawesome-svg-core": "7.2.0",
+        "@fortawesome/free-brands-svg-icons": "7.2.0",
+        "@fortawesome/free-solid-svg-icons": "7.2.0",
         "@fortawesome/react-fontawesome": "3.2.0",
         "@tauri-apps/api": "2.10.1",
         "@tauri-apps/plugin-clipboard-manager": "2.3.2",
@@ -28,7 +28,7 @@
         "@tailwindcss/postcss": "4.1.18",
         "@tauri-apps/cli": "2.10.0",
         "@types/crypto-js": "4.2.2",
-        "@types/node": "25.2.2",
+        "@types/node": "25.2.3",
         "@types/react": "19.2.13",
         "@types/react-dom": "19.2.3",
         "crypto-js": "4.2.0",
@@ -98,13 +98,13 @@
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.4.1", "", { "dependencies": { "@eslint/core": "^0.17.0", "levn": "^0.4.1" } }, "sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA=="],
 
-    "@fortawesome/fontawesome-common-types": ["@fortawesome/fontawesome-common-types@7.1.0", "", {}, "sha512-l/BQM7fYntsCI//du+6sEnHOP6a74UixFyOYUyz2DLMXKx+6DEhfR3F2NYGE45XH1JJuIamacb4IZs9S0ZOWLA=="],
+    "@fortawesome/fontawesome-common-types": ["@fortawesome/fontawesome-common-types@7.2.0", "", {}, "sha512-IpR0bER9FY25p+e7BmFH25MZKEwFHTfRAfhOyJubgiDnoJNsSvJ7nigLraHtp4VOG/cy8D7uiV0dLkHOne5Fhw=="],
 
-    "@fortawesome/fontawesome-svg-core": ["@fortawesome/fontawesome-svg-core@7.1.0", "", { "dependencies": { "@fortawesome/fontawesome-common-types": "7.1.0" } }, "sha512-fNxRUk1KhjSbnbuBxlWSnBLKLBNun52ZBTcs22H/xEEzM6Ap81ZFTQ4bZBxVQGQgVY0xugKGoRcCbaKjLQ3XZA=="],
+    "@fortawesome/fontawesome-svg-core": ["@fortawesome/fontawesome-svg-core@7.2.0", "", { "dependencies": { "@fortawesome/fontawesome-common-types": "7.2.0" } }, "sha512-6639htZMjEkwskf3J+e6/iar+4cTNM9qhoWuRfj9F3eJD6r7iCzV1SWnQr2Mdv0QT0suuqU8BoJCZUyCtP9R4Q=="],
 
-    "@fortawesome/free-brands-svg-icons": ["@fortawesome/free-brands-svg-icons@7.1.0", "", { "dependencies": { "@fortawesome/fontawesome-common-types": "7.1.0" } }, "sha512-9byUd9bgNfthsZAjBl6GxOu1VPHgBuRUP9juI7ZoM98h8xNPTCTagfwUFyYscdZq4Hr7gD1azMfM9s5tIWKZZA=="],
+    "@fortawesome/free-brands-svg-icons": ["@fortawesome/free-brands-svg-icons@7.2.0", "", { "dependencies": { "@fortawesome/fontawesome-common-types": "7.2.0" } }, "sha512-VNG8xqOip1JuJcC3zsVsKRQ60oXG9+oYNDCosjoU/H9pgYmLTEwWw8pE0jhPz/JWdHeUuK6+NQ3qsM4gIbdbYQ=="],
 
-    "@fortawesome/free-solid-svg-icons": ["@fortawesome/free-solid-svg-icons@7.1.0", "", { "dependencies": { "@fortawesome/fontawesome-common-types": "7.1.0" } }, "sha512-Udu3K7SzAo9N013qt7qmm22/wo2hADdheXtBfxFTecp+ogsc0caQNRKEb7pkvvagUGOpG9wJC1ViH6WXs8oXIA=="],
+    "@fortawesome/free-solid-svg-icons": ["@fortawesome/free-solid-svg-icons@7.2.0", "", { "dependencies": { "@fortawesome/fontawesome-common-types": "7.2.0" } }, "sha512-YTVITFGN0/24PxzXrwqCgnyd7njDuzp5ZvaCx5nq/jg55kUYd94Nj8UTchBdBofi/L0nwRfjGOg0E41d2u9T1w=="],
 
     "@fortawesome/react-fontawesome": ["@fortawesome/react-fontawesome@3.2.0", "", { "peerDependencies": { "@fortawesome/fontawesome-svg-core": "~6 || ~7", "react": "^18.0.0 || ^19.0.0" } }, "sha512-E9Gu1hqd6JussVO26EC4WqRZssXMnQr2ol7ZNWkkFOH8jZUaxDJ9Z9WF9wIVkC+kJGXUdY3tlffpDwEKfgQrQw=="],
 
@@ -290,7 +290,7 @@
 
     "@types/json5": ["@types/json5@0.0.29", "", {}, "sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ=="],
 
-    "@types/node": ["@types/node@25.2.2", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-BkmoP5/FhRYek5izySdkOneRyXYN35I860MFAGupTdebyE66uZaR+bXLHq8k4DirE5DwQi3NuhvRU1jqTVwUrQ=="],
+    "@types/node": ["@types/node@25.2.3", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-m0jEgYlYz+mDJZ2+F4v8D1AyQb+QzsNqRuI7xg1VQX/KlKS0qT9r1Mo16yo5F/MtifXFgaofIFsdFMox2SxIbQ=="],
 
     "@types/react": ["@types/react@19.2.13", "", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-KkiJeU6VbYbUOp5ITMIc7kBfqlYkKA5KhEHVrGMmUUMt7NeaZg65ojdPk+FtNrBAOXNVM5QM72jnADjM+XVRAQ=="],
 
