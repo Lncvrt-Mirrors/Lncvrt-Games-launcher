@@ -107,7 +107,7 @@ export default function Installs () {
               .map(([key, value]) => {
                 return (
                   <div
-                    key={value}
+                    key={key}
                     className={`downloads-entry ${
                       normalConfig?.settings.useLegacyInteractButtons
                         ? ''
