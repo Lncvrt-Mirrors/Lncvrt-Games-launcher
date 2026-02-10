@@ -800,9 +800,6 @@ export default function RootLayout ({
                                       list: updatedList
                                     }
                                     writeVersionsConfig(updatedConfig)
-                                    setManagingVersion(null)
-                                    setFadeOut(true)
-                                    setTimeout(() => setShowPopup(false), 200)
                                     return updatedConfig
                                   })
 
@@ -824,9 +821,11 @@ export default function RootLayout ({
                                 className='button btntheme2'
                                 disabled={downloadProgress.length != 0}
                                 onClick={async () => {
-                                  //uninstall
-                                  closePopup()
+                                  //change popup to downloads
+                                  setManagingVersion(null)
+                                  setPopupMode(1)
 
+                                  //uninstall
                                   setDownloadedVersionsConfig(prev => {
                                     if (!prev) return prev
                                     const updatedList = Object.fromEntries(
@@ -839,9 +838,6 @@ export default function RootLayout ({
                                       list: updatedList
                                     }
                                     writeVersionsConfig(updatedConfig)
-                                    setManagingVersion(null)
-                                    setFadeOut(true)
-                                    setTimeout(() => setShowPopup(false), 200)
                                     return updatedConfig
                                   })
 
