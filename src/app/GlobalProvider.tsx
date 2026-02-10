@@ -1,6 +1,12 @@
 'use client'
 
-import { createContext, useContext, ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  Dispatch,
+  SetStateAction
+} from 'react'
 import { DownloadProgress } from './types/DownloadProgress'
 import { VersionsConfig } from './types/VersionsConfig'
 import { NormalConfig } from './types/NormalConfig'
@@ -11,25 +17,25 @@ import { Game } from './types/Game'
 type GlobalCtxType = {
   serverVersionList: ServerVersionsResponse | null
   selectedVersionList: string[]
-  setSelectedVersionList: (v: string[]) => void
+  setSelectedVersionList: (value: SetStateAction<string[]>) => void
   downloadProgress: DownloadProgress[]
-  setDownloadProgress: (v: DownloadProgress[]) => void
+  setDownloadProgress: Dispatch<SetStateAction<DownloadProgress[]>>
   showPopup: boolean
-  setShowPopup: (v: boolean) => void
+  setShowPopup: Dispatch<SetStateAction<boolean>>
   popupMode: number | null
-  setPopupMode: (v: number | null) => void
+  setPopupMode: Dispatch<SetStateAction<number | null>>
   fadeOut: boolean
-  setFadeOut: (v: boolean) => void
+  setFadeOut: Dispatch<SetStateAction<boolean>>
   downloadedVersionsConfig: VersionsConfig | null
-  setDownloadedVersionsConfig: (v: VersionsConfig | null) => void
+  setDownloadedVersionsConfig: Dispatch<SetStateAction<VersionsConfig | null>>
   normalConfig: NormalConfig | null
-  setNormalConfig: (v: NormalConfig | null) => void
+  setNormalConfig: Dispatch<SetStateAction<NormalConfig | null>>
   managingVersion: string | null
-  setManagingVersion: (v: string | null) => void
-  setSelectedGame: (v: number | null) => void
+  setManagingVersion: Dispatch<SetStateAction<string | null>>
+  setSelectedGame: Dispatch<SetStateAction<number | null>>
   getVersionInfo: (id: string | undefined) => GameVersion | undefined
-  getGameInfo: (id: number | undefined) => Game | undefined
-  getListOfGames: () => Game[]
+  getGameInfo: (game: number | undefined) => Game | undefined
+  getListOfGames(): Game[]
   getVersionsAmountData: (gameId: number) => {
     installed: number
     total: number
