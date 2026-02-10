@@ -101,6 +101,7 @@ export default function RootLayout ({
           return false
 
         if (game && v.game != game) return false
+        if (category != -1 && v.category != category) return false
         if (downloadProgress.length != 0) {
           return !downloadProgress.some(d => d.version === v.id)
         }
