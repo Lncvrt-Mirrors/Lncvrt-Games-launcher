@@ -23,13 +23,13 @@ export default function VersionInfo () {
     viewingInfoFromDownloads,
     setPopupMode
   } = useGlobal()
-  const [versionSize, setVersionSize] = useState<number | null>(null)
+  const [versionSize, setVersionSize] = useState<number>(0)
 
   useEffect(() => {
     invoke<string>('folder_size', {
       version: managingVersion
     }).then(size => {
-      setVersionSize(parseInt(size, 10))
+      setVersionSize(Number(size))
     })
   }, [managingVersion, setVersionSize])
 
@@ -91,12 +91,12 @@ export default function VersionInfo () {
           <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
           <p>
             Size on disk:{' '}
-            {versionSize !== null
+            {versionSize > 0
               ? prettyBytes(versionSize, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 })
-              : 'Loading...'}
+              : 'N/A'}
           </p>
         </div>
         <div className='entry-info-item btntheme2' hidden={!versionInfo}>
