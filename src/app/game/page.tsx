@@ -8,6 +8,9 @@ import { useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { ask } from '@tauri-apps/plugin-dialog'
+import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
+import { writeVersionsConfig } from '../util/BazookaManager'
 
 export default function Installs () {
   const {
@@ -24,7 +27,9 @@ export default function Installs () {
     setSelectedGame,
     serverVersionList,
     category,
-    setCategory
+    setCategory,
+    setDownloadedVersionsConfig,
+    downloadVersions
   } = useGlobal()
 
   const params = useSearchParams()
@@ -390,12 +395,64 @@ export default function Installs () {
                       </button>
                       <button
                         className='button'
-                        onClick={e => {
+                        onClick={async e => {
                           e.stopPropagation()
-                          setManagingVersion(entry)
-                          setPopupMode(5)
-                          setShowPopup(true)
-                          setFadeOut(false)
+                          const answer = await ask(
+                            'Before proceeding, if you do not want your installation directory wiped just yet, please backup the files to another directory. When you click "Yes", it will be wiped. Click "No" if you want to open the installation folder instead.',
+                            {
+                              title: 'Revision Update',
+                              kind: 'warning'
+                            }
+                          )
+                          if (answer) {
+                            const answer2 = await ask(
+                              'Are you sure you want to update? If you did not read the last popup, please go back and read it.',
+                              {
+                                title: 'Revision Update',
+                                kind: 'warning'
+                              }
+                            )
+                            if (!answer2) return
+
+                            //open downloads popup
+                            setPopupMode(1)
+                            setShowPopup(true)
+                            setFadeOut(false)
+
+                            //uninstall
+                            setDownloadedVersionsConfig(prev => {
+                              if (!prev) return prev
+                              const updatedList = Object.fromEntries(
+                                Object.entries(prev.list).filter(
+                                  ([k]) => k !== entry
+                                )
+                              )
+                              const updatedConfig = {
+                                ...prev,
+                                list: updatedList
+                              }
+                              writeVersionsConfig(updatedConfig)
+                              return updatedConfig
+                            })
+
+                            if (
+                              await exists('game/' + entry, {
+                                baseDir: BaseDirectory.AppLocalData
+                              })
+                            )
+                              await remove('game/' + entry, {
+                                baseDir: BaseDirectory.AppLocalData,
+                                recursive: true
+                              })
+
+                            //reinstall
+                            setSelectedVersionList([entry])
+                            downloadVersions([entry])
+                          } else {
+                            invoke('open_folder', {
+                              name: entry
+                            })
+                          }
                         }}
                         hidden={
                           !needsRevisionUpdate(

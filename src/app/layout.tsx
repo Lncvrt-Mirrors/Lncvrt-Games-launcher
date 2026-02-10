@@ -46,7 +46,6 @@ import {
 } from '@tauri-apps/plugin-notification'
 import VersionChangelog from './componets/VersionChangelog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
-import VersionUpdateWarning from './componets/VersionUpdateWarning'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -892,14 +891,6 @@ export default function RootLayout ({
                       ) : popupMode === 4 ? (
                         managingVersion && downloadedVersionsConfig ? (
                           <VersionChangelog />
-                        ) : (
-                          <p className='text-xl text-center'>
-                            No version selected
-                          </p>
-                        )
-                      ) : popupMode === 5 ? (
-                        managingVersion && downloadedVersionsConfig ? (
-                          <VersionUpdateWarning />
                         ) : (
                           <p className='text-xl text-center'>
                             No version selected
