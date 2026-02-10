@@ -20,6 +20,7 @@ export default function Installs () {
     setFadeOut,
     setSelectedVersionList,
     downloadedVersionsConfig,
+    downloadProgress,
     normalConfig,
     setManagingVersion,
     getVersionInfo,
@@ -301,6 +302,10 @@ export default function Installs () {
                           !(
                             platform() === 'linux' &&
                             getVersionInfo(entry)?.wine
+                          ) ||
+                          needsRevisionUpdate(
+                            getVersionInfo(entry)?.lastRevision,
+                            entry
                           )
                         }
                         onClick={e => e.stopPropagation()}
@@ -460,7 +465,12 @@ export default function Installs () {
                             entry
                           )
                         }
-                        title='Click to update the game'
+                        disabled={downloadProgress.length != 0}
+                        title={
+                          downloadProgress.length != 0
+                            ? 'Cannot update while downloads are in progress '
+                            : 'Click to update the game'
+                        }
                       >
                         Update
                       </button>
