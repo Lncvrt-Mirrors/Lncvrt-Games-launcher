@@ -38,7 +38,7 @@
     "@types/react": "19.2.13",
     "@types/react-dom": "19.2.3",
     "crypto-js": "4.2.0",
-    "eslint": "10.0.0",
+    "eslint": "9.39.2",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "4.1.18",
     "typescript": "5.9.3"
