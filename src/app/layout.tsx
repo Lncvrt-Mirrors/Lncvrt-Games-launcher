@@ -82,6 +82,8 @@ export default function RootLayout ({
     useState<boolean>(false)
   const [selectedGame, setSelectedGame] = useState<number | null>(null)
 
+  const [category, setCategory] = useState<number>(-1)
+
   const pathname = usePathname()
   const revisionCheck = useRef(false)
 
@@ -480,7 +482,9 @@ export default function RootLayout ({
                 getVersionsAmountData,
                 viewingInfoFromDownloads,
                 version,
-                downloadVersions
+                downloadVersions,
+                category,
+                setCategory
               }}
             >
               <div

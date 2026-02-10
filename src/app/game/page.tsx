@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import '../Installs.css'
 import { invoke } from '@tauri-apps/api/core'
 import { useGlobal } from '../GlobalProvider'
@@ -22,7 +22,9 @@ export default function Installs () {
     getVersionInfo,
     getGameInfo,
     setSelectedGame,
-    serverVersionList
+    serverVersionList,
+    category,
+    setCategory
   } = useGlobal()
 
   const params = useSearchParams()
@@ -30,20 +32,12 @@ export default function Installs () {
   const id = Number(params.get('id') || 0)
   const game = serverVersionList?.games.find(g => g.id === id)
 
-  const [category, setCategory] = useState<number>(-1)
-  const [lastId, setLastId] = useState(id)
-
   useEffect(() => {
     if (!showPopup) return
     setSelectedVersionList([])
   }, [normalConfig, setSelectedVersionList, showPopup])
 
   if (!id || !game) return <p>Invalid game</p>
-
-  if (lastId !== id) {
-    setLastId(id)
-    setCategory(-1)
-  }
 
   const needsRevisionUpdate = (
     lastRevision: number | undefined,

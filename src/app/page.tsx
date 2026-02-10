@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import './Installs.css'
 import { useGlobal } from './GlobalProvider'
-import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCheck,
@@ -24,7 +23,8 @@ export default function Installs () {
     normalConfig,
     setSelectedGame,
     getListOfGames,
-    getVersionsAmountData
+    getVersionsAmountData,
+    setCategory
   } = useGlobal()
 
   const router = useRouter()
@@ -80,6 +80,7 @@ export default function Installs () {
                   }
                   onClick={() => {
                     if (normalConfig?.settings.useLegacyInteractButtons) return
+                    setCategory(-1)
                     router.push('/game?id=' + i.id)
                   }}
                 >
@@ -128,14 +129,17 @@ export default function Installs () {
                       </div>
                     </div>
 
-                    <Link
+                    <div
                       className='button absolute right-0 bottom-0'
-                      href={'/game?id=' + i.id}
                       hidden={!normalConfig?.settings.useLegacyInteractButtons}
                       title='Click to view game installs'
+                      onClick={() => {
+                        setCategory(-1)
+                        router.push('/game?id=' + i.id)
+                      }}
                     >
                       Installs
-                    </Link>
+                    </div>
                   </div>
                 </div>
               ))

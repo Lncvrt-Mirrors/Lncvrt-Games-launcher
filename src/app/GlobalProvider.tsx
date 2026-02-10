@@ -43,6 +43,8 @@ type GlobalCtxType = {
   viewingInfoFromDownloads: boolean
   version: string | null
   downloadVersions: (list: string[]) => Promise<void>
+  category: number
+  setCategory: Dispatch<SetStateAction<number>>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)
