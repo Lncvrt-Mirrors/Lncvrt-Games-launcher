@@ -45,6 +45,21 @@ export default function Installs () {
     setCategory(-1)
   }
 
+  const needsRevisionUpdate = (
+    lastRevision: number | undefined,
+    version: string
+  ) => {
+    if (!lastRevision) return false
+    return (
+      lastRevision > 0 &&
+      (downloadedVersionsConfig == undefined
+        ? 0
+        : downloadedVersionsConfig?.list[version]) /
+        1000 <=
+        lastRevision
+    )
+  }
+
   return (
     <div className='mx-4 mt-4'>
       <div className='flex justify-between items-center mb-4'>
@@ -203,17 +218,32 @@ export default function Installs () {
                 <div
                   key={entry}
                   className={`downloads-entry ${
-                    normalConfig?.settings.useLegacyInteractButtons
+                    normalConfig?.settings.useLegacyInteractButtons ||
+                    needsRevisionUpdate(
+                      getVersionInfo(entry)?.lastRevision,
+                      entry
+                    )
                       ? ''
                       : 'cursor-pointer'
                   }`}
                   title={
-                    normalConfig?.settings.useLegacyInteractButtons
+                    normalConfig?.settings.useLegacyInteractButtons ||
+                    needsRevisionUpdate(
+                      getVersionInfo(entry)?.lastRevision,
+                      entry
+                    )
                       ? ''
                       : 'Click to launch game. Right-click to manage this version install'
                   }
                   onClick={async () => {
-                    if (normalConfig?.settings.useLegacyInteractButtons) return
+                    if (
+                      normalConfig?.settings.useLegacyInteractButtons ||
+                      needsRevisionUpdate(
+                        getVersionInfo(entry)?.lastRevision,
+                        entry
+                      )
+                    )
+                      return
                     const verInfo = getVersionInfo(entry)
                     if (verInfo == undefined) return
                     const gameInfo = getGameInfo(verInfo.game)
@@ -232,7 +262,14 @@ export default function Installs () {
                   }}
                   onContextMenu={e => {
                     e.preventDefault()
-                    if (normalConfig?.settings.useLegacyInteractButtons) return
+                    if (
+                      normalConfig?.settings.useLegacyInteractButtons ||
+                      needsRevisionUpdate(
+                        getVersionInfo(entry)?.lastRevision,
+                        entry
+                      )
+                    )
+                      return
 
                     setManagingVersion(entry)
                     setPopupMode(2)
@@ -242,7 +279,7 @@ export default function Installs () {
                 >
                   <div className='h-18 w-screen relative'>
                     <p className='text-2xl'>
-                      {getVersionInfo(entry)?.displayName}
+                      {getVersionInfo(entry)?.displayName}{' '}
                     </p>
 
                     <div className='flex gap-2 absolute left-0 bottom-0'>
@@ -272,6 +309,19 @@ export default function Installs () {
                         <FontAwesomeIcon icon={faWarning} color='#ffc800' />
                         <p>Uses wine</p>
                       </div>
+                      <div
+                        className='entry-info-item'
+                        onClick={e => e.stopPropagation()}
+                        hidden={
+                          !needsRevisionUpdate(
+                            getVersionInfo(entry)?.lastRevision,
+                            entry
+                          )
+                        }
+                      >
+                        <FontAwesomeIcon icon={faWarning} color='#ffc800' />
+                        <p>Needs revision update!</p>
+                      </div>
                     </div>
 
                     <div className='flex gap-2 absolute right-0 bottom-0'>
@@ -284,6 +334,10 @@ export default function Installs () {
                           setShowPopup(true)
                           setFadeOut(false)
                         }}
+                        hidden={needsRevisionUpdate(
+                          getVersionInfo(entry)?.lastRevision,
+                          entry
+                        )}
                         title='Click to view version info'
                       >
                         View Info
@@ -291,7 +345,11 @@ export default function Installs () {
                       <button
                         className='button'
                         hidden={
-                          !normalConfig?.settings.useLegacyInteractButtons
+                          !normalConfig?.settings.useLegacyInteractButtons ||
+                          needsRevisionUpdate(
+                            getVersionInfo(entry)?.lastRevision,
+                            entry
+                          )
                         }
                         onClick={e => {
                           e.stopPropagation()
@@ -326,11 +384,34 @@ export default function Installs () {
                           })
                         }}
                         hidden={
-                          !normalConfig?.settings.useLegacyInteractButtons
+                          !normalConfig?.settings.useLegacyInteractButtons ||
+                          needsRevisionUpdate(
+                            getVersionInfo(entry)?.lastRevision,
+                            entry
+                          )
                         }
                         title='Click to launch game'
                       >
                         Launch
+                      </button>
+                      <button
+                        className='button'
+                        onClick={e => {
+                          e.stopPropagation()
+                          setManagingVersion(entry)
+                          setPopupMode(5)
+                          setShowPopup(true)
+                          setFadeOut(false)
+                        }}
+                        hidden={
+                          !needsRevisionUpdate(
+                            getVersionInfo(entry)?.lastRevision,
+                            entry
+                          )
+                        }
+                        title='Click to update the game'
+                      >
+                        Update
                       </button>
                     </div>
                   </div>

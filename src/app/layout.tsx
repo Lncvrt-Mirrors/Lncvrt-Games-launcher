@@ -46,6 +46,7 @@ import {
 } from '@tauri-apps/plugin-notification'
 import VersionChangelog from './componets/VersionChangelog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
+import VersionUpdateWarning from './componets/VersionUpdateWarning'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -394,28 +395,26 @@ export default function RootLayout ({
     if (!serverVersionList || !downloadedVersionsConfig) return
     revisionCheck.current = true
     ;(async () => {
-      const newConfig = {
-        ...downloadedVersionsConfig,
-        list: { ...downloadedVersionsConfig.list }
-      }
-      const versionsToSelect: string[] = []
-
       for (const [key, value] of Object.entries(
         downloadedVersionsConfig.list
       )) {
         const verInfo = serverVersionList.versions.find(item => item.id === key)
 
-        if (!verInfo || value / 1000 <= verInfo.lastRevision) {
-          delete newConfig.list[key]
-          versionsToSelect.push(key)
+        if (
+          !verInfo ||
+          (verInfo.lastRevision > 0 && value / 1000 <= verInfo.lastRevision)
+        ) {
+          if (
+            await exists('game/' + key + '/' + verInfo?.executable, {
+              baseDir: BaseDirectory.AppLocalData
+            })
+          )
+            await remove('game/' + key + '/' + verInfo?.executable, {
+              baseDir: BaseDirectory.AppLocalData,
+              recursive: true
+            })
         }
       }
-
-      setDownloadedVersionsConfig(newConfig)
-      writeVersionsConfig(newConfig)
-      setSelectedVersionList(prev => [...prev, ...versionsToSelect])
-
-      await downloadVersions(versionsToSelect)
     })()
   }, [serverVersionList, downloadedVersionsConfig, downloadVersions])
 
@@ -480,7 +479,8 @@ export default function RootLayout ({
                 setSelectedGame,
                 getVersionsAmountData,
                 viewingInfoFromDownloads,
-                version
+                version,
+                downloadVersions
               }}
             >
               <div
@@ -888,6 +888,14 @@ export default function RootLayout ({
                       ) : popupMode === 4 ? (
                         managingVersion && downloadedVersionsConfig ? (
                           <VersionChangelog />
+                        ) : (
+                          <p className='text-xl text-center'>
+                            No version selected
+                          </p>
+                        )
+                      ) : popupMode === 5 ? (
+                        managingVersion && downloadedVersionsConfig ? (
+                          <VersionUpdateWarning />
                         ) : (
                           <p className='text-xl text-center'>
                             No version selected

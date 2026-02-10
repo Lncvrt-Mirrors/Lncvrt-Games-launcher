@@ -42,6 +42,7 @@ type GlobalCtxType = {
   } | null
   viewingInfoFromDownloads: boolean
   version: string | null
+  downloadVersions: (list: string[]) => Promise<void>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)
