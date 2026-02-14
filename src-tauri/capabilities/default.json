@@ -32,6 +32,12 @@
       "allow": [
         { "path": "$APPLOCALDATA/game/**" }
       ]
+    },
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        { "path": "$APPLOCALDATA/game/**" }
+      ]
     }
   ]
 }

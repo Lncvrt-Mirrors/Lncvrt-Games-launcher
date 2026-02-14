@@ -12,8 +12,6 @@ use std::{
 };
 use sysinfo::System;
 use tauri::{AppHandle, Emitter, Manager};
-use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
-use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_os::platform;
 use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
@@ -324,30 +322,6 @@ fn launch_game(
     }
 }
 
-#[tauri::command]
-async fn open_folder(app: AppHandle, name: String) {
-    let game_path = app
-        .path()
-        .app_local_data_dir()
-        .unwrap()
-        .join("game")
-        .join(&name);
-    if game_path.exists() {
-        app.opener()
-            .open_path(game_path.to_string_lossy(), None::<&str>)
-            .unwrap();
-    } else {
-        app.dialog()
-            .message(format!(
-                "Game folder \"{}\" not found.",
-                game_path.display()
-            ))
-            .kind(MessageDialogKind::Error)
-            .title("Folder not found")
-            .show(|_| {});
-    }
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[allow(unused_variables)]
@@ -369,7 +343,6 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             download,
             launch_game,
-            open_folder,
             folder_size
         ])
         .setup(|app| {

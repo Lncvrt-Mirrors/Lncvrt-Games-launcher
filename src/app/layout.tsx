@@ -45,6 +45,7 @@ import {
   requestPermission
 } from '@tauri-apps/plugin-notification'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
+import { openFolder } from '@/lib/Util'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -930,9 +931,7 @@ export default function RootLayout ({
                               <button
                                 className='button btntheme2'
                                 onClick={async () =>
-                                  invoke('open_folder', {
-                                    name: managingVersion
-                                  })
+                                  openFolder(managingVersion)
                                 }
                                 title="Click to browse the game's files."
                               >

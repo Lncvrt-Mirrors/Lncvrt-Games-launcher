@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ask, message } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { writeVersionsConfig } from '@/lib/BazookaManager'
+import { openFolder } from '@/lib/Util'
 
 export default function Installs () {
   const {
@@ -359,9 +360,7 @@ export default function Installs () {
                             setSelectedVersionList([entry])
                             downloadVersions([entry])
                           } else {
-                            invoke('open_folder', {
-                              name: entry
-                            })
+                            openFolder(entry)
                           }
                         }}
                         hidden={
