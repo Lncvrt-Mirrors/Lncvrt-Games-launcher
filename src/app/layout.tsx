@@ -75,6 +75,8 @@ export default function RootLayout ({
   const [downloadProgress, setDownloadProgress] = useState<DownloadProgress[]>(
     []
   )
+  const [downloadQueue, setDownloadQueue] = useState<string[]>([])
+  const [isProcessingQueue, setIsProcessingQueue] = useState<boolean>(false)
   const [managingVersion, setManagingVersion] = useState<string | null>(null)
   const [viewingInfoFromDownloads, setViewingInfoFromDownloads] =
     useState<boolean>(false)
@@ -84,6 +86,7 @@ export default function RootLayout ({
 
   const pathname = usePathname()
   const revisionCheck = useRef(false)
+  const previousQueueLength = useRef(0)
 
   function getSpecialVersionsList (game?: number): GameVersion[] {
     if (!normalConfig || !serverVersionList) return []
@@ -184,7 +187,7 @@ export default function RootLayout ({
     return `${d}d ${h}h`
   }
 
-  function closePopup () {
+  const closePopup = useCallback(() => {
     if (popupMode == 0 && selectedGame && pathname === '/') {
       setSelectedGame(null)
       setSelectedVersionList([])
@@ -197,7 +200,7 @@ export default function RootLayout ({
       setFadeOut(true)
       setTimeout(() => setShowPopup(false), 200)
     }
-  }
+  }, [popupMode, selectedGame, pathname, viewingInfoFromDownloads])
 
   useEffect(() => {
     let unlistenProgress: (() => void) | null = null
@@ -305,91 +308,129 @@ export default function RootLayout ({
       if (list.length === 0) return
       setSelectedVersionList([])
 
-      const newDownloads = list.map(
+      const newVersions = list.filter(
+        version =>
+          !downloadQueue.includes(version) &&
+          !downloadProgress.some(d => d.version === version)
+      )
+
+      if (newVersions.length === 0) return
+
+      const newDownloads = newVersions.map(
         version =>
           new DownloadProgress(version, 0, 0, false, true, false, false, 0, 0)
       )
 
-      setDownloadProgress(newDownloads)
+      setDownloadProgress(prev => [...prev, ...newDownloads])
+      setDownloadQueue(prev => [...prev, ...newVersions])
+    },
+    [downloadQueue, downloadProgress]
+  )
 
-      for (const download of newDownloads) {
-        const info = getVersionInfo(download.version)
-        if (!info) {
-          setDownloadProgress(prev =>
-            prev.filter(d => d.version !== download.version)
-          )
-          continue
-        }
+  useEffect(() => {
+    if (isProcessingQueue || downloadQueue.length === 0) return
 
-        const gameInfo = getGameInfo(info.game)
-        if (!gameInfo) {
-          setDownloadProgress(prev =>
-            prev.filter(d => d.version !== download.version)
-          )
-          continue
-        }
+    const processNextDownload = async () => {
+      setIsProcessingQueue(true)
 
-        setDownloadProgress(prev =>
-          prev.map(d =>
-            d.version === download.version ? { ...d, queued: false } : d
-          )
-        )
+      const versionId = downloadQueue[0]
+      const info = getVersionInfo(versionId)
 
-        try {
-          await axios.get(
-            'https://games.lncvrt.xyz/api/launcher/download?id=' + info.id
-          )
-        } catch {}
-
-        const res = await invoke<string>('download', {
-          url: info.downloadUrl,
-          name: info.id,
-          executable: info.executable,
-          hash: info.sha512sum
-        })
-
-        if (res === '1') {
-          setDownloadProgress(prev =>
-            prev.filter(d => d.version !== download.version)
-          )
-          setDownloadedVersionsConfig(prev => {
-            if (!prev) return prev
-
-            const updated = {
-              ...prev,
-              list: {
-                ...prev.list,
-                [download.version]: Date.now()
-              }
-            }
-
-            writeVersionsConfig(updated)
-            return updated
-          })
-        } else {
-          setDownloadProgress(prev =>
-            prev.map(d =>
-              d.version === download.version
-                ? { ...d, queued: false, failed: true, progress: 0 }
-                : d
-            )
-          )
-          if (normalConfig?.settings.allowNotifications)
-            await notifyUser(
-              'Download Failed',
-              `The download for version ${info.displayName} has failed.`
-            )
-        }
+      if (!info) {
+        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
+        setDownloadQueue(prev => prev.slice(1))
+        setIsProcessingQueue(false)
+        return
       }
 
-      if (normalConfig?.settings.allowNotifications)
-        await notifyUser('Downloads Finished', 'All downloads have finished.')
+      const gameInfo = getGameInfo(info.game)
+      if (!gameInfo) {
+        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
+        setDownloadQueue(prev => prev.slice(1))
+        setIsProcessingQueue(false)
+        return
+      }
 
-      setFadeOut(true)
-      setTimeout(() => setShowPopup(false), 200)
-    },
-    [getGameInfo, getVersionInfo, normalConfig]
-  )
+      setDownloadProgress(prev =>
+        prev.map(d => (d.version === versionId ? { ...d, queued: false } : d))
+      )
+
+      try {
+        await axios.get(
+          'https://games.lncvrt.xyz/api/launcher/download?id=' + info.id
+        )
+      } catch {}
+
+      const res = await invoke<string>('download', {
+        url: info.downloadUrl,
+        name: info.id,
+        executable: info.executable,
+        hash: info.sha512sum
+      })
+
+      if (res === '1') {
+        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
+        setDownloadedVersionsConfig(prev => {
+          if (!prev) return prev
+
+          const updated = {
+            ...prev,
+            list: {
+              ...prev.list,
+              [versionId]: Date.now()
+            }
+          }
+
+          writeVersionsConfig(updated)
+          return updated
+        })
+      } else {
+        setDownloadProgress(prev =>
+          prev.map(d =>
+            d.version === versionId
+              ? { ...d, queued: false, failed: true, progress: 0 }
+              : d
+          )
+        )
+        if (normalConfig?.settings.allowNotifications)
+          await notifyUser(
+            'Download Failed',
+            `The download for version ${info.displayName} has failed.`
+          )
+      }
+
+      setDownloadQueue(prev => prev.slice(1))
+      setIsProcessingQueue(false)
+    }
+
+    processNextDownload()
+  }, [
+    downloadQueue,
+    isProcessingQueue,
+    getVersionInfo,
+    getGameInfo,
+    normalConfig
+  ])
+
+  useEffect(() => {
+    if (
+      downloadQueue.length === 0 &&
+      downloadProgress.length === 0 &&
+      !isProcessingQueue &&
+      previousQueueLength.current > 0 &&
+      normalConfig?.settings.allowNotifications
+    ) {
+      notifyUser('Downloads Finished', 'All downloads have finished.')
+      setTimeout(() => closePopup(), 0)
+    }
+    previousQueueLength.current = downloadQueue.length + downloadProgress.length
+  }, [
+    downloadQueue,
+    downloadProgress,
+    isProcessingQueue,
+    normalConfig,
+    closePopup
+  ])
 
   useEffect(() => {
     if (revisionCheck.current) return
@@ -696,85 +737,111 @@ export default function RootLayout ({
                         <>
                           <p className='text-xl text-center'>Downloads</p>
                           <div className='popup-content'>
-                            {downloadProgress.map((v, i) => (
-                              <div
-                                key={i}
-                                className='popup-entry flex flex-col justify-between'
-                              >
-                                <p className='text-2xl text-center'>
-                                  {getVersionInfo(v.version)?.displayName}
-                                </p>
-                                <div className='mt-6.25 flex items-center justify-between'>
-                                  {v.failed ? (
-                                    <>
-                                      <div className='flex items-center'>
-                                        <span className='text-red-500 inline-block w-full text-center'>
-                                          Download failed
+                            {downloadProgress.map((v, i) => {
+                              const queuePosition = downloadQueue.indexOf(
+                                v.version
+                              )
+                              return (
+                                <div
+                                  key={i}
+                                  className='popup-entry flex flex-col justify-between'
+                                >
+                                  <p className='text-2xl text-center'>
+                                    {getVersionInfo(v.version)?.displayName}
+                                  </p>
+                                  <div className='mt-6.25 flex items-center justify-between'>
+                                    {v.failed ? (
+                                      <>
+                                        <div className='flex items-center'>
+                                          <span className='text-red-500 inline-block w-full text-center'>
+                                            Download failed
+                                          </span>
+                                          <button
+                                            className='button btntheme3 ml-30 mb-2'
+                                            onClick={() => {
+                                              setDownloadProgress(prev =>
+                                                prev.filter(
+                                                  d => d.version !== v.version
+                                                )
+                                              )
+                                            }}
+                                            title='Click to remove this version from this menu.'
+                                          >
+                                            Remove
+                                          </button>
+                                        </div>
+                                      </>
+                                    ) : v.queued ? (
+                                      <div className='flex items-center justify-between w-full'>
+                                        <span className='text-yellow-500 inline-block text-center flex-1'>
+                                          {queuePosition === 0
+                                            ? 'Starting soon...'
+                                            : `Queued (Position ${
+                                                queuePosition + 1
+                                              })`}
                                         </span>
                                         <button
-                                          className='button btntheme3 ml-30 mb-2'
+                                          className='button btntheme3 -ml-1.25'
                                           onClick={() => {
+                                            setDownloadQueue(prev =>
+                                              prev.filter(
+                                                id => id !== v.version
+                                              )
+                                            )
                                             setDownloadProgress(prev =>
                                               prev.filter(
                                                 d => d.version !== v.version
                                               )
                                             )
                                           }}
-                                          title='Click to remove this version from this menu.'
+                                          title='Click to remove this version from the download queue.'
                                         >
                                           Cancel
                                         </button>
                                       </div>
-                                    </>
-                                  ) : v.queued ? (
-                                    <span className='text-yellow-500 inline-block w-full text-center'>
-                                      Queued…
-                                    </span>
-                                  ) : v.queued ? (
-                                    <span className='text-yellow-500 inline-block w-full text-center'>
-                                      Queued…
-                                    </span>
-                                  ) : v.hash_checking ? (
-                                    <span className='text-blue-500 inline-block w-full text-center'>
-                                      Checking hash...
-                                    </span>
-                                  ) : v.finishing ? (
-                                    <span className='text-green-500 inline-block w-full text-center'>
-                                      Finishing...
-                                    </span>
-                                  ) : (
-                                    <div className='flex flex-col gap-1 w-full'>
-                                      <span className='text-center'>
-                                        Downloaded{' '}
-                                        {prettyBytes(v.progressBytes, {
-                                          minimumFractionDigits: 1,
-                                          maximumFractionDigits: 1
-                                        })}{' '}
-                                        of{' '}
-                                        {prettyBytes(
-                                          getVersionInfo(v.version)?.size ?? 0,
-                                          {
+                                    ) : v.hash_checking ? (
+                                      <span className='text-blue-500 inline-block w-full text-center'>
+                                        Checking hash...
+                                      </span>
+                                    ) : v.finishing ? (
+                                      <span className='text-green-500 inline-block w-full text-center'>
+                                        Finishing...
+                                      </span>
+                                    ) : (
+                                      <div className='flex flex-col gap-1 w-full'>
+                                        <span className='text-center'>
+                                          Downloaded{' '}
+                                          {prettyBytes(v.progressBytes, {
                                             minimumFractionDigits: 1,
                                             maximumFractionDigits: 1
-                                          }
-                                        )}{' '}
-                                        (ETA: {formatEtaSmart(v.etaSecs)} &bull;
-                                        Speed:{' '}
-                                        {prettyBytes(v.speed, {
-                                          minimumFractionDigits: 1,
-                                          maximumFractionDigits: 1
-                                        })}
-                                        /s)
-                                      </span>
-                                      <ProgressBar
-                                        progress={v.progress}
-                                        className='w-full'
-                                      />
-                                    </div>
-                                  )}
+                                          })}{' '}
+                                          of{' '}
+                                          {prettyBytes(
+                                            getVersionInfo(v.version)?.size ??
+                                              0,
+                                            {
+                                              minimumFractionDigits: 1,
+                                              maximumFractionDigits: 1
+                                            }
+                                          )}{' '}
+                                          (ETA: {formatEtaSmart(v.etaSecs)}{' '}
+                                          &bull; Speed:{' '}
+                                          {prettyBytes(v.speed, {
+                                            minimumFractionDigits: 1,
+                                            maximumFractionDigits: 1
+                                          })}
+                                          /s)
+                                        </span>
+                                        <ProgressBar
+                                          progress={v.progress}
+                                          className='w-full'
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              )
+                            })}
                           </div>
                         </>
                       ) : popupMode === 2 ? (
@@ -787,7 +854,6 @@ export default function RootLayout ({
                             <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
                               <button
                                 className='button btntheme2'
-                                disabled={downloadProgress.length != 0}
                                 onClick={async () => {
                                   closePopup()
 
@@ -822,7 +888,6 @@ export default function RootLayout ({
                               </button>
                               <button
                                 className='button btntheme2'
-                                disabled={downloadProgress.length != 0}
                                 onClick={async () => {
                                   //change popup to downloads
                                   setManagingVersion(null)
@@ -896,23 +961,31 @@ export default function RootLayout ({
                             <button
                               className='button btntheme1 w-fit mt-2 -mb-4'
                               onClick={() => {
-                                setFadeOut(true)
-                                setTimeout(() => setShowPopup(false), 200)
-                                if (downloadedVersionsConfig)
+                                if (downloadedVersionsConfig) {
                                   downloadVersions(selectedVersionList)
+                                }
                               }}
-                              disabled={downloadProgress.length != 0}
+                              disabled={selectedVersionList.length === 0}
                               title={
-                                downloadProgress.length != 0
-                                  ? "You cannot download the versions as you have another download that hasn't completed."
-                                  : `Click to download ${
+                                selectedVersionList.length === 0
+                                  ? 'Select at least one version to download'
+                                  : downloadProgress.length > 0 ||
+                                    downloadQueue.length > 0
+                                  ? `Add ${selectedVersionList.length} version${
+                                      selectedVersionList.length == 1 ? '' : 's'
+                                    } to download queue`
+                                  : `Download ${
                                       selectedVersionList.length
                                     } version${
                                       selectedVersionList.length == 1 ? '' : 's'
                                     } of ${getGameInfo(selectedGame)?.name}`
                               }
                             >
-                              Download {selectedVersionList.length} version
+                              {downloadProgress.length > 0 ||
+                              downloadQueue.length > 0
+                                ? `Add ${selectedVersionList.length} to Queue`
+                                : `Download ${selectedVersionList.length}`}{' '}
+                              version
                               {selectedVersionList.length == 1 ? '' : 's'}
                             </button>
                             <button
