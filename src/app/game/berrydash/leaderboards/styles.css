@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+.box {
+  @apply bg-(--col1) border border-(--col3) rounded-lg w-auto p-1 h-[calc(100vh-84px)];
+}
+
+.leaderboard-button,
+.leaderboard-select {
+  @apply bg-(--col2) hover:bg-(--col4) border border-(--col4) hover:border-(--col6) rounded-lg px-4 py-2 inline-block transition-all duration-200;
+}
+
+.leaderboard-entry {
+  @apply rounded-lg text-gray-200 text-lg px-1 py-0.5 transition-colors bg-(--col2) hover:bg-(--col3) border border-(--col4) hover:border-(--col5) cursor-pointer;
+}

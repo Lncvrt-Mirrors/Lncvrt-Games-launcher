@@ -89,7 +89,7 @@ export default function Sidebar () {
           draggable={false}
           href='/'
           className={`link relative flex items-center ${
-            pathname === '/' || pathname === '/game' ? 'active' : ''
+            pathname === '/' || pathname.startsWith('/game') ? 'active' : ''
           }`}
         >
           <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Games
@@ -103,13 +103,15 @@ export default function Sidebar () {
               <div
                 draggable={false}
                 className={`link ${
-                  pathname === '/game' && Number(params.get('id') || 0) == i.id
+                  (pathname === '/game' &&
+                    Number(params.get('id') || 0) == i.id) ||
+                  (i.id == 1 && pathname === '/game/berrydash/leaderboards')
                     ? 'active'
                     : ''
                 } ml-auto w-50 ${
                   normalConfig?.settings.alwaysShowGamesInSidebar ||
                   pathname === '/' ||
-                  pathname === '/game'
+                  pathname.startsWith('/game')
                     ? ''
                     : 'hidden'
                 }`}
@@ -156,15 +158,17 @@ export default function Sidebar () {
                     key={`${i.id}-${key}`}
                     draggable={false}
                     className={`link ${
-                      pathname === '/game' &&
-                      Number(params.get('id') || 0) == i.id &&
-                      category == Number(key)
+                      (pathname === '/game' &&
+                        Number(params.get('id') || 0) == i.id) ||
+                      (i.id == 1 &&
+                        pathname === '/game/berrydash/leaderboards' &&
+                        category == Number(key))
                         ? 'active'
                         : ''
                     } ml-auto w-47.5 ${
                       normalConfig?.settings.alwaysShowGamesInSidebar ||
                       pathname === '/' ||
-                      pathname === '/game'
+                      pathname.startsWith('/game')
                         ? ''
                         : 'hidden'
                     }`}

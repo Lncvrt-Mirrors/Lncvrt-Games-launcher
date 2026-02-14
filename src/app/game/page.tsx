@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import '@/app/Installs.css'
 import { invoke } from '@tauri-apps/api/core'
 import { useGlobal } from '@/app/GlobalProvider'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -34,6 +34,7 @@ export default function Installs () {
   } = useGlobal()
 
   const params = useSearchParams()
+  const router = useRouter()
 
   const id = Number(params.get('id') || 0)
   const game = serverVersionList?.games.find(g => g.id === id)
@@ -65,6 +66,16 @@ export default function Installs () {
       <div className='flex justify-between items-center mb-4'>
         <p className='text-3xl'>Installs</p>
         <div className='flex gap-2'>
+          <button
+            className='button btntheme1'
+            onClick={() => {
+              router.push('/game/berrydash/leaderboards')
+            }}
+            title='View the leaderboards for this game.'
+            hidden={game.id != 1}
+          >
+            Leaderboards
+          </button>
           <button
             className='button btntheme1'
             onClick={() => {
