@@ -751,34 +751,18 @@ export default function RootLayout ({
                                     {getVersionInfo(v.version)?.displayName}
                                   </p>
                                   <div className='mt-6.25 flex items-center justify-between'>
-                                    {v.failed ? (
+                                    {v.failed || v.queued ? (
                                       <div className='flex items-center justify-between w-full'>
-                                        <span className='text-red-500 inline-block text-center flex-1'>
-                                          Download failed
-                                        </span>
-                                        <button
-                                          className='button btntheme3 -ml-1.25'
-                                          onClick={() => {
-                                            setDownloadQueue(prev =>
-                                              prev.filter(
-                                                id => id !== v.version
-                                              )
-                                            )
-                                            setDownloadProgress(prev =>
-                                              prev.filter(
-                                                d => d.version !== v.version
-                                              )
-                                            )
-                                          }}
-                                          title='Click to remove this version from the download queue.'
+                                        <span
+                                          className={`${
+                                            v.failed
+                                              ? 'text-red-500'
+                                              : 'text-yellow-300'
+                                          } inline-block text-center flex-1`}
                                         >
-                                          Remove
-                                        </button>
-                                      </div>
-                                    ) : v.queued ? (
-                                      <div className='flex items-center justify-between w-full'>
-                                        <span className='text-yellow-500 inline-block text-center flex-1'>
-                                          {queuePosition === 0
+                                          {v.failed
+                                            ? 'Download failed'
+                                            : queuePosition === 0
                                             ? 'Starting soon...'
                                             : `Queued (Position ${
                                                 queuePosition + 1
@@ -803,13 +787,18 @@ export default function RootLayout ({
                                           Remove
                                         </button>
                                       </div>
-                                    ) : v.hash_checking ? (
-                                      <span className='text-blue-500 inline-block w-full text-center'>
-                                        Checking hash...
-                                      </span>
-                                    ) : v.finishing ? (
-                                      <span className='text-green-500 inline-block w-full text-center'>
-                                        Finishing...
+                                    ) : v.hash_checking || v.finishing ? (
+                                      <span
+                                        className={`${
+                                          v.hash_checking
+                                            ? 'text-blue-300'
+                                            : 'text-green-300'
+                                        } inline-block w-full text-center`}
+                                      >
+                                        {v.hash_checking
+                                          ? 'Checking hash'
+                                          : 'Finishing'}
+                                        ...
                                       </span>
                                     ) : (
                                       <div className='flex flex-col gap-1 w-full'>
