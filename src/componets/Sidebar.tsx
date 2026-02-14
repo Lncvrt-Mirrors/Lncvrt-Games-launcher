@@ -13,7 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { faDiscord } from '@fortawesome/free-brands-svg-icons'
 import { platform } from '@tauri-apps/plugin-os'
-import { useGlobal } from '../GlobalProvider'
+import { useGlobal } from '@/app/GlobalProvider'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'

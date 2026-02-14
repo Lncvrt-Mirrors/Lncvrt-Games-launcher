@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import '../Installs.css'
+import '@/app/Installs.css'
 import { invoke } from '@tauri-apps/api/core'
-import { useGlobal } from '../GlobalProvider'
+import { useGlobal } from '@/app/GlobalProvider'
 import { useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { faWarning } from '@fortawesome/free-solid-svg-icons'

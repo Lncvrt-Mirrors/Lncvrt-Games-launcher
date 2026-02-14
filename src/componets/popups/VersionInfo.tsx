@@ -9,7 +9,7 @@ import {
   faWarning
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useGlobal } from '../GlobalProvider'
+import { useGlobal } from '@/app/GlobalProvider'
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
 import prettyBytes from 'pretty-bytes'

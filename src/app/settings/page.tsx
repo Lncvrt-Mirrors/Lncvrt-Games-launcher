@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Setting } from '../componets/Setting'
+import { Setting } from '@/componets/Setting'
 import { writeNormalConfig } from '@/lib/BazookaManager'
-import { useGlobal } from '../GlobalProvider'
+import { useGlobal } from '@/app/GlobalProvider'
 import { copyToClipboard } from '@/lib/Clipboard'
 import { platform } from '@tauri-apps/plugin-os'
 
