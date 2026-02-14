@@ -7,12 +7,12 @@ import {
   Dispatch,
   SetStateAction
 } from 'react'
-import { DownloadProgress } from './types/DownloadProgress'
-import { VersionsConfig } from './types/VersionsConfig'
-import { NormalConfig } from './types/NormalConfig'
-import { ServerVersionsResponse } from './types/ServerVersionsResponse'
-import { GameVersion } from './types/GameVersion'
-import { Game } from './types/Game'
+import { DownloadProgress } from '../types/DownloadProgress'
+import { VersionsConfig } from '../types/VersionsConfig'
+import { NormalConfig } from '../types/NormalConfig'
+import { ServerVersionsResponse } from '../types/ServerVersionsResponse'
+import { GameVersion } from '../types/GameVersion'
+import { Game } from '../types/Game'
 
 type GlobalCtxType = {
   serverVersionList: ServerVersionsResponse | null

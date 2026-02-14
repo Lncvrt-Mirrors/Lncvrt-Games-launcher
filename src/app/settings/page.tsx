@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { Setting } from '../componets/Setting'
-import { writeNormalConfig } from '../util/BazookaManager'
+import { writeNormalConfig } from '@/lib/BazookaManager'
 import { useGlobal } from '../GlobalProvider'
-import { copyToClipboard } from '../util/Clipboard'
+import { copyToClipboard } from '@/lib/Clipboard'
 import { platform } from '@tauri-apps/plugin-os'
 
 export default function Settings () {

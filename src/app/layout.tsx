@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Sidebar from './componets/Sidebar'
 import './Globals.css'
-import { DownloadProgress } from './types/DownloadProgress'
+import { DownloadProgress } from '../types/DownloadProgress'
 import { invoke } from '@tauri-apps/api/core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -22,24 +22,24 @@ import {
   readNormalConfig,
   readVersionsConfig,
   writeVersionsConfig
-} from './util/BazookaManager'
-import { VersionsConfig } from './types/VersionsConfig'
-import { NormalConfig } from './types/NormalConfig'
+} from '@/lib/BazookaManager'
+import { VersionsConfig } from '../types/VersionsConfig'
+import { NormalConfig } from '../types/NormalConfig'
 import { app } from '@tauri-apps/api'
 import axios from 'axios'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { GlobalProvider } from './GlobalProvider'
 import { Roboto } from 'next/font/google'
-import { ServerVersionsResponse } from './types/ServerVersionsResponse'
-import { GameVersion } from './types/GameVersion'
-import { Game } from './types/Game'
+import { ServerVersionsResponse } from '../types/ServerVersionsResponse'
+import { GameVersion } from '../types/GameVersion'
+import { Game } from '../types/Game'
 import { listen } from '@tauri-apps/api/event'
 import { usePathname } from 'next/navigation'
 import { arch, platform } from '@tauri-apps/plugin-os'
 import VersionInfo from './componets/VersionInfo'
 import prettyBytes from 'pretty-bytes'
 import ProgressBar from './componets/ProgressBar'
-import { notifyUser } from './util/Notifications'
+import { notifyUser } from '@/lib/Notifications'
 import {
   isPermissionGranted,
   requestPermission

@@ -10,7 +10,7 @@ import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ask, message } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
-import { writeVersionsConfig } from '../util/BazookaManager'
+import { writeVersionsConfig } from '@/lib/BazookaManager'
 
 export default function Installs () {
   const {

@@ -1,7 +1,7 @@
 import './Setting.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
-import { SettingProps } from '../types/SettingProps'
+import { SettingProps } from '../../types/SettingProps'
 
 export function Setting ({
   label,

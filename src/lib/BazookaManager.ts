@@ -1,5 +1,5 @@
 import { app } from '@tauri-apps/api'
-import { NormalConfig } from '../types/NormalConfig'
+import { NormalConfig } from '@/types/NormalConfig'
 import {
   BaseDirectory,
   create,
@@ -8,7 +8,7 @@ import {
   readTextFile,
   writeFile
 } from '@tauri-apps/plugin-fs'
-import { VersionsConfig } from '../types/VersionsConfig'
+import { VersionsConfig } from '@/types/VersionsConfig'
 
 export async function readNormalConfig (): Promise<NormalConfig> {
   const version = await app.getVersion()

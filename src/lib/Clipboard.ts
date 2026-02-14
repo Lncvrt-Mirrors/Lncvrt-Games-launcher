@@ -1,4 +1,4 @@
-import { NormalConfig } from '../types/NormalConfig'
+import { NormalConfig } from '@/types/NormalConfig'
 import { notifyUser } from './Notifications'
 
 export async function copyToClipboard (
