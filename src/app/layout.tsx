@@ -752,26 +752,29 @@ export default function RootLayout ({
                                   </p>
                                   <div className='mt-6.25 flex items-center justify-between'>
                                     {v.failed ? (
-                                      <>
-                                        <div className='flex items-center'>
-                                          <span className='text-red-500 inline-block w-full text-center'>
-                                            Download failed
-                                          </span>
-                                          <button
-                                            className='button btntheme3 ml-30 mb-2'
-                                            onClick={() => {
-                                              setDownloadProgress(prev =>
-                                                prev.filter(
-                                                  d => d.version !== v.version
-                                                )
+                                      <div className='flex items-center justify-between w-full'>
+                                        <span className='text-red-500 inline-block text-center flex-1'>
+                                          Download failed
+                                        </span>
+                                        <button
+                                          className='button btntheme3 -ml-1.25'
+                                          onClick={() => {
+                                            setDownloadQueue(prev =>
+                                              prev.filter(
+                                                id => id !== v.version
                                               )
-                                            }}
-                                            title='Click to remove this version from this menu.'
-                                          >
-                                            Remove
-                                          </button>
-                                        </div>
-                                      </>
+                                            )
+                                            setDownloadProgress(prev =>
+                                              prev.filter(
+                                                d => d.version !== v.version
+                                              )
+                                            )
+                                          }}
+                                          title='Click to remove this version from the download queue.'
+                                        >
+                                          Remove
+                                        </button>
+                                      </div>
                                     ) : v.queued ? (
                                       <div className='flex items-center justify-between w-full'>
                                         <span className='text-yellow-500 inline-block text-center flex-1'>
