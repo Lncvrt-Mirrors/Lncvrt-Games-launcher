@@ -4,7 +4,7 @@
   "version": "1.5.8",
   "identifier": "xyz.lncvrt.games-launcher",
   "build": {
-    "beforeDevCommand": "next dev",
+    "beforeDevCommand": "next dev --webpack",
     "devUrl": "http://localhost:3000",
     "beforeBuildCommand": "next build",
     "frontendDist": "../out"
