@@ -465,12 +465,7 @@ export default function Installs () {
                             entry
                           )
                         }
-                        disabled={downloadProgress.length != 0}
-                        title={
-                          downloadProgress.length != 0
-                            ? 'Cannot update while downloads are in progress '
-                            : 'Click to update the game'
-                        }
+                        title={'Click to update the game'}
                       >
                         Update
                       </button>
