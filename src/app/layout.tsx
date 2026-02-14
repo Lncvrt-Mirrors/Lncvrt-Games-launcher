@@ -797,7 +797,7 @@ export default function RootLayout ({
                                           }}
                                           title='Click to remove this version from the download queue.'
                                         >
-                                          Cancel
+                                          Remove
                                         </button>
                                       </div>
                                     ) : v.hash_checking ? (
