@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react'
 import prettyBytes from 'pretty-bytes'
 import { message } from '@tauri-apps/plugin-dialog'
 
-export default function VersionInfo () {
+export default function VersionInfoPopup () {
   const {
     getGameInfo,
     getVersionInfo,

@@ -45,6 +45,12 @@ type GlobalCtxType = {
   downloadVersions: (list: string[]) => Promise<void>
   category: number
   setCategory: Dispatch<SetStateAction<number>>
+  downloadQueue: string[]
+  setDownloadQueue: Dispatch<SetStateAction<string[]>>
+  closePopup: () => void
+  getSpecialVersionsList(game?: number | undefined): GameVersion[]
+  selectedGame: number | null
+  setViewingInfoFromDownloads: Dispatch<SetStateAction<boolean>>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)

@@ -6,18 +6,7 @@ import './Globals.css'
 import { DownloadProgress } from '@/types/DownloadProgress'
 import { invoke } from '@tauri-apps/api/core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faAdd,
-  faCheck,
-  faChevronLeft,
-  faCode,
-  faDownload,
-  faInfo,
-  faRemove,
-  faShieldHalved,
-  faWarning,
-  faXmark
-} from '@fortawesome/free-solid-svg-icons'
+import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
 import {
   readNormalConfig,
   readVersionsConfig,
@@ -36,16 +25,18 @@ import { Game } from '@/types/Game'
 import { listen } from '@tauri-apps/api/event'
 import { usePathname } from 'next/navigation'
 import { arch, platform } from '@tauri-apps/plugin-os'
-import VersionInfo from '@/componets/popups/VersionInfo'
-import prettyBytes from 'pretty-bytes'
-import ProgressBar from '@/componets/ProgressBar'
 import { notifyUser } from '@/lib/Notifications'
 import {
   isPermissionGranted,
   requestPermission
 } from '@tauri-apps/plugin-notification'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
-import { openFolder } from '@/lib/Util'
+
+import DownloadsPopup from '@/componets/popups/Downloads'
+import VersionInfoPopup from '@/componets/popups/VersionInfo'
+import ManagingVersionPopup from '@/componets/popups/ManageVersion'
+import GamesDownloadPopup from '@/componets/popups/GamesDownload'
+import VersionsDownloadPopup from '@/componets/popups/VersionsDownload'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -172,20 +163,6 @@ export default function RootLayout ({
     }).length
 
     return { installed, total }
-  }
-
-  function formatEtaSmart (seconds: number) {
-    if (seconds < 60) return `${Math.floor(seconds)}s`
-    if (seconds < 3600)
-      return `${Math.floor(seconds / 60)}m ${Math.floor(seconds % 60)}s`
-    if (seconds < 86400) {
-      const h = Math.floor(seconds / 3600)
-      const m = Math.floor((seconds % 3600) / 60)
-      return `${h}h ${m}m`
-    }
-    const d = Math.floor(seconds / 86400)
-    const h = Math.floor((seconds % 86400) / 3600)
-    return `${d}d ${h}h`
   }
 
   const closePopup = useCallback(() => {
@@ -525,7 +502,13 @@ export default function RootLayout ({
                 version,
                 downloadVersions,
                 category,
-                setCategory
+                setCategory,
+                downloadQueue,
+                setDownloadQueue,
+                closePopup,
+                getSpecialVersionsList,
+                selectedGame,
+                setViewingInfoFromDownloads
               }}
             >
               <div
@@ -578,431 +561,16 @@ export default function RootLayout ({
                         />
                       </button>
                       {popupMode === 0 && selectedGame ? (
-                        <>
-                          <p className='text-xl text-center'>
-                            Select versions to download
-                          </p>
-                          <div className='popup-content'>
-                            {getSpecialVersionsList(selectedGame).map(
-                              (v, i) => (
-                                <div key={i} className='popup-entry'>
-                                  <div className='flex items-center'>
-                                    <p
-                                      className={`text-2xl truncate ${
-                                        selectedVersionList.includes(v.id)
-                                          ? 'max-w-84.5'
-                                          : 'max-w-91.5'
-                                      }`}
-                                    >
-                                      {v.displayName}
-                                    </p>
-                                  </div>
-                                  <button
-                                    className='button btntheme3 right-20.75 bottom-1.75'
-                                    onClick={() => {
-                                      setSelectedVersionList(prev =>
-                                        prev.includes(v.id)
-                                          ? prev.filter(i => i !== v.id)
-                                          : [...prev, v.id]
-                                      )
-                                    }}
-                                    title={
-                                      selectedVersionList.includes(v.id)
-                                        ? 'This version will be downloaded. Click to remove from the list of versions that will be downloaded.'
-                                        : 'This version will NOT be downloaded. Click to add from the list of versions that will be downloaded.'
-                                    }
-                                  >
-                                    {selectedVersionList.includes(v.id) ? (
-                                      <>
-                                        <FontAwesomeIcon icon={faRemove} />{' '}
-                                        Remove
-                                      </>
-                                    ) : (
-                                      <>
-                                        <FontAwesomeIcon icon={faAdd} /> Add
-                                      </>
-                                    )}
-                                  </button>
-                                  <button
-                                    className='button btntheme3 right-1.5 bottom-1.75'
-                                    onClick={() => {
-                                      setManagingVersion(v.id)
-                                      setViewingInfoFromDownloads(true)
-                                      setPopupMode(3)
-                                    }}
-                                    title='Click to view version info'
-                                  >
-                                    <FontAwesomeIcon icon={faInfo} /> Info
-                                  </button>
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </>
+                        <VersionsDownloadPopup />
                       ) : popupMode === 0 && !selectedGame ? (
-                        <>
-                          <p className='text-xl text-center'>
-                            Select a game to download
-                          </p>
-                          <div className='popup-content'>
-                            {serverVersionList?.games
-                              .filter(v => {
-                                const data = getVersionsAmountData(v.id)
-                                if (!data) return false
-                                if (data.total > 0) return true
-                              })
-                              .map((v, i) => (
-                                <div key={i} className='popup-entry'>
-                                  <p className='text-2xl'>{v.name}</p>
-                                  <div className='flex gap-2'>
-                                    <div
-                                      className='entry-info-item btntheme3'
-                                      title='The amount of versions installed of this game in installed/installable format.'
-                                    >
-                                      <p>
-                                        {(() => {
-                                          const data = getVersionsAmountData(
-                                            v.id
-                                          )
-                                          if (!data) return 'N/A'
-                                          return `${data.installed}/${data.total}`
-                                        })()}{' '}
-                                        versions installed
-                                      </p>
-                                    </div>
-                                    <div
-                                      className='entry-info-item btntheme3'
-                                      hidden={!v.official}
-                                      title='This game is official.'
-                                    >
-                                      <FontAwesomeIcon
-                                        icon={faCheck}
-                                        color='#19c84b'
-                                      />
-                                      <p>Official</p>
-                                    </div>
-                                    <div
-                                      className='entry-info-item btntheme3'
-                                      hidden={v.official}
-                                      title={
-                                        v.verified
-                                          ? 'This game is verified to be safe'
-                                          : 'This game is NOT verified to be save. Proceed with caution.'
-                                      }
-                                    >
-                                      <FontAwesomeIcon
-                                        icon={
-                                          v.verified
-                                            ? faShieldHalved
-                                            : faWarning
-                                        }
-                                        color={
-                                          v.verified ? '#19c84b' : '#ffc800'
-                                        }
-                                      />
-                                      <p>
-                                        {v.verified ? 'Verified' : 'Unverified'}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div
-                                    className='entry-info-item btntheme3 mt-2'
-                                    hidden={v.developer == null}
-                                    title={`The developer of ${v.name} is ${v.developer}.`}
-                                  >
-                                    <FontAwesomeIcon
-                                      icon={faCode}
-                                      color='lightgray'
-                                    />
-                                    <p>Developer: {v.developer}</p>
-                                  </div>
-                                  <button
-                                    className='button btntheme3 right-2 bottom-2'
-                                    onClick={() => setSelectedGame(v.id)}
-                                    title={`Click to download specific versions of the game. You have ${(() => {
-                                      const data = getVersionsAmountData(v.id)
-                                      if (!data) return 'N/A'
-                                      return `${data.installed} of ${data.total}`
-                                    })()} versions downloaded.`}
-                                  >
-                                    <>
-                                      <FontAwesomeIcon icon={faDownload} />{' '}
-                                      Download
-                                    </>
-                                  </button>
-                                </div>
-                              ))}
-                          </div>
-                        </>
+                        <GamesDownloadPopup />
                       ) : popupMode === 1 ? (
-                        <>
-                          <p className='text-xl text-center'>Downloads</p>
-                          <div className='popup-content'>
-                            {downloadProgress.map((v, i) => {
-                              const queuePosition = downloadQueue.indexOf(
-                                v.version
-                              )
-                              return (
-                                <div
-                                  key={i}
-                                  className='popup-entry flex flex-col justify-between'
-                                >
-                                  <p className='text-2xl text-center'>
-                                    {getVersionInfo(v.version)?.displayName}
-                                  </p>
-                                  <div className='mt-6.25 flex items-center justify-between'>
-                                    {v.failed || v.queued ? (
-                                      <div className='flex items-center justify-between w-full'>
-                                        <span
-                                          className={`${
-                                            v.failed
-                                              ? 'text-red-500'
-                                              : 'text-yellow-300'
-                                          } inline-block text-center flex-1`}
-                                        >
-                                          {v.failed
-                                            ? 'Download failed'
-                                            : queuePosition === 0
-                                            ? 'Starting soon...'
-                                            : `Queued (Position ${
-                                                queuePosition + 1
-                                              })`}
-                                        </span>
-                                        <button
-                                          className='button btntheme3 -ml-1.25'
-                                          onClick={() => {
-                                            setDownloadQueue(prev =>
-                                              prev.filter(
-                                                id => id !== v.version
-                                              )
-                                            )
-                                            setDownloadProgress(prev =>
-                                              prev.filter(
-                                                d => d.version !== v.version
-                                              )
-                                            )
-                                          }}
-                                          title='Click to remove this version from the download queue.'
-                                        >
-                                          Remove
-                                        </button>
-                                      </div>
-                                    ) : v.hash_checking || v.finishing ? (
-                                      <span
-                                        className={`${
-                                          v.hash_checking
-                                            ? 'text-blue-300'
-                                            : 'text-green-300'
-                                        } inline-block w-full text-center`}
-                                      >
-                                        {v.hash_checking
-                                          ? 'Checking hash'
-                                          : 'Finishing'}
-                                        ...
-                                      </span>
-                                    ) : (
-                                      <div className='flex flex-col gap-1 w-full'>
-                                        <span className='text-center'>
-                                          Downloaded{' '}
-                                          {prettyBytes(v.progressBytes, {
-                                            minimumFractionDigits: 1,
-                                            maximumFractionDigits: 1
-                                          })}{' '}
-                                          of{' '}
-                                          {prettyBytes(
-                                            getVersionInfo(v.version)?.size ??
-                                              0,
-                                            {
-                                              minimumFractionDigits: 1,
-                                              maximumFractionDigits: 1
-                                            }
-                                          )}{' '}
-                                          (ETA: {formatEtaSmart(v.etaSecs)}{' '}
-                                          &bull; Speed:{' '}
-                                          {prettyBytes(v.speed, {
-                                            minimumFractionDigits: 1,
-                                            maximumFractionDigits: 1
-                                          })}
-                                          /s)
-                                        </span>
-                                        <ProgressBar
-                                          progress={v.progress}
-                                          className='w-full'
-                                        />
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        </>
+                        <DownloadsPopup />
                       ) : popupMode === 2 ? (
-                        managingVersion ? (
-                          <>
-                            <p className='text-xl text-center'>
-                              Manage{' '}
-                              {getVersionInfo(managingVersion)?.displayName}
-                            </p>
-                            <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
-                              <button
-                                className='button btntheme2'
-                                onClick={async () => {
-                                  closePopup()
-
-                                  setDownloadedVersionsConfig(prev => {
-                                    if (!prev) return prev
-                                    const updatedList = Object.fromEntries(
-                                      Object.entries(prev.list).filter(
-                                        ([k]) => k !== managingVersion
-                                      )
-                                    )
-                                    const updatedConfig = {
-                                      ...prev,
-                                      list: updatedList
-                                    }
-                                    writeVersionsConfig(updatedConfig)
-                                    return updatedConfig
-                                  })
-
-                                  if (
-                                    await exists('game/' + managingVersion, {
-                                      baseDir: BaseDirectory.AppLocalData
-                                    })
-                                  )
-                                    await remove('game/' + managingVersion, {
-                                      baseDir: BaseDirectory.AppLocalData,
-                                      recursive: true
-                                    })
-                                }}
-                                title='Click to uninstall this game. This will NOT remove any progress or any save files.'
-                              >
-                                Uninstall
-                              </button>
-                              <button
-                                className='button btntheme2'
-                                onClick={async () => {
-                                  //change popup to downloads
-                                  setManagingVersion(null)
-                                  setPopupMode(1)
-
-                                  //uninstall
-                                  setDownloadedVersionsConfig(prev => {
-                                    if (!prev) return prev
-                                    const updatedList = Object.fromEntries(
-                                      Object.entries(prev.list).filter(
-                                        ([k]) => k !== managingVersion
-                                      )
-                                    )
-                                    const updatedConfig = {
-                                      ...prev,
-                                      list: updatedList
-                                    }
-                                    writeVersionsConfig(updatedConfig)
-                                    return updatedConfig
-                                  })
-
-                                  if (
-                                    await exists('game/' + managingVersion, {
-                                      baseDir: BaseDirectory.AppLocalData
-                                    })
-                                  )
-                                    await remove('game/' + managingVersion, {
-                                      baseDir: BaseDirectory.AppLocalData,
-                                      recursive: true
-                                    })
-
-                                  //reinstall
-                                  setSelectedVersionList([managingVersion])
-                                  downloadVersions([managingVersion])
-                                }}
-                                title="Click to reinstall this game. This will NOT remove any progress or any save files. This WILL uninstall any modifications to the game's executable files."
-                              >
-                                Reinstall
-                              </button>
-                              <button
-                                className='button btntheme2'
-                                onClick={async () =>
-                                  openFolder(managingVersion)
-                                }
-                                title="Click to browse the game's files."
-                              >
-                                Open Folder
-                              </button>
-                            </div>
-                          </>
-                        ) : (
-                          <p className='text-xl text-center'>
-                            No version selected
-                          </p>
-                        )
+                        <ManagingVersionPopup />
                       ) : popupMode === 3 ? (
-                        managingVersion && downloadedVersionsConfig ? (
-                          <VersionInfo />
-                        ) : (
-                          <p className='text-xl text-center'>
-                            No version selected
-                          </p>
-                        )
+                        <VersionInfoPopup />
                       ) : null}
-                      {popupMode == 0 &&
-                        selectedGame &&
-                        serverVersionList != null && (
-                          <div className='flex justify-center'>
-                            <button
-                              className='button btntheme1 w-fit mt-2 -mb-4'
-                              onClick={() => {
-                                if (downloadedVersionsConfig) {
-                                  downloadVersions(selectedVersionList)
-                                }
-                              }}
-                              disabled={selectedVersionList.length === 0}
-                              title={
-                                selectedVersionList.length === 0
-                                  ? 'Select at least one version to download'
-                                  : downloadProgress.length > 0 ||
-                                    downloadQueue.length > 0
-                                  ? `Add ${selectedVersionList.length} version${
-                                      selectedVersionList.length == 1 ? '' : 's'
-                                    } to download queue`
-                                  : `Download ${
-                                      selectedVersionList.length
-                                    } version${
-                                      selectedVersionList.length == 1 ? '' : 's'
-                                    } of ${getGameInfo(selectedGame)?.name}`
-                              }
-                            >
-                              {downloadProgress.length > 0 ||
-                              downloadQueue.length > 0
-                                ? `Add ${selectedVersionList.length} to Queue`
-                                : `Download ${selectedVersionList.length}`}{' '}
-                              version
-                              {selectedVersionList.length == 1 ? '' : 's'}
-                            </button>
-                            <button
-                              className='button btntheme1 w-fit mt-2 ml-2 -mb-4'
-                              onClick={() => {
-                                const allIds = getSpecialVersionsList(
-                                  selectedGame
-                                ).map(v => v.id)
-                                setSelectedVersionList(prev =>
-                                  prev.length === allIds.length ? [] : allIds
-                                )
-                              }}
-                              title={
-                                selectedVersionList.length ===
-                                getSpecialVersionsList(selectedGame).length
-                                  ? 'Click to remove all selected versions for download.'
-                                  : 'Click to add all selected versions for download.'
-                              }
-                            >
-                              {selectedVersionList.length ===
-                              getSpecialVersionsList(selectedGame).length
-                                ? 'Deselect All'
-                                : 'Select All'}
-                            </button>
-                          </div>
-                        )}
                     </div>
                   </div>
                 )}
