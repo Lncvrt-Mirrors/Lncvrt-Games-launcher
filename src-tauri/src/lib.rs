@@ -278,6 +278,9 @@ fn launch_game(
     //if already running on macos, it'll auto take the user to that proccess
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     {
+        use tauri_plugin_dialog::MessageDialogKind;
+        use tauri_plugin_dialog::DialogExt;
+
         if !use_wine && is_running_by_path(&exe_path) {
             app.dialog()
                 .message(format!(
