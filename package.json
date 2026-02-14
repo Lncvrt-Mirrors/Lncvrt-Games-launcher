@@ -35,7 +35,7 @@
     "@tauri-apps/cli": "2.10.0",
     "@types/crypto-js": "4.2.2",
     "@types/node": "25.2.3",
-    "@types/react": "19.2.13",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "crypto-js": "4.2.0",
     "eslint": "9.39.2",
