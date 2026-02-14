@@ -164,7 +164,10 @@ export default function BerryDashLeaderboards () {
             className='button btntheme1'
             onClick={() => {
               if (selected == -1) router.push('/game?id=1')
-              else setSelected(-1)
+              else {
+                setSelected(-1)
+                setEntries([])
+              }
             }}
             title='Click to go up a level.'
           >
