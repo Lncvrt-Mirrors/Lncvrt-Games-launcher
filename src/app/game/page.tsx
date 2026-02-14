@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ask } from '@tauri-apps/plugin-dialog'
+import { ask, message } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { writeVersionsConfig } from '../util/BazookaManager'
 
@@ -20,7 +20,6 @@ export default function Installs () {
     setFadeOut,
     setSelectedVersionList,
     downloadedVersionsConfig,
-    downloadProgress,
     normalConfig,
     setManagingVersion,
     getVersionInfo,
@@ -123,21 +122,9 @@ export default function Installs () {
                 return (
                   <div
                     key={key}
-                    className={`downloads-entry ${
-                      normalConfig?.settings.useLegacyInteractButtons
-                        ? ''
-                        : 'cursor-pointer'
-                    }`}
-                    title={
-                      normalConfig?.settings.useLegacyInteractButtons
-                        ? ''
-                        : 'Click to view category'
-                    }
-                    onClick={() => {
-                      if (normalConfig?.settings.useLegacyInteractButtons)
-                        return
-                      setCategory(Number(key))
-                    }}
+                    className={'downloads-entry'}
+                    title={'Click to view category'}
+                    onClick={() => setCategory(Number(key))}
                   >
                     <div className='h-18 w-screen relative'>
                       <p className='text-2xl'>{value}</p>
@@ -171,17 +158,6 @@ export default function Installs () {
                           })()}
                         </p>
                       </div>
-
-                      <button
-                        className='button absolute right-0 bottom-0'
-                        hidden={
-                          !normalConfig?.settings.useLegacyInteractButtons
-                        }
-                        title='Click to view category'
-                        onClick={() => setCategory(Number(key))}
-                      >
-                        Installs
-                      </button>
                     </div>
                   </div>
                 )
@@ -217,33 +193,23 @@ export default function Installs () {
               .map(entry => (
                 <div
                   key={entry}
-                  className={`downloads-entry ${
-                    normalConfig?.settings.useLegacyInteractButtons ||
-                    needsRevisionUpdate(
-                      getVersionInfo(entry)?.lastRevision,
-                      entry
-                    )
-                      ? ''
-                      : 'cursor-pointer'
-                  }`}
+                  className={'downloads-entry'}
                   title={
-                    normalConfig?.settings.useLegacyInteractButtons ||
-                    needsRevisionUpdate(
-                      getVersionInfo(entry)?.lastRevision,
-                      entry
-                    )
-                      ? ''
-                      : 'Click to launch game. Right-click to manage this version install'
+                    'Click to launch game. Right-click to manage this version install'
                   }
                   onClick={async () => {
                     if (
-                      normalConfig?.settings.useLegacyInteractButtons ||
                       needsRevisionUpdate(
                         getVersionInfo(entry)?.lastRevision,
                         entry
                       )
-                    )
+                    ) {
+                      await message(
+                        "Can't launch game. Need revision update.",
+                        { title: 'Error launching game', kind: 'error' }
+                      )
                       return
+                    }
                     const verInfo = getVersionInfo(entry)
                     if (verInfo == undefined) return
                     const gameInfo = getGameInfo(verInfo.game)
@@ -262,15 +228,6 @@ export default function Installs () {
                   }}
                   onContextMenu={e => {
                     e.preventDefault()
-                    if (
-                      normalConfig?.settings.useLegacyInteractButtons ||
-                      needsRevisionUpdate(
-                        getVersionInfo(entry)?.lastRevision,
-                        entry
-                      )
-                    )
-                      return
-
                     setManagingVersion(entry)
                     setPopupMode(2)
                     setShowPopup(true)
@@ -345,58 +302,6 @@ export default function Installs () {
                         title='Click to view version info'
                       >
                         View Info
-                      </button>
-                      <button
-                        className='button'
-                        hidden={
-                          !normalConfig?.settings.useLegacyInteractButtons ||
-                          needsRevisionUpdate(
-                            getVersionInfo(entry)?.lastRevision,
-                            entry
-                          )
-                        }
-                        onClick={e => {
-                          e.stopPropagation()
-                          setManagingVersion(entry)
-                          setPopupMode(2)
-                          setShowPopup(true)
-                          setFadeOut(false)
-                        }}
-                        title='Click to manage this version install'
-                      >
-                        Manage
-                      </button>
-                      <button
-                        className='button'
-                        onClick={e => {
-                          e.stopPropagation()
-                          const verInfo = getVersionInfo(entry)
-                          if (verInfo == undefined) return
-                          const gameInfo = getGameInfo(verInfo.game)
-                          if (gameInfo == undefined) return
-                          invoke('launch_game', {
-                            name: verInfo.id,
-                            executable: verInfo.executable,
-                            displayName: verInfo.displayName,
-                            useWine: !!(
-                              platform() === 'linux' &&
-                              verInfo.wine &&
-                              normalConfig?.settings.useWineOnUnixWhenNeeded
-                            ),
-                            wineCommand:
-                              normalConfig?.settings.wineOnUnixCommand
-                          })
-                        }}
-                        hidden={
-                          !normalConfig?.settings.useLegacyInteractButtons ||
-                          needsRevisionUpdate(
-                            getVersionInfo(entry)?.lastRevision,
-                            entry
-                          )
-                        }
-                        title='Click to launch game'
-                      >
-                        Launch
                       </button>
                       <button
                         className='button'

@@ -68,18 +68,9 @@ export default function Installs () {
               .map(i => (
                 <div
                   key={i.id}
-                  className={`downloads-entry ${
-                    normalConfig?.settings.useLegacyInteractButtons
-                      ? ''
-                      : 'cursor-pointer'
-                  }`}
-                  title={
-                    normalConfig?.settings.useLegacyInteractButtons
-                      ? ''
-                      : 'Click to view game installs'
-                  }
+                  className={'downloads-entry'}
+                  title={'Click to view game installs'}
                   onClick={() => {
-                    if (normalConfig?.settings.useLegacyInteractButtons) return
                     setCategory(-1)
                     router.push('/game?id=' + i.id)
                   }}
@@ -127,18 +118,6 @@ export default function Installs () {
                         />
                         <p>{i.verified ? 'Verified' : 'Unverified'}</p>
                       </div>
-                    </div>
-
-                    <div
-                      className='button absolute right-0 bottom-0'
-                      hidden={!normalConfig?.settings.useLegacyInteractButtons}
-                      title='Click to view game installs'
-                      onClick={() => {
-                        setCategory(-1)
-                        router.push('/game?id=' + i.id)
-                      }}
-                    >
-                      Installs
                     </div>
                   </div>
                 </div>

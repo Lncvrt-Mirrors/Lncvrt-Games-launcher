@@ -11,8 +11,6 @@ export default function Settings () {
   const [allowNotifications, setAllowNotifications] = useState(false)
   const [alwaysShowGamesInSidebar, setAlwaysShowGamesInSidebar] =
     useState(false)
-  const [useLegacyInteractButtons, setUseLegacyInteractButtons] =
-    useState(false)
   const [useWineOnUnixWhenNeeded, setUseWineOnUnixWhenNeeded] = useState(false)
   const [wineOnUnixCommand, setWineOnUnixCommand] = useState('wine %path%')
   const [theme, setTheme] = useState(0)
@@ -26,9 +24,6 @@ export default function Settings () {
         setAllowNotifications(normalConfig.settings.allowNotifications)
         setAlwaysShowGamesInSidebar(
           normalConfig.settings.alwaysShowGamesInSidebar
-        )
-        setUseLegacyInteractButtons(
-          normalConfig.settings.useLegacyInteractButtons
         )
         setUseWineOnUnixWhenNeeded(
           normalConfig.settings.useWineOnUnixWhenNeeded
@@ -91,29 +86,6 @@ export default function Settings () {
               })
             }}
             title="This setting will make it so when you are on a page like this, the games won't disappear."
-          />
-          <Setting
-            label='Show Installs/Launch/Manage Buttons'
-            value={useLegacyInteractButtons}
-            onChange={async () => {
-              if (!normalConfig) return
-              setUseLegacyInteractButtons(!useLegacyInteractButtons)
-              setNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  useLegacyInteractButtons: !useLegacyInteractButtons
-                }
-              })
-              await writeNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  useLegacyInteractButtons: !useLegacyInteractButtons
-                }
-              })
-            }}
-            title='Enable the legacy method of using the installs/launch/manage buttons. In the future this setting may be removed so try and get used to the new method.'
           />
           <Setting
             label='Use wine when needed to launch games'
