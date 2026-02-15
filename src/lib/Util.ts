@@ -11,11 +11,20 @@ export const openFolder = async (name: string) => {
   const folderExists = await exists(relativePath, {
     baseDir: BaseDirectory.AppLocalData
   })
+
+  if (!folderExists) {
+    await message(`Game folder "${absolutePath}" not found.`, {
+      title: 'Folder not found',
+      kind: 'error'
+    })
+    return
+  }
+
   const folderStat = await stat(relativePath, {
     baseDir: BaseDirectory.AppLocalData
   })
 
-  if (!folderExists || folderStat.isFile) {
+  if (folderStat.isFile) {
     await message(`Game folder "${absolutePath}" not found.`, {
       title: 'Folder not found',
       kind: 'error'
