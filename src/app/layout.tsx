@@ -50,6 +50,7 @@ export default function RootLayout ({
   const [loadingText, setLoadingText] = useState('Loading...')
   const [outdated, setOutdated] = useState(false)
   const [version, setVersion] = useState<string | null>(null)
+  const [platformName, setPlatformName] = useState<string | null>(null)
 
   const [serverVersionList, setServerVersionList] =
     useState<null | ServerVersionsResponse>(null)
@@ -88,7 +89,7 @@ export default function RootLayout ({
       )
       .filter(v => {
         if (
-          platform() == 'linux' &&
+          platformName == 'linux' &&
           v.wine &&
           !normalConfig.settings.useWineOnUnixWhenNeeded
         )
@@ -146,7 +147,7 @@ export default function RootLayout ({
     if (!downloadedVersionsConfig || !serverVersionList) return null
 
     const allowWine =
-      platform() !== 'linux' || normalConfig?.settings.useWineOnUnixWhenNeeded
+      platformName !== 'linux' || normalConfig?.settings.useWineOnUnixWhenNeeded
 
     const installed = Object.keys(downloadedVersionsConfig.list).filter(v => {
       const info = getVersionInfo(v)
@@ -231,10 +232,10 @@ export default function RootLayout ({
 
   useEffect(() => {
     ;(async () => {
+      setPlatformName(platform())
       const client = await app.getVersion()
       setVersion(client)
       if (process.env.NODE_ENV === 'production') {
-        setLoadingText('Checking latest version...')
         try {
           const response = await axios.get(
             'https://games.lncvrt.xyz/api/launcher/latest'
@@ -248,7 +249,6 @@ export default function RootLayout ({
           return
         }
       }
-      setLoadingText('Downloading version list...')
       try {
         const res = await axios.get(
           `https://games.lncvrt.xyz/api/launcher/versions?platform=${platform()}&arch=${arch()}`
@@ -258,7 +258,6 @@ export default function RootLayout ({
         setLoadingText('Failed to download versions list.')
         return
       }
-      setLoadingText('Loading configs...')
       const normalConfig = await readNormalConfig()
       const versionsConfig = await readVersionsConfig()
       setDownloadedVersionsConfig(versionsConfig)
@@ -450,26 +449,38 @@ export default function RootLayout ({
           }
         >
           {loading ? (
-            <div className='w-screen h-screen flex items-center justify-center'>
-              {outdated ? (
-                <div className='text-center'>
-                  <p className='text-8xl mb-4'>Outdated Launcher!</p>
-                  <p className='text-4xl mb-4'>
-                    Please update to the latest version to continue.
-                  </p>
-                  <button
-                    className='button'
-                    onClick={() =>
-                      openUrl('https://games.lncvrt.xyz/berrydash/download')
-                    }
-                  >
-                    Download latest version
-                  </button>
-                </div>
-              ) : (
-                <p className='text-7xl text-center'>{loadingText}</p>
-              )}
-            </div>
+            <>
+              <div
+                className='relative z-2 w-screen border-b border-b-(--col3) h-8.25 bg-(--col1)'
+                hidden={platformName != 'windows'}
+              />
+              <div
+                className={`w-screen ${
+                  platformName == 'windows'
+                    ? 'h-[calc(100vh-64px)]'
+                    : 'h-screen'
+                } flex items-center justify-center`}
+              >
+                {outdated ? (
+                  <div className='text-center'>
+                    <p className='text-8xl mb-4'>Outdated Launcher!</p>
+                    <p className='text-4xl mb-4'>
+                      Please update to the latest version to continue.
+                    </p>
+                    <button
+                      className='button'
+                      onClick={() =>
+                        openUrl('https://games.lncvrt.xyz/berrydash/download')
+                      }
+                    >
+                      Download latest version
+                    </button>
+                  </div>
+                ) : (
+                  <p className='text-7xl text-center'>{loadingText}</p>
+                )}
+              </div>
+            </>
           ) : (
             <GlobalProvider
               value={{
@@ -517,7 +528,7 @@ export default function RootLayout ({
                 <Sidebar />
                 <div
                   className='relative z-2 ml-59.75 w-[calc(100vw-239px)] border-b border-b-(--col3) h-8.25 bg-(--col1)'
-                  hidden={platform() != 'windows'}
+                  hidden={platformName != 'windows'}
                 />
                 <div className='relative z-0'>
                   <main className='ml-60'>{children}</main>
