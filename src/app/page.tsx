@@ -54,7 +54,7 @@ export default function Installs () {
       <div className='downloads-container'>
         <div
           className={`downloads-scroll ${
-            platform() === 'windows'
+            platform() == 'windows'
               ? 'h-[calc(100vh-116px)]'
               : 'h-[calc(100vh-84px)]'
           }`}

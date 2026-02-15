@@ -12,10 +12,8 @@ export default function VersionsDownloadPopup () {
     selectedGame,
     setViewingInfoFromDownloads,
     downloadedVersionsConfig,
-    downloadProgress,
     downloadVersions,
-    getGameInfo,
-    downloadQueue
+    getGameInfo
   } = useGlobal()
   if (!selectedGame) return <></>
 
@@ -81,25 +79,19 @@ export default function VersionsDownloadPopup () {
           onClick={() => {
             if (downloadedVersionsConfig) {
               downloadVersions(selectedVersionList)
+              setPopupMode(1)
             }
           }}
-          disabled={selectedVersionList.length === 0}
+          disabled={selectedVersionList.length == 0}
           title={
-            selectedVersionList.length === 0
+            selectedVersionList.length == 0
               ? 'Select at least one version to download'
-              : downloadProgress.length > 0 || downloadQueue.length > 0
-              ? `Add ${selectedVersionList.length} version${
-                  selectedVersionList.length == 1 ? '' : 's'
-                } to download queue`
               : `Download ${selectedVersionList.length} version${
                   selectedVersionList.length == 1 ? '' : 's'
                 } of ${getGameInfo(selectedGame)?.name}`
           }
         >
-          {downloadProgress.length > 0 || downloadQueue.length > 0
-            ? `Add ${selectedVersionList.length} to Queue`
-            : `Download ${selectedVersionList.length}`}{' '}
-          version
+          Download {selectedVersionList.length} version
           {selectedVersionList.length == 1 ? '' : 's'}
         </button>
         <button

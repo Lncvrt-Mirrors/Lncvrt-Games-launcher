@@ -113,7 +113,7 @@ export default function Installs () {
       <div className='downloads-container'>
         <div
           className={`downloads-scroll ${
-            platform() === 'windows'
+            platform() == 'windows'
               ? 'h-[calc(100vh-116px)]'
               : 'h-[calc(100vh-84px)]'
           }`}
@@ -129,7 +129,7 @@ export default function Installs () {
                   if (!info) return false
 
                   if (
-                    platform() === 'linux' &&
+                    platform() == 'linux' &&
                     info.wine &&
                     !normalConfig?.settings.useWineOnUnixWhenNeeded
                   )
@@ -165,7 +165,7 @@ export default function Installs () {
                                 const info = getVersionInfo(v)
                                 if (!info) return false
                                 if (
-                                  platform() === 'linux' &&
+                                  platform() == 'linux' &&
                                   info.wine &&
                                   !normalConfig?.settings
                                     .useWineOnUnixWhenNeeded
@@ -200,7 +200,7 @@ export default function Installs () {
                 const info = getVersionInfo(v)
                 if (!info) return false
                 if (
-                  platform() === 'linux' &&
+                  platform() == 'linux' &&
                   info.wine &&
                   !normalConfig?.settings.useWineOnUnixWhenNeeded
                 )
@@ -291,7 +291,7 @@ export default function Installs () {
                       executable: verInfo.executable,
                       displayName: verInfo.displayName,
                       useWine: !!(
-                        platform() === 'linux' &&
+                        platform() == 'linux' &&
                         verInfo.wine &&
                         normalConfig?.settings.useWineOnUnixWhenNeeded
                       ),
@@ -329,8 +329,7 @@ export default function Installs () {
                         title='This version is using wine. It cannot be guarenteed to work fully and might not work at all.'
                         hidden={
                           !(
-                            platform() === 'linux' &&
-                            getVersionInfo(entry)?.wine
+                            platform() == 'linux' && getVersionInfo(entry)?.wine
                           ) ||
                           needsRevisionUpdate(
                             getVersionInfo(entry)?.lastRevision,

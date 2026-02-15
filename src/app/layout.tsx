@@ -88,7 +88,7 @@ export default function RootLayout ({
       )
       .filter(v => {
         if (
-          platform() === 'linux' &&
+          platform() == 'linux' &&
           v.wine &&
           !normalConfig.settings.useWineOnUnixWhenNeeded
         )

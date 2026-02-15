@@ -137,7 +137,7 @@ export default function Sidebar () {
                     if (!info) return false
 
                     if (
-                      platform() === 'linux' &&
+                      platform() == 'linux' &&
                       info.wine &&
                       !normalConfig?.settings.useWineOnUnixWhenNeeded
                     )
