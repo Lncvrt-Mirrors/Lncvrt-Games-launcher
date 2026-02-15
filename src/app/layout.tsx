@@ -519,10 +519,8 @@ export default function RootLayout ({
               >
                 <Sidebar />
                 <div
-                  className='relative z-2 ml-59.75 w-[calc(100vw-239px)] border-b border-(--col3) h-8.25 bg-(--col1)'
-                  style={{
-                    display: platform() === 'windows' ? 'block' : 'none'
-                  }}
+                  className='relative z-2 ml-59.75 w-[calc(100vw-239px)] border-b border-b-(--col3) h-8.25 bg-(--col1)'
+                  hidden={platform() != 'windows'}
                 />
                 <div className='relative z-0'>
                   <main className='ml-60'>{children}</main>
