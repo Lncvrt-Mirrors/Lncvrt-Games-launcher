@@ -13,6 +13,7 @@ use std::{
 use sysinfo::System;
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_os::platform;
+use tauri_plugin_prevent_default::Flags;
 use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
@@ -278,8 +279,8 @@ fn launch_game(
     //if already running on macos, it'll auto take the user to that proccess
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     {
-        use tauri_plugin_dialog::MessageDialogKind;
         use tauri_plugin_dialog::DialogExt;
+        use tauri_plugin_dialog::MessageDialogKind;
 
         if !use_wine && is_running_by_path(&exe_path) {
             app.dialog()
@@ -329,6 +330,22 @@ fn launch_game(
 pub fn run() {
     #[allow(unused_variables)]
     tauri::Builder::default()
+        .plugin(
+            tauri_plugin_prevent_default::Builder::new()
+                .with_flags(
+                    Flags::FIND
+                        | Flags::CARET_BROWSING
+                        | Flags::DEV_TOOLS
+                        | Flags::DOWNLOADS
+                        | Flags::FOCUS_MOVE
+                        | Flags::RELOAD
+                        | Flags::SOURCE
+                        | Flags::OPEN
+                        | Flags::PRINT
+                        | Flags::CONTEXT_MENU,
+                )
+                .build(),
+        )
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
@@ -343,11 +360,7 @@ pub fn run() {
         .plugin(tauri_plugin_decorum::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![
-            download,
-            launch_game,
-            folder_size
-        ])
+        .invoke_handler(tauri::generate_handler![download, launch_game, folder_size])
         .setup(|app| {
             #[cfg(target_os = "windows")]
             {

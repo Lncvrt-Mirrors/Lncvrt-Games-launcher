@@ -270,13 +270,6 @@ export default function RootLayout ({
     })()
   }, [])
 
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') return
-    const handler = (e: MouseEvent) => e.preventDefault()
-    document.addEventListener('contextmenu', handler)
-    return () => document.removeEventListener('contextmenu', handler)
-  }, [])
-
   const downloadVersions = useCallback(
     async (list: string[]): Promise<void> => {
       if (list.length === 0) return
