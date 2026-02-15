@@ -7,6 +7,7 @@ import { GetIconForUser } from '@/lib/BerryDash'
 import Image from 'next/image'
 import './styles.css'
 import { useRouter } from 'next/navigation'
+import { platform } from '@tauri-apps/plugin-os'
 
 interface BaseEntry {
   id: number
@@ -175,11 +176,17 @@ export default function BerryDashLeaderboards () {
           </button>
         </div>
       </div>
-      <div className='box'>
+      <div
+        className={`box ${
+          platform() == 'windows'
+            ? 'h-[calc(100vh-116px)]'
+            : 'h-[calc(100vh-84px)]'
+        }`}
+      >
         {selected == -1 ? (
           <>
-            <p className='text-center mt-4 text-xl'>Select a Leaderboard</p>
-            <div className='flex flex-col gap-2 mt-4 items-center justify-center'>
+            <p className='text-center mt-2 text-xl'>Select a Leaderboard</p>
+            <div className='flex flex-col gap-2 mt-2 items-center justify-center'>
               <button
                 className='leaderboard-button'
                 onClick={() => setSelected(0)}
@@ -228,7 +235,13 @@ export default function BerryDashLeaderboards () {
           <>
             <div
               className={`flex flex-col gap-2 overflow-y-auto ${
-                selected == 1 ? 'h-[calc(100vh-128px)]' : 'h-[calc(100vh-96px)]'
+                selected == 1
+                  ? platform() == 'windows'
+                    ? 'h-[calc(100vh-168px)]'
+                    : 'h-[calc(100vh-136px)]'
+                  : platform() == 'windows'
+                  ? 'h-[calc(100vh-128px)]'
+                  : 'h-[calc(100vh-96px)]'
               } px-1`}
             >
               {entries.map((item, index) => {
@@ -288,7 +301,7 @@ export default function BerryDashLeaderboards () {
                 <select
                   value={selectedBerryOption}
                   onChange={e => setSelectedBerryOption(Number(e.target.value))}
-                  className='leaderboard-select mt-2'
+                  className='leaderboard-select mt-0.75'
                 >
                   <option value='0'>Normal Berry</option>
                   <option value='1'>Poison Berry</option>
