@@ -32,11 +32,10 @@ import {
 } from '@tauri-apps/plugin-notification'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 
-import DownloadsPopup from '@/componets/popups/Downloads'
-import VersionInfoPopup from '@/componets/popups/VersionInfo'
-import ManagingVersionPopup from '@/componets/popups/ManageVersion'
-import GamesDownloadPopup from '@/componets/popups/GamesDownload'
 import VersionsDownloadPopup from '@/componets/popups/VersionsDownload'
+import GamesDownloadPopup from '@/componets/popups/GamesDownload'
+import DownloadsPopup from '@/componets/popups/Downloads'
+import VersionVersionPopup from '@/componets/popups/VersionVersion'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -172,8 +171,6 @@ export default function RootLayout ({
     } else if (viewingInfoFromDownloads) {
       setViewingInfoFromDownloads(false)
       setPopupMode(0)
-    } else if (popupMode == 4) {
-      setPopupMode(3)
     } else {
       setFadeOut(true)
       setTimeout(() => setShowPopup(false), 200)
@@ -565,9 +562,7 @@ export default function RootLayout ({
                       ) : popupMode === 1 ? (
                         <DownloadsPopup />
                       ) : popupMode === 2 ? (
-                        <ManagingVersionPopup />
-                      ) : popupMode === 3 ? (
-                        <VersionInfoPopup />
+                        <VersionVersionPopup />
                       ) : null}
                     </div>
                   </div>

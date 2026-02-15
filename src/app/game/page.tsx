@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ask, message } from '@tauri-apps/plugin-dialog'
+import { ask } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { writeVersionsConfig } from '@/lib/BazookaManager'
 import { openFolder } from '@/lib/Util'
@@ -226,10 +226,60 @@ export default function Installs () {
                         entry
                       )
                     ) {
-                      await message(
-                        "Can't launch game. Need revision update.",
-                        { title: 'Error launching game', kind: 'error' }
+                      const answer = await ask(
+                        'Before proceeding, if you do not want your installation directory wiped just yet, please backup the files to another directory. When you click "Yes", it will be wiped. Click "No" if you want to open the installation folder instead.',
+                        {
+                          title: 'Revision Update',
+                          kind: 'warning'
+                        }
                       )
+                      if (answer) {
+                        const answer2 = await ask(
+                          'Are you sure you want to update? If you did not read the last popup, please go back and read it.',
+                          {
+                            title: 'Revision Update',
+                            kind: 'warning'
+                          }
+                        )
+                        if (!answer2) return
+
+                        //open downloads popup
+                        setPopupMode(1)
+                        setShowPopup(true)
+                        setFadeOut(false)
+
+                        //uninstall
+                        setDownloadedVersionsConfig(prev => {
+                          if (!prev) return prev
+                          const updatedList = Object.fromEntries(
+                            Object.entries(prev.list).filter(
+                              ([k]) => k !== entry
+                            )
+                          )
+                          const updatedConfig = {
+                            ...prev,
+                            list: updatedList
+                          }
+                          writeVersionsConfig(updatedConfig)
+                          return updatedConfig
+                        })
+
+                        if (
+                          await exists('game/' + entry, {
+                            baseDir: BaseDirectory.AppLocalData
+                          })
+                        )
+                          await remove('game/' + entry, {
+                            baseDir: BaseDirectory.AppLocalData,
+                            recursive: true
+                          })
+
+                        //reinstall
+                        setSelectedVersionList([entry])
+                        downloadVersions([entry])
+                      } else {
+                        openFolder(entry)
+                      }
                       return
                     }
                     const verInfo = getVersionInfo(entry)
@@ -305,95 +355,6 @@ export default function Installs () {
                         <FontAwesomeIcon icon={faWarning} color='#ffc800' />
                         <p>Needs revision update!</p>
                       </div>
-                    </div>
-
-                    <div className='flex gap-2 absolute right-0 bottom-0'>
-                      <button
-                        className='button'
-                        onClick={e => {
-                          e.stopPropagation()
-                          setManagingVersion(entry)
-                          setPopupMode(3)
-                          setShowPopup(true)
-                          setFadeOut(false)
-                        }}
-                        hidden={needsRevisionUpdate(
-                          getVersionInfo(entry)?.lastRevision,
-                          entry
-                        )}
-                        title='Click to view version info'
-                      >
-                        View Info
-                      </button>
-                      <button
-                        className='button'
-                        onClick={async e => {
-                          e.stopPropagation()
-                          const answer = await ask(
-                            'Before proceeding, if you do not want your installation directory wiped just yet, please backup the files to another directory. When you click "Yes", it will be wiped. Click "No" if you want to open the installation folder instead.',
-                            {
-                              title: 'Revision Update',
-                              kind: 'warning'
-                            }
-                          )
-                          if (answer) {
-                            const answer2 = await ask(
-                              'Are you sure you want to update? If you did not read the last popup, please go back and read it.',
-                              {
-                                title: 'Revision Update',
-                                kind: 'warning'
-                              }
-                            )
-                            if (!answer2) return
-
-                            //open downloads popup
-                            setPopupMode(1)
-                            setShowPopup(true)
-                            setFadeOut(false)
-
-                            //uninstall
-                            setDownloadedVersionsConfig(prev => {
-                              if (!prev) return prev
-                              const updatedList = Object.fromEntries(
-                                Object.entries(prev.list).filter(
-                                  ([k]) => k !== entry
-                                )
-                              )
-                              const updatedConfig = {
-                                ...prev,
-                                list: updatedList
-                              }
-                              writeVersionsConfig(updatedConfig)
-                              return updatedConfig
-                            })
-
-                            if (
-                              await exists('game/' + entry, {
-                                baseDir: BaseDirectory.AppLocalData
-                              })
-                            )
-                              await remove('game/' + entry, {
-                                baseDir: BaseDirectory.AppLocalData,
-                                recursive: true
-                              })
-
-                            //reinstall
-                            setSelectedVersionList([entry])
-                            downloadVersions([entry])
-                          } else {
-                            openFolder(entry)
-                          }
-                        }}
-                        hidden={
-                          !needsRevisionUpdate(
-                            getVersionInfo(entry)?.lastRevision,
-                            entry
-                          )
-                        }
-                        title={'Click to update the game'}
-                      >
-                        Update
-                      </button>
                     </div>
                   </div>
                 </div>

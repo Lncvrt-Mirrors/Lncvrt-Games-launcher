@@ -58,7 +58,7 @@ export default function DownloadsPopup () {
                       v.hash_checking ? 'text-blue-300' : 'text-green-300'
                     } inline-block w-full text-center`}
                   >
-                    {v.hash_checking ? 'Checking hash' : 'Finishing'}
+                    {v.hash_checking ? 'Verifying file integerty' : 'Finishing'}
                     ...
                   </span>
                 ) : (

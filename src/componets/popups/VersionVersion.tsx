@@ -14,24 +14,34 @@ import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
 import prettyBytes from 'pretty-bytes'
 import { message } from '@tauri-apps/plugin-dialog'
+import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
+import { writeVersionsConfig } from '@/lib/BazookaManager'
+import { openFolder } from '@/lib/Util'
 
-export default function VersionInfoPopup () {
+export default function VersionVersionPopup () {
   const {
     getGameInfo,
     getVersionInfo,
     managingVersion,
     downloadedVersionsConfig,
-    viewingInfoFromDownloads
+    viewingInfoFromDownloads,
+    setManagingVersion,
+    closePopup,
+    setDownloadedVersionsConfig,
+    setPopupMode,
+    setSelectedVersionList,
+    downloadVersions
   } = useGlobal()
   const [versionSize, setVersionSize] = useState<number>(0)
 
   useEffect(() => {
+    if (viewingInfoFromDownloads) return
     invoke<string>('folder_size', {
       version: managingVersion
     }).then(size => {
       setVersionSize(Number(size))
     })
-  }, [managingVersion, setVersionSize])
+  }, [managingVersion, setVersionSize, viewingInfoFromDownloads])
 
   if (!managingVersion || !downloadedVersionsConfig) return <></>
 
@@ -40,9 +50,7 @@ export default function VersionInfoPopup () {
 
   return (
     <>
-      <p className='text-xl text-center'>
-        Viewing info for {versionInfo?.displayName}
-      </p>
+      <p className='text-xl text-center'>Viewing {versionInfo?.displayName}</p>
       <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
         <div
           className='entry-info-item btntheme2'
@@ -86,12 +94,12 @@ export default function VersionInfoPopup () {
         </div>
         <div
           className='entry-info-item btntheme2'
-          hidden={viewingInfoFromDownloads || versionSize === null}
+          hidden={viewingInfoFromDownloads}
         >
           <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
           <p>
             Size on disk:{' '}
-            {versionSize > 0
+            {versionSize && versionSize > 0
               ? prettyBytes(versionSize, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
@@ -99,7 +107,10 @@ export default function VersionInfoPopup () {
               : 'N/A'}
           </p>
         </div>
-        <div className='entry-info-item btntheme2' hidden={!versionInfo}>
+        <div
+          className='entry-info-item btntheme2'
+          hidden={!viewingInfoFromDownloads}
+        >
           <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
           <p>
             Size when downloaded (zipped):{' '}
@@ -124,6 +135,88 @@ export default function VersionInfoPopup () {
         >
           <p>View Changelog</p>
           <FontAwesomeIcon icon={faArrowUpRightFromSquare} color='lightgray' />
+        </div>
+        <div
+          className='entry-info-item btntheme2'
+          onClick={async () => openFolder(managingVersion)}
+          title="Click to browse the game's files."
+          hidden={viewingInfoFromDownloads}
+        >
+          Open Folder
+          <FontAwesomeIcon icon={faArrowUpRightFromSquare} color='lightgray' />
+        </div>
+        <div
+          className='entry-info-item btntheme2'
+          onClick={async () => {
+            closePopup()
+
+            setDownloadedVersionsConfig(prev => {
+              if (!prev) return prev
+              const updatedList = Object.fromEntries(
+                Object.entries(prev.list).filter(([k]) => k !== managingVersion)
+              )
+              const updatedConfig = {
+                ...prev,
+                list: updatedList
+              }
+              writeVersionsConfig(updatedConfig)
+              return updatedConfig
+            })
+
+            if (
+              await exists('game/' + managingVersion, {
+                baseDir: BaseDirectory.AppLocalData
+              })
+            )
+              await remove('game/' + managingVersion, {
+                baseDir: BaseDirectory.AppLocalData,
+                recursive: true
+              })
+          }}
+          title='Click to uninstall this game. This will NOT remove any progress or any save files.'
+          hidden={viewingInfoFromDownloads}
+        >
+          Uninstall
+        </div>
+        <div
+          className='entry-info-item btntheme2'
+          onClick={async () => {
+            //change popup to downloads
+            setManagingVersion(null)
+            setPopupMode(1)
+
+            //uninstall
+            setDownloadedVersionsConfig(prev => {
+              if (!prev) return prev
+              const updatedList = Object.fromEntries(
+                Object.entries(prev.list).filter(([k]) => k !== managingVersion)
+              )
+              const updatedConfig = {
+                ...prev,
+                list: updatedList
+              }
+              writeVersionsConfig(updatedConfig)
+              return updatedConfig
+            })
+
+            if (
+              await exists('game/' + managingVersion, {
+                baseDir: BaseDirectory.AppLocalData
+              })
+            )
+              await remove('game/' + managingVersion, {
+                baseDir: BaseDirectory.AppLocalData,
+                recursive: true
+              })
+
+            //reinstall
+            setSelectedVersionList([managingVersion])
+            downloadVersions([managingVersion])
+          }}
+          title="Click to reinstall this game. This will NOT remove any progress or any save files. This WILL uninstall any modifications to the game's executable files."
+          hidden={viewingInfoFromDownloads}
+        >
+          Reinstall
         </div>
       </div>
     </>

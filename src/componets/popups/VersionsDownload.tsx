@@ -66,7 +66,7 @@ export default function VersionsDownloadPopup () {
               onClick={() => {
                 setManagingVersion(v.id)
                 setViewingInfoFromDownloads(true)
-                setPopupMode(3)
+                setPopupMode(2)
               }}
               title='Click to view version info'
             >
