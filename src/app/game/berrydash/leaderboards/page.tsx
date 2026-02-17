@@ -257,11 +257,17 @@ export default function BerryDashLeaderboards () {
                       <Image
                         src={
                           !item.customIcon
-                            ? `https://games-r2.lncvrt.xyz/game-assets/berrydash/icons/bird_${
+                            ? `https://games.lncvrt.xyz/api/berrydash/render-icon?icon=${
                                 item.icon === 1
                                   ? GetIconForUser(item.id)
                                   : item.icon
-                              }.png`
+                              }&overlay=${item.overlay}&birdR=${
+                                item.birdColor[0]
+                              }&birdG=${item.birdColor[1]}&birdB=${
+                                item.birdColor[2]
+                              }&overlayR=${item.overlayColor[0]}&overlayG=${
+                                item.overlayColor[1]
+                              }&overlayB=${item.overlayColor[2]}`
                             : `https://games.lncvrt.xyz/api/berrydash/icon-marketplace/icon?id=${item.customIcon}&raw=true`
                         }
                         className='pointer-events-none'
