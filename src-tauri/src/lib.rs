@@ -27,11 +27,10 @@ use std::os::unix::fs::PermissionsExt;
 #[allow(unused)]
 fn is_running_by_path(path: &Path) -> bool {
     let sys = System::new_all();
-    let target = path.canonicalize().ok();
-    if target.is_none() {
-        return false;
-    }
-    let target = target.unwrap();
+    let target = match path.canonicalize() {
+        Ok(t) => t,
+        Err(_) => return false,
+    };
     sys.processes().values().any(|proc| {
         proc.exe()
             .and_then(|exe| exe.canonicalize().ok())
@@ -95,12 +94,10 @@ async fn unzip_to_dir(zip_path: PathBuf, out_dir: PathBuf) -> String {
 
 #[tauri::command]
 fn folder_size(app: AppHandle, version: String) -> String {
-    let path = app
-        .path()
-        .app_local_data_dir()
-        .unwrap()
-        .join("game")
-        .join(&version);
+    let path = match app.path().app_local_data_dir() {
+        Ok(p) => p.join("game").join(&version),
+        Err(_) => return "-1".to_string(),
+    };
     fn inner(path: &Path) -> u64 {
         let mut size = 0;
         if let Ok(entries) = fs::read_dir(path) {
@@ -146,8 +143,14 @@ async fn download(
     let mut downloaded: u64 = 0;
     let mut stream = resp.bytes_stream();
 
-    let downloads_path = app.path().app_local_data_dir().unwrap().join("downloads");
-    let game_path = app.path().app_local_data_dir().unwrap().join("game");
+    let downloads_path = match app.path().app_local_data_dir() {
+        Ok(p) => p.join("downloads"),
+        Err(_) => return "-1".to_string(),
+    };
+    let game_path = match app.path().app_local_data_dir() {
+        Ok(p) => p.join("game"),
+        Err(_) => return "-1".to_string(),
+    };
 
     let download_part_path = downloads_path.join(format!("{}.part", name));
     let download_zip_path = downloads_path.join(format!("{}.zip", name));
@@ -161,9 +164,10 @@ async fn download(
         let _ = tokio::fs::remove_dir_all(&game_path.join(name.clone())).await;
     }
     let _ = tokio::fs::create_dir_all(&game_path.join(&name)).await;
-    let mut file = tokio::fs::File::create(download_part_path.clone())
-        .await
-        .unwrap();
+    let mut file = match tokio::fs::File::create(download_part_path.clone()).await {
+        Ok(f) => f,
+        Err(_) => return "-1".to_string(),
+    };
 
     let start = Instant::now();
 
@@ -195,32 +199,34 @@ async fn download(
             0.0
         };
 
-        app.emit(
+        let _ = app.emit(
             "download-progress",
             format!(
                 "{}:{:.8}:{}:{}:{:.2}",
                 &name, progress, downloaded, speed, eta_secs
             ),
-        )
-        .unwrap();
+        );
     }
 
     if total_size > 0 && downloaded < total_size {
         return "-1".to_string();
     }
 
-    app.emit("download-hash-checking", format!("{}", &name))
-        .unwrap();
+    let _ = app.emit("download-hash-checking", format!("{}", &name));
 
     let download_hash = {
-        let mut file = tokio::fs::File::open(download_part_path.clone())
-            .await
-            .unwrap();
+        let mut file = match tokio::fs::File::open(download_part_path.clone()).await {
+            Ok(f) => f,
+            Err(_) => return "-1".to_string(),
+        };
         let mut hasher = Sha512::new();
         {
             let mut buffer = [0; 8192];
             loop {
-                let bytes_read = file.read(&mut buffer).await.unwrap();
+                let bytes_read = match file.read(&mut buffer).await {
+                    Ok(n) => n,
+                    Err(_) => return "-1".to_string(),
+                };
                 if bytes_read == 0 {
                     break;
                 }
@@ -232,21 +238,16 @@ async fn download(
     };
 
     if hash != download_hash {
-        tokio::fs::remove_file(download_part_path.clone())
-            .await
-            .unwrap();
+        let _ = tokio::fs::remove_file(download_part_path.clone()).await;
         return "-1".to_string();
     }
-    app.emit("download-finishing", format!("{}", &name))
-        .unwrap();
+    let _ = app.emit("download-finishing", format!("{}", &name));
 
-    tokio::fs::rename(download_part_path.clone(), download_zip_path.clone())
-        .await
-        .unwrap();
+    if let Err(_) = tokio::fs::rename(download_part_path.clone(), download_zip_path.clone()).await {
+        return "-1".to_string();
+    }
     let unzip_res = unzip_to_dir(download_zip_path.clone(), game_path.join(&name)).await;
-    tokio::fs::remove_file(download_zip_path.clone())
-        .await
-        .unwrap();
+    let _ = tokio::fs::remove_file(download_zip_path.clone()).await;
     if unzip_res == "-1" {
         return "-1".to_string();
     }
@@ -264,12 +265,10 @@ fn launch_game(
     use_wine: bool,
     wine_command: String,
 ) {
-    let game_folder = app
-        .path()
-        .app_local_data_dir()
-        .unwrap()
-        .join("game")
-        .join(&name);
+    let game_folder = match app.path().app_local_data_dir() {
+        Ok(p) => p.join("game").join(&name),
+        Err(_) => return,
+    };
     if !game_folder.exists() {
         return;
     }
@@ -301,28 +300,31 @@ fn launch_game(
             let quoted_path = format!("\"{}\"", exe_path.to_string_lossy());
             let cmd = wine_command.replace("%path%", &quoted_path);
 
-            Command::new("bash")
+            if let Err(_) = Command::new("bash")
                 .arg("-c")
                 .arg(cmd)
                 .current_dir(&game_folder)
-                .spawn()
-                .unwrap();
+                .spawn() {
+                eprintln!("Failed to launch game with Wine");
+            }
 
             return;
         }
     }
 
     if platform() == "macos" {
-        Command::new("open")
+        if let Err(_) = Command::new("open")
             .arg(&executable)
             .current_dir(&game_folder)
-            .spawn()
-            .unwrap();
+            .spawn() {
+            eprintln!("Failed to launch game on macOS");
+        }
     } else {
-        Command::new(&exe_path)
+        if let Err(_) = Command::new(&exe_path)
             .current_dir(&game_folder)
-            .spawn()
-            .unwrap();
+            .spawn() {
+            eprintln!("Failed to launch game");
+        }
     }
 }
 
@@ -350,10 +352,9 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            let _ = app
-                .get_webview_window("main")
-                .expect("no main window")
-                .set_focus();
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_focus();
+            }
         }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -364,8 +365,11 @@ pub fn run() {
         .setup(|app| {
             #[cfg(target_os = "windows")]
             {
-                let main_window = app.get_webview_window("main").unwrap();
-                main_window.create_overlay_titlebar().unwrap();
+                if let Some(main_window) = app.get_webview_window("main") {
+                    if let Err(e) = main_window.create_overlay_titlebar() {
+                        eprintln!("Failed to create overlay titlebar: {:?}", e);
+                    }
+                }
             }
             Ok(())
         })
