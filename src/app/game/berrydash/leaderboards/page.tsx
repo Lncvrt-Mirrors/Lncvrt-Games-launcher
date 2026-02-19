@@ -270,11 +270,10 @@ export default function BerryDashLeaderboards () {
                               }&overlayB=${item.overlayColor[2]}`
                             : `https://games.lncvrt.xyz/api/berrydash/icon-marketplace/icon?id=${item.customIcon}&raw=true`
                         }
-                        className='pointer-events-none'
                         width={48}
                         height={48}
                         alt=''
-                        unoptimized
+                        className='pointer-events-none scale-x-[-1]'
                       />
                       <p>
                         {item.username} (#{index + 1})
