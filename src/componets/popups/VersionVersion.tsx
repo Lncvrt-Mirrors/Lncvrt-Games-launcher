@@ -109,21 +109,6 @@ export default function VersionVersionPopup () {
         </div>
         <div
           className='entry-info-item btntheme2'
-          hidden={!viewingInfoFromDownloads}
-        >
-          <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
-          <p>
-            Size when downloaded (zipped):{' '}
-            {versionInfo
-              ? prettyBytes(versionInfo.size, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })
-              : 'Loading...'}
-          </p>
-        </div>
-        <div
-          className='entry-info-item btntheme2'
           onClick={async () => {
             if (!versionInfo) return
             await message(atob(versionInfo.changelog), {

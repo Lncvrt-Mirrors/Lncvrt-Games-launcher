@@ -139,6 +139,7 @@ async fn download(
         }
     };
     let total_size = resp.content_length().unwrap_or(0);
+    let _ = app.emit("download-size", format!("{}:{}", &name, &total_size));
 
     let mut downloaded: u64 = 0;
     let mut stream = resp.bytes_stream();

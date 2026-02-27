@@ -181,6 +181,21 @@ export default function RootLayout ({
   useEffect(() => {
     let unlistenProgress: (() => void) | null = null
 
+    listen<string>('download-size', event => {
+      const [displayName, sizeStr] = event.payload.split(':')
+      const size = Number(sizeStr)
+      setDownloadProgress(prev => {
+        const i = prev.findIndex(d => d.version === displayName)
+        if (i === -1) return prev
+        const copy = [...prev]
+        copy[i] = {
+          ...copy[i],
+          size
+        }
+        return copy
+      })
+    }).then(f => (unlistenProgress = f))
+
     listen<string>('download-progress', event => {
       const [displayName, progStr, totalSizeStr, speedStr, etaSecsStr] =
         event.payload.split(':')
@@ -285,7 +300,18 @@ export default function RootLayout ({
 
       const newDownloads = newVersions.map(
         version =>
-          new DownloadProgress(version, 0, 0, false, true, false, false, 0, 0)
+          new DownloadProgress(
+            version,
+            0,
+            0,
+            false,
+            true,
+            false,
+            false,
+            0,
+            0,
+            0
+          )
       )
 
       setDownloadProgress(prev => [...prev, ...newDownloads])
@@ -322,17 +348,33 @@ export default function RootLayout ({
         prev.map(d => (d.version === versionId ? { ...d, queued: false } : d))
       )
 
-      try {
-        await axios.get(
-          'https://games.lncvrt.xyz/api/launcher/download?id=' + info.id
+      const downloadInfoRequest = await axios.get(
+        'https://games.lncvrt.xyz/api/launcher/download?gameId=' +
+          info.id +
+          '&downloadId=' +
+          info.download
+      )
+      if (!downloadInfoRequest.data.success) {
+        setDownloadProgress(prev =>
+          prev.map(d =>
+            d.version === versionId
+              ? { ...d, queued: false, failed: true, progress: 0 }
+              : d
+          )
         )
-      } catch {}
+        if (normalConfig?.settings.allowNotifications)
+          await notifyUser(
+            'Download Failed',
+            `The download for version ${info.displayName} has failed.`
+          )
+        return
+      }
 
       const res = await invoke<string>('download', {
-        url: info.downloadUrl,
+        url: downloadInfoRequest.data.data.url,
         name: info.id,
         executable: info.executable,
-        hash: info.sha512sum
+        hash: downloadInfoRequest.data.data.hash
       })
 
       if (res === '1') {

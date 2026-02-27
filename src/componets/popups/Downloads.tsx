@@ -70,7 +70,7 @@ export default function DownloadsPopup () {
                         maximumFractionDigits: 1
                       })}{' '}
                       of{' '}
-                      {prettyBytes(getVersionInfo(v.version)?.size ?? 0, {
+                      {prettyBytes(v.size, {
                         minimumFractionDigits: 1,
                         maximumFractionDigits: 1
                       })}{' '}

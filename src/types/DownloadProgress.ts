@@ -8,6 +8,7 @@ export class DownloadProgress {
     public hash_checking: boolean,
     public finishing: boolean,
     public speed: number,
+    public size: number,
     public etaSecs: number
   ) {}
 }
