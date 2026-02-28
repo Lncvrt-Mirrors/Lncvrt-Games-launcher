@@ -131,56 +131,98 @@ async fn download(
     executable: String,
     hash: String,
 ) -> String {
+    println!("[download] Starting download for '{}' from '{}'", name, url);
+
     let client = reqwest::Client::new();
     let resp = match client.get(&url).send().await {
-        Ok(r) => r,
-        Err(_) => {
+        Ok(r) => {
+            println!("[download] HTTP request succeeded, status: {}", r.status());
+            r
+        }
+        Err(e) => {
+            println!("[download] ERROR: HTTP request failed: {}", e);
             return "-1".to_string();
         }
     };
+
     let total_size = resp.content_length().unwrap_or(0);
+    println!("[download] Content-Length: {} bytes ({:.2} MB)", total_size, total_size as f64 / 1_048_576.0);
     let _ = app.emit("download-size", format!("{}:{}", &name, &total_size));
 
     let mut downloaded: u64 = 0;
     let mut stream = resp.bytes_stream();
 
     let downloads_path = match app.path().app_local_data_dir() {
-        Ok(p) => p.join("downloads"),
-        Err(_) => return "-1".to_string(),
+        Ok(p) => {
+            let path = p.join("downloads");
+            println!("[download] Downloads path: {:?}", path);
+            path
+        }
+        Err(e) => {
+            println!("[download] ERROR: Failed to resolve app_local_data_dir: {}", e);
+            return "-1".to_string();
+        }
     };
     let game_path = match app.path().app_local_data_dir() {
-        Ok(p) => p.join("game"),
-        Err(_) => return "-1".to_string(),
+        Ok(p) => {
+            let path = p.join("game");
+            println!("[download] Game path: {:?}", path);
+            path
+        }
+        Err(e) => {
+            println!("[download] ERROR: Failed to resolve game path: {}", e);
+            return "-1".to_string();
+        }
     };
 
     let download_part_path = downloads_path.join(format!("{}.part", name));
     let download_zip_path = downloads_path.join(format!("{}.zip", name));
+    println!("[download] Part file: {:?}", download_part_path);
+    println!("[download] Zip file:  {:?}", download_zip_path);
 
     if download_part_path.exists() {
+        println!("[download] Stale .part file found, removing...");
         let _ = tokio::fs::remove_file(&download_part_path).await;
     }
 
+    println!("[download] Creating downloads dir (if needed): {:?}", downloads_path);
     let _ = tokio::fs::create_dir_all(&downloads_path).await;
+
     if let Ok(true) = tokio::fs::try_exists(&game_path.join(name.clone())).await {
+        println!("[download] Existing game dir found, removing: {:?}", game_path.join(&name));
         let _ = tokio::fs::remove_dir_all(&game_path.join(name.clone())).await;
     }
+
+    println!("[download] Creating game dir: {:?}", game_path.join(&name));
     let _ = tokio::fs::create_dir_all(&game_path.join(&name)).await;
+
     let mut file = match tokio::fs::File::create(download_part_path.clone()).await {
-        Ok(f) => f,
-        Err(_) => return "-1".to_string(),
+        Ok(f) => {
+            println!("[download] Created .part file successfully");
+            f
+        }
+        Err(e) => {
+            println!("[download] ERROR: Failed to create .part file: {}", e);
+            return "-1".to_string();
+        }
     };
 
     let start = Instant::now();
+    let mut chunk_count: u64 = 0;
 
     while let Ok(Some(chunk_result)) = timeout(Duration::from_secs(5), stream.next()).await {
         let chunk = match chunk_result {
             Ok(c) => c,
-            Err(_) => {
+            Err(e) => {
+                println!("[download] ERROR: Failed to read chunk #{}: {}", chunk_count, e);
                 return "-1".to_string();
             }
         };
 
-        if let Err(_) = file.write_all(&chunk).await {
+        chunk_count += 1;
+
+        if let Err(e) = file.write_all(&chunk).await {
+            println!("[download] ERROR: Failed to write chunk #{} to disk: {}", chunk_count, e);
             return "-1".to_string();
         }
 
@@ -200,6 +242,18 @@ async fn download(
             0.0
         };
 
+        if chunk_count % 50 == 0 || downloaded == total_size {
+            println!(
+                "[download] [{:.1}%] {:.2} MB / {:.2} MB | Speed: {:.1} KB/s | ETA: {:.1}s | Chunks: {}",
+                progress,
+                downloaded as f64 / 1_048_576.0,
+                total_size as f64 / 1_048_576.0,
+                speed / 1024.0,
+                eta_secs,
+                chunk_count,
+            );
+        }
+
         let _ = app.emit(
             "download-progress",
             format!(
@@ -210,49 +264,81 @@ async fn download(
     }
 
     if total_size > 0 && downloaded < total_size {
+        println!(
+            "[download] ERROR: Download incomplete — got {} of {} bytes ({:.1}% complete)",
+            downloaded,
+            total_size,
+            (downloaded as f64 / total_size as f64) * 100.0
+        );
         return "-1".to_string();
     }
 
+    println!("[download] Download complete: {} bytes in {:.2}s", downloaded, start.elapsed().as_secs_f64());
+    println!("[download] Verifying SHA-512 hash...");
     let _ = app.emit("download-hash-checking", format!("{}", &name));
 
     let download_hash = {
         let mut file = match tokio::fs::File::open(download_part_path.clone()).await {
             Ok(f) => f,
-            Err(_) => return "-1".to_string(),
+            Err(e) => {
+                println!("[download] ERROR: Failed to open .part file for hashing: {}", e);
+                return "-1".to_string();
+            }
         };
         let mut hasher = Sha512::new();
+        let mut bytes_hashed: u64 = 0;
         {
             let mut buffer = [0; 8192];
             loop {
                 let bytes_read = match file.read(&mut buffer).await {
                     Ok(n) => n,
-                    Err(_) => return "-1".to_string(),
+                    Err(e) => {
+                        println!("[download] ERROR: Failed to read file during hashing: {}", e);
+                        return "-1".to_string();
+                    }
                 };
                 if bytes_read == 0 {
                     break;
                 }
                 hasher.update(&buffer[..bytes_read]);
+                bytes_hashed += bytes_read as u64;
             }
         }
         drop(file);
+        println!("[download] Hashed {} bytes", bytes_hashed);
         format!("{:x}", hasher.finalize())
     };
 
+    println!("[download] Expected hash: {}", hash);
+    println!("[download] Computed hash: {}", download_hash);
+
     if hash != download_hash {
+        println!("[download] ERROR: Hash mismatch! File may be corrupt or tampered with.");
         let _ = tokio::fs::remove_file(download_part_path.clone()).await;
         return "-1".to_string();
     }
+
+    println!("[download] Hash verified OK");
     let _ = app.emit("download-finishing", format!("{}", &name));
 
-    if let Err(_) = tokio::fs::rename(download_part_path.clone(), download_zip_path.clone()).await {
-        return "-1".to_string();
-    }
-    let unzip_res = unzip_to_dir(download_zip_path.clone(), game_path.join(&name)).await;
-    let _ = tokio::fs::remove_file(download_zip_path.clone()).await;
-    if unzip_res == "-1" {
+    println!("[download] Renaming .part -> .zip: {:?}", download_zip_path);
+    if let Err(e) = tokio::fs::rename(download_part_path.clone(), download_zip_path.clone()).await {
+        println!("[download] ERROR: Failed to rename .part to .zip: {}", e);
         return "-1".to_string();
     }
 
+    println!("[download] Unzipping to: {:?}", game_path.join(&name));
+    let unzip_res = unzip_to_dir(download_zip_path.clone(), game_path.join(&name)).await;
+
+    println!("[download] Removing zip file: {:?}", download_zip_path);
+    let _ = tokio::fs::remove_file(download_zip_path.clone()).await;
+
+    if unzip_res == "-1" {
+        println!("[download] ERROR: Unzip failed for '{}'", name);
+        return "-1".to_string();
+    }
+
+    println!("[download] SUCCESS: '{}' downloaded, verified, and extracted", name);
     return "1".to_string();
 }
 
@@ -305,7 +391,8 @@ fn launch_game(
                 .arg("-c")
                 .arg(cmd)
                 .current_dir(&game_folder)
-                .spawn() {
+                .spawn()
+            {
                 eprintln!("Failed to launch game with Wine");
             }
 
@@ -317,13 +404,12 @@ fn launch_game(
         if let Err(_) = Command::new("open")
             .arg(&executable)
             .current_dir(&game_folder)
-            .spawn() {
+            .spawn()
+        {
             eprintln!("Failed to launch game on macOS");
         }
     } else {
-        if let Err(_) = Command::new(&exe_path)
-            .current_dir(&game_folder)
-            .spawn() {
+        if let Err(_) = Command::new(&exe_path).current_dir(&game_folder).spawn() {
             eprintln!("Failed to launch game");
         }
     }
