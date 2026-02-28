@@ -2,6 +2,7 @@ import { message } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, stat } from '@tauri-apps/plugin-fs'
 import { openPath } from '@tauri-apps/plugin-opener'
 import { join, appLocalDataDir } from '@tauri-apps/api/path'
+import { invoke } from '@tauri-apps/api/core'
 
 export const openFolder = async (name: string) => {
   const relativePath = await join('game', name)
@@ -47,4 +48,17 @@ export const formatEtaSmart = (seconds: number) => {
   const d = Math.floor(seconds / 86400)
   const h = Math.floor((seconds % 86400) / 3600)
   return `${d}d ${h}h`
+}
+
+export const verifySignature = async (body: string, signature: string) => {
+  try {
+    const result = await invoke<boolean>('verify_signature', {
+      body: body ?? '',
+      signature: signature ?? '',
+      publicKey: process.env.NEXT_PUBLIC_PUBLIC_SIGNING_KEY ?? ''
+    })
+    return Boolean(result)
+  } catch {
+    return false
+  }
 }

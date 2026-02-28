@@ -15,7 +15,6 @@ import {
 import { VersionsConfig } from '@/types/VersionsConfig'
 import { NormalConfig } from '@/types/NormalConfig'
 import { app } from '@tauri-apps/api'
-import axios from 'axios'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { GlobalProvider } from './GlobalProvider'
 import { Roboto } from 'next/font/google'
@@ -36,6 +35,8 @@ import VersionsDownloadPopup from '@/componets/popups/VersionsDownload'
 import GamesDownloadPopup from '@/componets/popups/GamesDownload'
 import DownloadsPopup from '@/componets/popups/Downloads'
 import VersionVersionPopup from '@/componets/popups/VersionVersion'
+import { fetch } from '@tauri-apps/plugin-http'
+import { verifySignature } from '@/lib/Util'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -252,11 +253,18 @@ export default function RootLayout ({
       setVersion(client)
       if (process.env.NODE_ENV === 'production') {
         try {
-          const response = await axios.get(
+          const response = await fetch(
             'https://games.lncvrt.xyz/api/launcher/latest'
           )
-          if (response.data !== client) {
-            setOutdated(true)
+          const signature = response.headers.get('x-signature') ?? ''
+          const data = await response.text()
+          if (await verifySignature(data, signature)) {
+            if (data !== client) {
+              setOutdated(true)
+              return
+            }
+          } else {
+            setLoadingText('Failed to check latest version.')
             return
           }
         } catch {
@@ -265,10 +273,17 @@ export default function RootLayout ({
         }
       }
       try {
-        const res = await axios.get(
+        const response = await fetch(
           `https://games.lncvrt.xyz/api/launcher/versions?platform=${platform()}&arch=${arch()}`
         )
-        setServerVersionList(res.data)
+        const signature = response.headers.get('x-signature') ?? ''
+        const data = await response.json()
+        if (await verifySignature(JSON.stringify(data), signature)) {
+          setServerVersionList(data)
+        } else {
+          setLoadingText('Failed to download versions list.')
+          return
+        }
       } catch {
         setLoadingText('Failed to download versions list.')
         return
@@ -348,13 +363,18 @@ export default function RootLayout ({
         prev.map(d => (d.version === versionId ? { ...d, queued: false } : d))
       )
 
-      const downloadInfoRequest = await axios.get(
+      const downloadInfoRequest = await fetch(
         'https://games.lncvrt.xyz/api/launcher/download?gameId=' +
           info.id +
           '&downloadId=' +
           info.download
       )
-      if (!downloadInfoRequest.data.success) {
+      const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
+      const data = await downloadInfoRequest.json()
+      if (
+        !(await verifySignature(JSON.stringify(data), signature)) ||
+        !data.success
+      ) {
         setDownloadProgress(prev =>
           prev.map(d =>
             d.version === versionId
@@ -371,10 +391,10 @@ export default function RootLayout ({
       }
 
       const res = await invoke<string>('download', {
-        url: downloadInfoRequest.data.data.url,
+        url: data.data.url,
         name: info.id,
         executable: info.executable,
-        hash: downloadInfoRequest.data.data.hash
+        hash: data.data.hash
       })
 
       if (res === '1') {

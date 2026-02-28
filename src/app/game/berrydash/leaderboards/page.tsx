@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { BirdColor } from '@/types/BerryDash/BirdColor'
-import axios from 'axios'
 import { GetIconForUser } from '@/lib/BerryDash'
 import Image from 'next/image'
 import './styles.css'
 import { useRouter } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
+import { fetch } from '@tauri-apps/plugin-http'
+import { verifySignature } from '@/lib/Util'
 
 interface BaseEntry {
   id: number
@@ -90,11 +91,16 @@ export default function BerryDashLeaderboards () {
   const Refresh = useCallback(async () => {
     try {
       if (selected == 3 || selected == 4) {
-        const result = await axios.get(
+        const response = await fetch(
           'https://games.lncvrt.xyz/api/berrydash/account?username='
         )
-        if (result.data.success) {
-          let accounts = result.data.data as Account[]
+        const signature = response.headers.get('x-signature') ?? ''
+        const data = await response.json()
+        if (
+          (await verifySignature(JSON.stringify(data), signature)) &&
+          data.success
+        ) {
+          let accounts = data.data as Account[]
 
           accounts = accounts.map(acc => {
             const xp = calculateXP(
@@ -114,9 +120,9 @@ export default function BerryDashLeaderboards () {
           accounts.sort((a, b) => (b.xp > a.xp ? 1 : b.xp < a.xp ? -1 : 0))
 
           setEntries(accounts)
-        }
+        } else console.log('Failed')
       } else {
-        const result = await axios.get(
+        const response = await fetch(
           'https://games.lncvrt.xyz/api/berrydash/leaderboard/' +
             (selected == 0
               ? 'score'
@@ -128,9 +134,13 @@ export default function BerryDashLeaderboards () {
               ? 'legacy'
               : 'total')
         )
-        if (result.data.success) {
-          setEntries(result.data.data as LeaderboardEntry[])
-        }
+        const signature = response.headers.get('x-signature') ?? ''
+        const data = await response.json()
+        if (
+          (await verifySignature(JSON.stringify(data), signature)) &&
+          data.success
+        )
+          setEntries(data.data as LeaderboardEntry[])
       }
     } catch {
       setEntries([])

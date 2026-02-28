@@ -1,4 +1,7 @@
+use base64::{Engine as _, engine::general_purpose};
 use futures_util::stream::StreamExt;
+use openssl::pkey::PKey;
+use openssl::sign::Verifier;
 use sha2::{Digest, Sha512};
 use std::fs;
 use std::path::Path;
@@ -415,10 +418,33 @@ fn launch_game(
     }
 }
 
+#[tauri::command]
+fn verify_signature(body: String, signature: String, public_key: String) -> bool {
+    let Ok(pem) = general_purpose::STANDARD.decode(public_key) else {
+        return false;
+    };
+    let Ok(pubkey) = PKey::public_key_from_pem(&pem) else {
+        return false;
+    };
+    let Ok(sig) = general_purpose::STANDARD.decode(signature) else {
+        return false;
+    };
+
+    let mut verifier = match Verifier::new_without_digest(&pubkey) {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
+
+    verifier
+        .verify_oneshot(&sig, body.as_bytes())
+        .unwrap_or(false)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[allow(unused_variables)]
     tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
         .plugin(
             tauri_plugin_prevent_default::Builder::new()
                 .with_flags(
@@ -448,7 +474,12 @@ pub fn run() {
         .plugin(tauri_plugin_decorum::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![download, launch_game, folder_size])
+        .invoke_handler(tauri::generate_handler![
+            download,
+            launch_game,
+            folder_size,
+            verify_signature
+        ])
         .setup(|app| {
             #[cfg(target_os = "windows")]
             {

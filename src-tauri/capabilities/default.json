@@ -38,6 +38,20 @@
       "allow": [
         { "path": "$APPLOCALDATA/game/**" }
       ]
+    },
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "https://games.lncvrt.xyz/api/launcher/latest" },
+        { "url": "https://games.lncvrt.xyz/api/launcher/versions" },
+        { "url": "https://games.lncvrt.xyz/api/launcher/download" },
+        { "url": "https://games.lncvrt.xyz/api/berrydash/account" },
+        { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/score" },
+        { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/berry" },
+        { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/coin" },
+        { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/legacy" },
+        { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/total" }
+      ]
     }
   ]
 }
