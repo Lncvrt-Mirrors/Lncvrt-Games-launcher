@@ -143,13 +143,17 @@ async fn download(
             r
         }
         Err(e) => {
-            println!("[download] ERROR: HTTP request failed: {}", e);
+            println!("[download] ERROR: HTTP request failed: {:?}", e);
             return "-1".to_string();
         }
     };
 
     let total_size = resp.content_length().unwrap_or(0);
-    println!("[download] Content-Length: {} bytes ({:.2} MB)", total_size, total_size as f64 / 1_048_576.0);
+    println!(
+        "[download] Content-Length: {} bytes ({:.2} MB)",
+        total_size,
+        total_size as f64 / 1_048_576.0
+    );
     let _ = app.emit("download-size", format!("{}:{}", &name, &total_size));
 
     let mut downloaded: u64 = 0;
@@ -162,7 +166,10 @@ async fn download(
             path
         }
         Err(e) => {
-            println!("[download] ERROR: Failed to resolve app_local_data_dir: {}", e);
+            println!(
+                "[download] ERROR: Failed to resolve app_local_data_dir: {}",
+                e
+            );
             return "-1".to_string();
         }
     };
@@ -188,11 +195,17 @@ async fn download(
         let _ = tokio::fs::remove_file(&download_part_path).await;
     }
 
-    println!("[download] Creating downloads dir (if needed): {:?}", downloads_path);
+    println!(
+        "[download] Creating downloads dir (if needed): {:?}",
+        downloads_path
+    );
     let _ = tokio::fs::create_dir_all(&downloads_path).await;
 
     if let Ok(true) = tokio::fs::try_exists(&game_path.join(name.clone())).await {
-        println!("[download] Existing game dir found, removing: {:?}", game_path.join(&name));
+        println!(
+            "[download] Existing game dir found, removing: {:?}",
+            game_path.join(&name)
+        );
         let _ = tokio::fs::remove_dir_all(&game_path.join(name.clone())).await;
     }
 
@@ -217,7 +230,10 @@ async fn download(
         let chunk = match chunk_result {
             Ok(c) => c,
             Err(e) => {
-                println!("[download] ERROR: Failed to read chunk #{}: {}", chunk_count, e);
+                println!(
+                    "[download] ERROR: Failed to read chunk #{}: {}",
+                    chunk_count, e
+                );
                 return "-1".to_string();
             }
         };
@@ -225,7 +241,10 @@ async fn download(
         chunk_count += 1;
 
         if let Err(e) = file.write_all(&chunk).await {
-            println!("[download] ERROR: Failed to write chunk #{} to disk: {}", chunk_count, e);
+            println!(
+                "[download] ERROR: Failed to write chunk #{} to disk: {}",
+                chunk_count, e
+            );
             return "-1".to_string();
         }
 
@@ -276,7 +295,11 @@ async fn download(
         return "-1".to_string();
     }
 
-    println!("[download] Download complete: {} bytes in {:.2}s", downloaded, start.elapsed().as_secs_f64());
+    println!(
+        "[download] Download complete: {} bytes in {:.2}s",
+        downloaded,
+        start.elapsed().as_secs_f64()
+    );
     println!("[download] Verifying SHA-512 hash...");
     let _ = app.emit("download-hash-checking", format!("{}", &name));
 
@@ -284,7 +307,10 @@ async fn download(
         let mut file = match tokio::fs::File::open(download_part_path.clone()).await {
             Ok(f) => f,
             Err(e) => {
-                println!("[download] ERROR: Failed to open .part file for hashing: {}", e);
+                println!(
+                    "[download] ERROR: Failed to open .part file for hashing: {}",
+                    e
+                );
                 return "-1".to_string();
             }
         };
@@ -296,7 +322,10 @@ async fn download(
                 let bytes_read = match file.read(&mut buffer).await {
                     Ok(n) => n,
                     Err(e) => {
-                        println!("[download] ERROR: Failed to read file during hashing: {}", e);
+                        println!(
+                            "[download] ERROR: Failed to read file during hashing: {}",
+                            e
+                        );
                         return "-1".to_string();
                     }
                 };
@@ -341,7 +370,10 @@ async fn download(
         return "-1".to_string();
     }
 
-    println!("[download] SUCCESS: '{}' downloaded, verified, and extracted", name);
+    println!(
+        "[download] SUCCESS: '{}' downloaded, verified, and extracted",
+        name
+    );
     return "1".to_string();
 }
 
