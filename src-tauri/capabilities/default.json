@@ -19,6 +19,8 @@
     "core:window:allow-is-maximized",
     "core:window:allow-start-dragging",
     "core:window:allow-toggle-maximize",
+    "core:window:allow-request-user-attention",
+    "core:window:allow-set-progress-bar",
     "decorum:allow-show-snap-overlay",
     "fs:default",
     "dialog:default",

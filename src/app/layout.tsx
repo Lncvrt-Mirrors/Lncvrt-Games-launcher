@@ -37,6 +37,11 @@ import DownloadsPopup from '@/componets/popups/Downloads'
 import VersionVersionPopup from '@/componets/popups/VersionVersion'
 import { fetch } from '@tauri-apps/plugin-http'
 import { verifySignature } from '@/lib/Util'
+import {
+  getCurrentWindow,
+  ProgressBarStatus,
+  UserAttentionType
+} from '@tauri-apps/api/window'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -197,7 +202,7 @@ export default function RootLayout ({
       })
     }).then(f => (unlistenProgress = f))
 
-    listen<string>('download-progress', event => {
+    listen<string>('download-progress', async event => {
       const [displayName, progStr, totalSizeStr, speedStr, etaSecsStr] =
         event.payload.split(':')
       const prog = Number(progStr)
@@ -216,6 +221,10 @@ export default function RootLayout ({
           etaSecs
         }
         return copy
+      })
+      getCurrentWindow().setProgressBar({
+        status: ProgressBarStatus.Normal,
+        progress: Math.floor(prog)
       })
     }).then(f => (unlistenProgress = f))
 
@@ -244,7 +253,7 @@ export default function RootLayout ({
     return () => {
       unlistenProgress?.()
     }
-  }, [])
+  }, [downloadProgress])
 
   useEffect(() => {
     ;(async () => {
@@ -387,6 +396,9 @@ export default function RootLayout ({
             'Download Failed',
             `The download for version ${info.displayName} has failed.`
           )
+        await getCurrentWindow().requestUserAttention(
+          UserAttentionType.Critical
+        )
         return
       }
 
@@ -426,6 +438,9 @@ export default function RootLayout ({
             'Download Failed',
             `The download for version ${info.displayName} has failed.`
           )
+        await getCurrentWindow().requestUserAttention(
+          UserAttentionType.Critical
+        )
       }
 
       setDownloadQueue(prev => prev.slice(1))
@@ -451,6 +466,15 @@ export default function RootLayout ({
     ) {
       notifyUser('Downloads Finished', 'All downloads have finished.')
       setTimeout(() => closePopup(), 0)
+      ;(async () => {
+        await getCurrentWindow().setProgressBar({
+          status: ProgressBarStatus.None,
+          progress: 0
+        })
+        await getCurrentWindow().requestUserAttention(
+          UserAttentionType.Informational
+        )
+      })()
     }
     previousQueueLength.current = downloadQueue.length + downloadProgress.length
   }, [
