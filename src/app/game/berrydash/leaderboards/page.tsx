@@ -268,7 +268,7 @@ export default function BerryDashLeaderboards () {
                         src={
                           !item.customIcon
                             ? `https://games.lncvrt.xyz/api/berrydash/render-icon?icon=${
-                                item.icon === 1
+                                item.icon == 1
                                   ? GetIconForUser(item.id)
                                   : item.icon
                               }&overlay=${item.overlay}&birdR=${
