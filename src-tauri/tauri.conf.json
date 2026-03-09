@@ -10,6 +10,7 @@
     "frontendDist": "../out"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Lncvrt Games Launcher",
@@ -24,6 +25,13 @@
     }
   },
   "bundle": {
-    "active": false
+    "active": true,
+    "icon": ["icons/icon.ico"],
+    "targets": "nsis",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      }
+    }
   }
 }

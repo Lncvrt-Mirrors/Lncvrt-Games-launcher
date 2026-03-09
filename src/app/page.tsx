@@ -9,7 +9,6 @@ import {
   faShieldHalved,
   faWarning
 } from '@fortawesome/free-solid-svg-icons'
-import { platform } from '@tauri-apps/plugin-os'
 import { useRouter } from 'next/navigation'
 
 export default function Installs () {

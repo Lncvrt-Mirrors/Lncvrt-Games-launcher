@@ -24,11 +24,6 @@ import { Game } from '@/types/Game'
 import { listen } from '@tauri-apps/api/event'
 import { usePathname } from 'next/navigation'
 import { arch, platform } from '@tauri-apps/plugin-os'
-import { notifyUser } from '@/lib/Notifications'
-import {
-  isPermissionGranted,
-  requestPermission
-} from '@tauri-apps/plugin-notification'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 
 import VersionsDownloadPopup from '@/componets/popups/VersionsDownload'
@@ -36,11 +31,6 @@ import GamesDownloadPopup from '@/componets/popups/GamesDownload'
 import DownloadsPopup from '@/componets/popups/Downloads'
 import VersionVersionPopup from '@/componets/popups/VersionVersion'
 import { fetch } from '@tauri-apps/plugin-http'
-import {
-  getCurrentWindow,
-  ProgressBarStatus,
-  UserAttentionType
-} from '@tauri-apps/api/window'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -83,7 +73,6 @@ export default function RootLayout ({
 
   const pathname = usePathname()
   const revisionCheck = useRef(false)
-  const previousQueueLength = useRef(0)
 
   function getSpecialVersionsList (game?: number): GameVersion[] {
     if (!normalConfig || !serverVersionList) return []
@@ -237,10 +226,6 @@ export default function RootLayout ({
       setDownloadedVersionsConfig(versionsConfig)
       setNormalConfig(normalConfig)
       setLoading(false)
-
-      if (!(await isPermissionGranted())) {
-        await requestPermission()
-      }
     })()
   }, [])
 
@@ -310,14 +295,6 @@ export default function RootLayout ({
               : d
           )
         )
-        if (normalConfig?.settings.allowNotifications)
-          await notifyUser(
-            'Download Failed',
-            `The download for version ${info.displayName} has failed.`
-          )
-        await getCurrentWindow().requestUserAttention(
-          UserAttentionType.Critical
-        )
         return
       }
 
@@ -350,14 +327,6 @@ export default function RootLayout ({
               : d
           )
         )
-        if (normalConfig?.settings.allowNotifications)
-          await notifyUser(
-            'Download Failed',
-            `The download for version ${info.displayName} has failed.`
-          )
-        await getCurrentWindow().requestUserAttention(
-          UserAttentionType.Critical
-        )
       }
 
       setDownloadQueue(prev => prev.slice(1))
@@ -371,35 +340,6 @@ export default function RootLayout ({
     getVersionInfo,
     getGameInfo,
     normalConfig
-  ])
-
-  useEffect(() => {
-    if (
-      downloadQueue.length === 0 &&
-      downloadProgress.length === 0 &&
-      !isProcessingQueue &&
-      previousQueueLength.current > 0 &&
-      normalConfig?.settings.allowNotifications
-    ) {
-      notifyUser('Downloads Finished', 'All downloads have finished.')
-      setTimeout(() => closePopup(), 0)
-      ;(async () => {
-        await getCurrentWindow().setProgressBar({
-          status: ProgressBarStatus.None,
-          progress: 0
-        })
-        await getCurrentWindow().requestUserAttention(
-          UserAttentionType.Informational
-        )
-      })()
-    }
-    previousQueueLength.current = downloadQueue.length + downloadProgress.length
-  }, [
-    downloadQueue,
-    downloadProgress,
-    isProcessingQueue,
-    normalConfig,
-    closePopup
   ])
 
   useEffect(() => {

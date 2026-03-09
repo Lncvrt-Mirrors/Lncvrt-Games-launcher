@@ -4,11 +4,9 @@ import { useEffect, useState } from 'react'
 import { Setting } from '@/componets/Setting'
 import { writeNormalConfig } from '@/lib/BazookaManager'
 import { useGlobal } from '@/app/GlobalProvider'
-import { copyToClipboard } from '@/lib/Clipboard'
 import { platform } from '@tauri-apps/plugin-os'
 
 export default function Settings () {
-  const [allowNotifications, setAllowNotifications] = useState(false)
   const [alwaysShowGamesInSidebar, setAlwaysShowGamesInSidebar] =
     useState(false)
   const [useWineOnUnixWhenNeeded, setUseWineOnUnixWhenNeeded] = useState(false)
@@ -21,7 +19,6 @@ export default function Settings () {
   useEffect(() => {
     ;(async () => {
       while (normalConfig != null) {
-        setAllowNotifications(normalConfig.settings.allowNotifications)
         setAlwaysShowGamesInSidebar(
           normalConfig.settings.alwaysShowGamesInSidebar
         )
@@ -41,29 +38,6 @@ export default function Settings () {
       <p className='text-3xl ml-4 mt-4'>Settings</p>
       {loaded && (
         <div className='ml-4 mt-4 bg-(--col1) border border-(--col3) rounded-lg p-4 w-fit h-fit'>
-          <Setting
-            label='Allow sending notifications'
-            value={allowNotifications}
-            onChange={async () => {
-              if (!normalConfig) return
-              setAllowNotifications(!allowNotifications)
-              setNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  allowNotifications: !allowNotifications
-                }
-              })
-              await writeNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  allowNotifications: !allowNotifications
-                }
-              })
-            }}
-            title='This setting does as you expect, allow the launcher to send notifications for when stuff like downloading is done.'
-          />
           <Setting
             label='Always show games in sidebar'
             value={alwaysShowGamesInSidebar}
@@ -173,9 +147,6 @@ export default function Settings () {
       )}
       <p
         className='fixed bottom-1.5 right-1.5 rounded-md cursor-pointer px-1 border z-100 transition-colors btntheme1'
-        onClick={async () => {
-          await copyToClipboard(`v${version}`, normalConfig)
-        }}
         title='The current launcher version.'
       >
         v{version}

@@ -6,7 +6,6 @@ import { GetIconForUser } from '@/lib/BerryDash'
 import Image from 'next/image'
 import './styles.css'
 import { useRouter } from 'next/navigation'
-import { platform } from '@tauri-apps/plugin-os'
 import { fetch } from '@tauri-apps/plugin-http'
 
 interface BaseEntry {
