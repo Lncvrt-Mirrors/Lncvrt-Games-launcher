@@ -4,15 +4,11 @@ import {
   faArrowUpRightFromSquare,
   faCheck,
   faCode,
-  faHardDrive,
   faShieldHalved,
   faWarning
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useGlobal } from '@/app/GlobalProvider'
-import { invoke } from '@tauri-apps/api/core'
-import { useEffect, useState } from 'react'
-import prettyBytes from 'pretty-bytes'
 import { message } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { writeVersionsConfig } from '@/lib/BazookaManager'
@@ -32,16 +28,6 @@ export default function VersionVersionPopup () {
     setSelectedVersionList,
     downloadVersions
   } = useGlobal()
-  const [versionSize, setVersionSize] = useState<number>(0)
-
-  useEffect(() => {
-    if (viewingInfoFromDownloads) return
-    invoke<string>('folder_size', {
-      version: managingVersion
-    }).then(size => {
-      setVersionSize(Number(size))
-    })
-  }, [managingVersion, setVersionSize, viewingInfoFromDownloads])
 
   if (!managingVersion || !downloadedVersionsConfig) return <></>
 
@@ -91,21 +77,6 @@ export default function VersionVersionPopup () {
         >
           <FontAwesomeIcon icon={faCode} color='lightgray' />
           <p>Developer: {gameInfo?.developer}</p>
-        </div>
-        <div
-          className='entry-info-item btntheme2'
-          hidden={viewingInfoFromDownloads}
-        >
-          <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
-          <p>
-            Size on disk:{' '}
-            {versionSize && versionSize > 0
-              ? prettyBytes(versionSize, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })
-              : 'N/A'}
-          </p>
         </div>
         <div
           className='entry-info-item btntheme2'

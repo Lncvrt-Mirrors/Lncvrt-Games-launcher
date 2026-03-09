@@ -17,7 +17,6 @@ import { useGlobal } from '@/app/GlobalProvider'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { getCurrentWindow } from '@tauri-apps/api/window'
 import { Lexend } from 'next/font/google'
 import React from 'react'
 
@@ -45,35 +44,7 @@ export default function Sidebar () {
 
   return (
     <aside className='sidebar'>
-      <div
-        className='macos-drag'
-        hidden={platform() != 'macos'}
-        onMouseDown={e => {
-          if (e.buttons === 1) {
-            if (e.detail === 2) {
-              getCurrentWindow().toggleMaximize()
-            } else {
-              getCurrentWindow().startDragging()
-            }
-          }
-        }}
-      ></div>
-      <div
-        className={`flex items-center h-10 w-60 ${
-          (platform() == 'windows' ? 'pl-1 pt-1' : 'pl-2 pt-2') +
-          (platform() == 'macos' ? ' mt-7' : '')
-        }`}
-        onMouseDown={e => {
-          if (platform() != 'macos') return
-          if (e.buttons === 1) {
-            if (e.detail === 2) {
-              getCurrentWindow().toggleMaximize()
-            } else {
-              getCurrentWindow().startDragging()
-            }
-          }
-        }}
-      >
+      <div className='flex items-center h-10 w-60'>
         <Image draggable={false} src={Icon} width={36} height={36} alt='' />
         <p className={`ml-1 text-[16px] whitespace-nowrap ${lexend.className}`}>
           Lncvrt Games Launcher

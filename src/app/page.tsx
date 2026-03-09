@@ -52,13 +52,7 @@ export default function Installs () {
         </button>
       </div>
       <div className='downloads-container'>
-        <div
-          className={`downloads-scroll ${
-            platform() == 'windows'
-              ? 'h-[calc(100vh-116px)]'
-              : 'h-[calc(100vh-84px)]'
-          }`}
-        >
+        <div className='downloads-scroll h-[calc(100vh-84px)]'>
           {downloadedVersionsConfig &&
           Object.keys(downloadedVersionsConfig.list).length ? (
             getListOfGames()

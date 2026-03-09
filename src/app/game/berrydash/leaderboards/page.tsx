@@ -8,7 +8,6 @@ import './styles.css'
 import { useRouter } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { fetch } from '@tauri-apps/plugin-http'
-import { verifySignature } from '@/lib/Util'
 
 interface BaseEntry {
   id: number
@@ -94,12 +93,8 @@ export default function BerryDashLeaderboards () {
         const response = await fetch(
           'https://games.lncvrt.xyz/api/berrydash/account?username='
         )
-        const signature = response.headers.get('x-signature') ?? ''
         const data = await response.json()
-        if (
-          (await verifySignature(JSON.stringify(data), signature)) &&
-          data.success
-        ) {
+        if (data.success) {
           let accounts = data.data as Account[]
 
           accounts = accounts.map(acc => {
@@ -134,13 +129,8 @@ export default function BerryDashLeaderboards () {
               ? 'legacy'
               : 'total')
         )
-        const signature = response.headers.get('x-signature') ?? ''
         const data = await response.json()
-        if (
-          (await verifySignature(JSON.stringify(data), signature)) &&
-          data.success
-        )
-          setEntries(data.data as LeaderboardEntry[])
+        if (data.success) setEntries(data.data as LeaderboardEntry[])
       }
     } catch {
       setEntries([])
@@ -186,13 +176,7 @@ export default function BerryDashLeaderboards () {
           </button>
         </div>
       </div>
-      <div
-        className={`box ${
-          platform() == 'windows'
-            ? 'h-[calc(100vh-116px)]'
-            : 'h-[calc(100vh-84px)]'
-        }`}
-      >
+      <div className='box h-[calc(100vh-84px)]'>
         {selected == -1 ? (
           <>
             <p className='text-center mt-2 text-xl'>Select a Leaderboard</p>
@@ -245,13 +229,7 @@ export default function BerryDashLeaderboards () {
           <>
             <div
               className={`flex flex-col gap-2 overflow-y-auto ${
-                selected == 1
-                  ? platform() == 'windows'
-                    ? 'h-[calc(100vh-168px)]'
-                    : 'h-[calc(100vh-136px)]'
-                  : platform() == 'windows'
-                  ? 'h-[calc(100vh-128px)]'
-                  : 'h-[calc(100vh-96px)]'
+                selected == 1 ? 'h-[calc(100vh-136px)]' : 'h-[calc(100vh-96px)]'
               } px-1`}
             >
               {entries.map((item, index) => {

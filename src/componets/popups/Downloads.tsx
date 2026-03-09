@@ -1,7 +1,4 @@
 import { useGlobal } from '@/app/GlobalProvider'
-import prettyBytes from 'pretty-bytes'
-import ProgressBar from '../ProgressBar'
-import { formatEtaSmart } from '@/lib/Util'
 
 export default function DownloadsPopup () {
   const {
@@ -52,36 +49,13 @@ export default function DownloadsPopup () {
                       Remove
                     </button>
                   </div>
-                ) : v.hash_checking || v.finishing ? (
-                  <span
-                    className={`${
-                      v.hash_checking ? 'text-blue-300' : 'text-green-300'
-                    } inline-block w-full text-center`}
-                  >
-                    {v.hash_checking ? 'Verifying file integerty' : 'Finishing'}
-                    ...
+                ) : v.finishing ? (
+                  <span className='text-green-300 inline-block w-full text-center'>
+                    Finishing...
                   </span>
                 ) : (
                   <div className='flex flex-col gap-1 w-full'>
-                    <span className='text-center'>
-                      Downloaded{' '}
-                      {prettyBytes(v.progressBytes, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1
-                      })}{' '}
-                      of{' '}
-                      {prettyBytes(v.size, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1
-                      })}{' '}
-                      (ETA: {formatEtaSmart(v.etaSecs)} &bull; Speed:{' '}
-                      {prettyBytes(v.speed, {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1
-                      })}
-                      /s)
-                    </span>
-                    <ProgressBar progress={v.progress} className='w-full' />
+                    <span className='text-center'>Downloading...</span>
                   </div>
                 )}
               </div>

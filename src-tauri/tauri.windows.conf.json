@@ -17,11 +17,7 @@
         "width": 1000,
         "height": 632,
         "minWidth": 875,
-        "minHeight": 532,
-        "titleBarStyle": "Overlay",
-        "hiddenTitle": true,
-        "decorations": false,
-        "shadow": true
+        "minHeight": 532
       }
     ],
     "security": {
@@ -29,7 +25,13 @@
     }
   },
   "bundle": {
-    "active": false,
-    "icon": ["icons/icon.ico"]
+    "active": true,
+    "icon": ["icons/icon.ico"],
+    "targets": "nsis",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      }
+    }
   }
 }

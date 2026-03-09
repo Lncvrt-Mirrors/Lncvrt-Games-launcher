@@ -36,7 +36,6 @@ import GamesDownloadPopup from '@/componets/popups/GamesDownload'
 import DownloadsPopup from '@/componets/popups/Downloads'
 import VersionVersionPopup from '@/componets/popups/VersionVersion'
 import { fetch } from '@tauri-apps/plugin-http'
-import { verifySignature } from '@/lib/Util'
 import {
   getCurrentWindow,
   ProgressBarStatus,
@@ -187,65 +186,13 @@ export default function RootLayout ({
   useEffect(() => {
     let unlistenProgress: (() => void) | null = null
 
-    listen<string>('download-size', event => {
-      const [displayName, sizeStr] = event.payload.split(':')
-      const size = Number(sizeStr)
-      setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === displayName)
-        if (i === -1) return prev
-        const copy = [...prev]
-        copy[i] = {
-          ...copy[i],
-          size
-        }
-        return copy
-      })
-    }).then(f => (unlistenProgress = f))
-
-    listen<string>('download-progress', async event => {
-      const [displayName, progStr, totalSizeStr, speedStr, etaSecsStr] =
-        event.payload.split(':')
-      const prog = Number(progStr)
-      const progBytes = Number(totalSizeStr)
-      const speed = Number(speedStr)
-      const etaSecs = Number(etaSecsStr)
-      setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === displayName)
-        if (i === -1) return prev
-        const copy = [...prev]
-        copy[i] = {
-          ...copy[i],
-          progress: prog,
-          progressBytes: progBytes,
-          speed,
-          etaSecs
-        }
-        return copy
-      })
-      getCurrentWindow().setProgressBar({
-        status: ProgressBarStatus.Normal,
-        progress: Math.floor(prog)
-      })
-    }).then(f => (unlistenProgress = f))
-
-    listen<string>('download-hash-checking', event => {
-      const displayName = event.payload
-      setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === displayName)
-        if (i === -1) return prev
-        const copy = [...prev]
-        copy[i] = { ...copy[i], hash_checking: true }
-        return copy
-      })
-    }).then(f => (unlistenProgress = f))
-
     listen<string>('download-finishing', event => {
       const displayName = event.payload
       setDownloadProgress(prev => {
         const i = prev.findIndex(d => d.version === displayName)
         if (i === -1) return prev
         const copy = [...prev]
-        copy[i] = { ...copy[i], hash_checking: false, finishing: true }
+        copy[i] = { ...copy[i], finishing: true }
         return copy
       })
     }).then(f => (unlistenProgress = f))
@@ -265,15 +212,9 @@ export default function RootLayout ({
           const response = await fetch(
             'https://games.lncvrt.xyz/api/launcher/latest'
           )
-          const signature = response.headers.get('x-signature') ?? ''
           const data = await response.text()
-          if (await verifySignature(data, signature)) {
-            if (data !== client) {
-              setOutdated(true)
-              return
-            }
-          } else {
-            setLoadingText('Failed to check latest version.')
+          if (data !== client) {
+            setOutdated(true)
             return
           }
         } catch {
@@ -285,14 +226,8 @@ export default function RootLayout ({
         const response = await fetch(
           `https://games.lncvrt.xyz/api/launcher/versions?platform=${platform()}&arch=${arch()}`
         )
-        const signature = response.headers.get('x-signature') ?? ''
         const data = await response.json()
-        if (await verifySignature(JSON.stringify(data), signature)) {
-          setServerVersionList(data)
-        } else {
-          setLoadingText('Failed to download versions list.')
-          return
-        }
+        setServerVersionList(data)
       } catch {
         setLoadingText('Failed to download versions list.')
         return
@@ -323,19 +258,7 @@ export default function RootLayout ({
       if (newVersions.length === 0) return
 
       const newDownloads = newVersions.map(
-        version =>
-          new DownloadProgress(
-            version,
-            0,
-            0,
-            false,
-            true,
-            false,
-            false,
-            0,
-            0,
-            0
-          )
+        version => new DownloadProgress(version, false, true, false)
       )
 
       setDownloadProgress(prev => [...prev, ...newDownloads])
@@ -378,12 +301,8 @@ export default function RootLayout ({
           '&downloadId=' +
           info.download
       )
-      const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
       const data = await downloadInfoRequest.json()
-      if (
-        !(await verifySignature(JSON.stringify(data), signature)) ||
-        !data.success
-      ) {
+      if (!data.success) {
         setDownloadProgress(prev =>
           prev.map(d =>
             d.version === versionId
@@ -404,9 +323,7 @@ export default function RootLayout ({
 
       const res = await invoke<string>('download', {
         url: data.data.url,
-        name: info.id,
-        executable: info.executable,
-        hash: data.data.hash
+        name: info.id
       })
 
       if (res === '1') {
@@ -529,17 +446,7 @@ export default function RootLayout ({
         >
           {loading ? (
             <>
-              <div
-                className='relative z-2 w-screen border-b border-b-(--col3) h-8.25 bg-(--col1)'
-                hidden={platformName != 'windows'}
-              />
-              <div
-                className={`w-screen ${
-                  platformName == 'windows'
-                    ? 'h-[calc(100vh-64px)]'
-                    : 'h-screen'
-                } flex items-center justify-center`}
-              >
+              <div className='w-screen h-screen flex items-center justify-center'>
                 {outdated ? (
                   <div className='text-center'>
                     <p className='text-8xl mb-4'>Outdated Launcher!</p>
@@ -605,10 +512,6 @@ export default function RootLayout ({
                 }}
               >
                 <Sidebar />
-                <div
-                  className='relative z-2 ml-59.75 w-[calc(100vw-239px)] border-b border-b-(--col3) h-8.25 bg-(--col1)'
-                  hidden={platformName != 'windows'}
-                />
                 <div className='relative z-0'>
                   <main className='ml-60'>{children}</main>
                 </div>

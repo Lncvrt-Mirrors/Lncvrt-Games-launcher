@@ -111,13 +111,7 @@ export default function Installs () {
         </div>
       </div>
       <div className='downloads-container'>
-        <div
-          className={`downloads-scroll ${
-            platform() == 'windows'
-              ? 'h-[calc(100vh-116px)]'
-              : 'h-[calc(100vh-84px)]'
-          }`}
-        >
+        <div className='downloads-scroll h-[calc(100vh-84px)]'>
           {category == -1 &&
             Object.entries(game.categoryNames)
               .sort(([a], [b]) => Number(b) - Number(a))
