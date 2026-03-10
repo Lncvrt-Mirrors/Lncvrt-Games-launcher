@@ -37,11 +37,7 @@ import DownloadsPopup from '@/componets/popups/Downloads'
 import VersionVersionPopup from '@/componets/popups/VersionVersion'
 import { fetch } from '@tauri-apps/plugin-http'
 import { verifySignature } from '@/lib/Util'
-import {
-  getCurrentWindow,
-  ProgressBarStatus,
-  UserAttentionType
-} from '@tauri-apps/api/window'
+import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -84,7 +80,6 @@ export default function RootLayout ({
 
   const pathname = usePathname()
   const revisionCheck = useRef(false)
-  const previousQueueLength = useRef(0)
 
   function getSpecialVersionsList (game?: number): GameVersion[] {
     if (!normalConfig || !serverVersionList) return []
@@ -221,10 +216,6 @@ export default function RootLayout ({
           etaSecs
         }
         return copy
-      })
-      getCurrentWindow().setProgressBar({
-        status: ProgressBarStatus.Normal,
-        progress: Math.floor(prog)
       })
     }).then(f => (unlistenProgress = f))
 
@@ -454,35 +445,6 @@ export default function RootLayout ({
     getVersionInfo,
     getGameInfo,
     normalConfig
-  ])
-
-  useEffect(() => {
-    if (
-      downloadQueue.length === 0 &&
-      downloadProgress.length === 0 &&
-      !isProcessingQueue &&
-      previousQueueLength.current > 0 &&
-      normalConfig?.settings.allowNotifications
-    ) {
-      notifyUser('Downloads Finished', 'All downloads have finished.')
-      setTimeout(() => closePopup(), 0)
-      ;(async () => {
-        await getCurrentWindow().setProgressBar({
-          status: ProgressBarStatus.None,
-          progress: 0
-        })
-        await getCurrentWindow().requestUserAttention(
-          UserAttentionType.Informational
-        )
-      })()
-    }
-    previousQueueLength.current = downloadQueue.length + downloadProgress.length
-  }, [
-    downloadQueue,
-    downloadProgress,
-    isProcessingQueue,
-    normalConfig,
-    closePopup
   ])
 
   useEffect(() => {
