@@ -177,6 +177,7 @@ export default function BerryDashLeaderboards () {
               if (selected == -1) router.push('/game?id=1')
               else {
                 setSelected(-1)
+                setSelectedBerryOption(0)
                 setEntries([])
               }
             }}
