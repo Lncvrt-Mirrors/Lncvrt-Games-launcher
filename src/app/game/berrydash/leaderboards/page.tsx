@@ -315,7 +315,7 @@ export default function BerryDashLeaderboards () {
             {selected == 1 && (
               <div className='flex justify-center'>
                 <select
-                  className='mt-1 bg-(--col2) border border-(--col4) rounded-md'
+                  className='mt-1.25 bg-(--col2) border border-(--col4) rounded-md'
                   value={selectedBerryOption}
                   onChange={e => setSelectedBerryOption(Number(e.target.value))}
                 >
