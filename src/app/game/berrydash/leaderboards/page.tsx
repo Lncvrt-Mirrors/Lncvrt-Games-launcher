@@ -247,8 +247,8 @@ export default function BerryDashLeaderboards () {
               className={`flex flex-col gap-2 overflow-y-auto ${
                 selected == 1
                   ? platform() == 'windows'
-                    ? 'h-[calc(100vh-168px)]'
-                    : 'h-[calc(100vh-136px)]'
+                    ? 'h-[calc(100vh-156px)]'
+                    : 'h-[calc(100vh-124px)]'
                   : platform() == 'windows'
                   ? 'h-[calc(100vh-128px)]'
                   : 'h-[calc(100vh-96px)]'
@@ -314,9 +314,9 @@ export default function BerryDashLeaderboards () {
             {selected == 1 && (
               <div className='flex justify-center'>
                 <select
+                  className='mt-1 bg-(--col2) border border-(--col4) rounded-md'
                   value={selectedBerryOption}
                   onChange={e => setSelectedBerryOption(Number(e.target.value))}
-                  className='leaderboard-select mt-0.75'
                 >
                   <option value='0'>Normal Berry</option>
                   <option value='1'>Poison Berry</option>

@@ -4,8 +4,7 @@
   @apply bg-(--col1) border border-(--col3) rounded-lg w-auto p-1;
 }
 
-.leaderboard-button,
-.leaderboard-select {
+.leaderboard-button {
   @apply bg-(--col2) hover:bg-(--col4) border border-(--col4) hover:border-(--col6) rounded-lg px-4 py-2 inline-block transition-all duration-200 cursor-pointer;
 }
 
