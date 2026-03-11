@@ -21,6 +21,7 @@ use tauri_plugin_prevent_default::Flags;
 use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
+use zip::result::ZipError;
 
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
@@ -46,20 +47,25 @@ fn should_skip(name: &str) -> bool {
         || name.ends_with(".DS_Store")
 }
 
-async fn unzip_to_dir(zip_path: PathBuf, out_dir: PathBuf) -> String {
+async fn unzip_to_dir(app: AppHandle, zip_path: PathBuf, out_dir: PathBuf, name: String) -> String {
+    let _ = app.emit("unzip-start", format!("{}", name));
     let res = tauri::async_runtime::spawn_blocking(move || {
         let file = File::open(zip_path)?;
         let mut archive = ZipArchive::new(BufReader::new(file))?;
+        let total = archive.len();
 
-        for i in 0..archive.len() {
+        for i in 0..total {
             let mut entry = archive.by_index(i)?;
-            let name = entry.name();
+            let entry_name = entry.name();
 
-            if should_skip(name) {
+            if should_skip(entry_name) {
                 continue;
             }
 
-            let outpath = out_dir.join(name);
+            let outpath = out_dir.join(entry_name);
+            if !outpath.starts_with(&out_dir) {
+                return Err(ZipError::InvalidArchive("Path traversal detected".into()));
+            }
 
             if entry.is_dir() {
                 create_dir_all(&outpath)?;
@@ -81,6 +87,8 @@ async fn unzip_to_dir(zip_path: PathBuf, out_dir: PathBuf) -> String {
                     std::fs::set_permissions(&outpath, std::fs::Permissions::from_mode(mode))?;
                 }
             }
+
+            let _ = app.emit("unzip-progress", format!("{}:{}:{}", name, i + 1, total));
         }
 
         Ok::<(), zip::result::ZipError>(())
@@ -362,7 +370,6 @@ async fn download(
     }
 
     println!("[download] Hash verified OK");
-    let _ = app.emit("download-finishing", format!("{}", &name));
 
     println!("[download] Renaming .part -> .zip: {:?}", download_zip_path);
     if let Err(e) = tokio::fs::rename(download_part_path.clone(), download_zip_path.clone()).await {
@@ -375,7 +382,13 @@ async fn download(
     }
 
     println!("[download] Unzipping to: {:?}", game_path.join(&name));
-    let unzip_res = unzip_to_dir(download_zip_path.clone(), game_path.join(&name)).await;
+    let unzip_res = unzip_to_dir(
+        app,
+        download_zip_path.clone(),
+        game_path.join(&name),
+        name.clone(),
+    )
+    .await;
 
     println!("[download] Removing zip file: {:?}", download_zip_path);
     let _ = tokio::fs::remove_file(download_zip_path.clone()).await;
@@ -391,7 +404,7 @@ async fn download(
 
     println!(
         "[download] SUCCESS: '{}' downloaded, verified, and extracted",
-        name
+        &name
     );
     let _ = window.set_progress_bar(ProgressBarState {
         status: Some(ProgressBarStatus::None),

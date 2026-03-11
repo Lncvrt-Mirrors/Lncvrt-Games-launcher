@@ -52,15 +52,20 @@ export default function DownloadsPopup () {
                       Remove
                     </button>
                   </div>
-                ) : v.hash_checking || v.finishing ? (
-                  <span
-                    className={`${
-                      v.hash_checking ? 'text-blue-300' : 'text-green-300'
-                    } inline-block w-full text-center`}
-                  >
-                    {v.hash_checking ? 'Verifying file integerty' : 'Finishing'}
-                    ...
+                ) : v.hash_checking ? (
+                  <span className='text-blue-300 inline-block w-full text-center'>
+                    Verifying file integerty...
                   </span>
+                ) : v.unzipping ? (
+                  <div className='flex flex-col gap-1 w-full'>
+                    <span className='text-center'>
+                      Unzipped {v.unzipped} / {v.unzipTotal} files
+                    </span>
+                    <ProgressBar
+                      progress={(v.unzipped / v.unzipTotal) * 100}
+                      className='w-full'
+                    />
+                  </div>
                 ) : (
                   <div className='flex flex-col gap-1 w-full'>
                     <span className='text-center'>

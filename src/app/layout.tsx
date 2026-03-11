@@ -235,13 +235,33 @@ export default function RootLayout ({
       )
 
       unlisteners.push(
-        await listen<string>('download-finishing', event => {
+        await listen<string>('unzip-start', event => {
           const displayName = event.payload
           setDownloadProgress(prev => {
             const i = prev.findIndex(d => d.version === displayName)
             if (i === -1) return prev
             const copy = [...prev]
-            copy[i] = { ...copy[i], hash_checking: false, finishing: true }
+            copy[i] = { ...copy[i], hash_checking: false, unzipping: true }
+            return copy
+          })
+        })
+      )
+
+      unlisteners.push(
+        await listen<string>('unzip-progress', async event => {
+          const [displayName, unzippedStr, unzipTotalStr] =
+            event.payload.split(':')
+          const unzipped = Number(unzippedStr)
+          const unzipTotal = Number(unzipTotalStr)
+          setDownloadProgress(prev => {
+            const i = prev.findIndex(d => d.version === displayName)
+            if (i === -1) return prev
+            const copy = [...prev]
+            copy[i] = {
+              ...copy[i],
+              unzipped,
+              unzipTotal
+            }
             return copy
           })
         })
@@ -331,8 +351,10 @@ export default function RootLayout ({
             false,
             true,
             false,
-            false,
             0,
+            0,
+            0,
+            false,
             0,
             0
           )
