@@ -22,9 +22,6 @@ use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
 
-#[cfg(target_os = "windows")]
-use tauri_plugin_decorum::WebviewWindowExt;
-
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
@@ -541,6 +538,7 @@ pub fn run() {
         .setup(|app| {
             #[cfg(target_os = "windows")]
             {
+                use tauri_plugin_decorum::WebviewWindowExt;
                 if let Some(main_window) = app.get_webview_window("main") {
                     if let Err(e) = main_window.create_overlay_titlebar() {
                         eprintln!("Failed to create overlay titlebar: {:?}", e);
