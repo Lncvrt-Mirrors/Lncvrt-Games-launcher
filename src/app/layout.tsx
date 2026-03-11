@@ -297,27 +297,6 @@ export default function RootLayout ({
           })
         })
       )
-
-      unlisteners.push(
-        await listen<string>('download-cancelled', event => {
-          const displayName = event.payload
-          setDownloadProgress(prev => {
-            const i = prev.findIndex(d => d.version === displayName)
-            if (i === -1) return prev
-            if (prev[i].canceled) {
-              return prev.filter((_, idx) => idx !== i)
-            }
-            const copy = [...prev]
-            copy[i] = {
-              ...copy[i],
-              downloading: false,
-              paused: true,
-              failed: false
-            }
-            return copy
-          })
-        })
-      )
     }
 
     setupListeners()
@@ -518,7 +497,23 @@ export default function RootLayout ({
           writeVersionsConfig(updated)
           return updated
         })
-      } else if (res !== '0') {
+      } else if (res == '0') {
+        setDownloadProgress(prev => {
+          const i = prev.findIndex(d => d.version === info.id)
+          if (i === -1) return prev
+          if (prev[i].canceled) {
+            return prev.filter((_, idx) => idx !== i)
+          }
+          const copy = [...prev]
+          copy[i] = {
+            ...copy[i],
+            downloading: false,
+            paused: true,
+            failed: false
+          }
+          return copy
+        })
+      } else if (res == '-1') {
         setDownloadProgress(prev =>
           prev.map(d =>
             d.version === versionId

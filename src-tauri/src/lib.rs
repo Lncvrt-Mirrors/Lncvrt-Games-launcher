@@ -303,7 +303,6 @@ async fn download(
                 status: Some(ProgressBarStatus::None),
                 progress: Some(0),
             });
-            let _ = app.emit("download-cancelled", format!("{}", name));
             return "0".to_string();
         }
 

@@ -5,6 +5,9 @@ import { formatEtaSmart } from '@/lib/Util'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCancel, faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { invoke } from '@tauri-apps/api/core'
+import { writeVersionsConfig } from '@/lib/BazookaManager'
+import { notifyUser } from '@/lib/Notifications'
+import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
 
 export default function DownloadsPopup () {
   const {
@@ -12,7 +15,9 @@ export default function DownloadsPopup () {
     getVersionInfo,
     setDownloadProgress,
     downloadQueue,
-    setDownloadQueue
+    setDownloadQueue,
+    normalConfig,
+    setDownloadedVersionsConfig
   } = useGlobal()
 
   return (
@@ -29,26 +34,94 @@ export default function DownloadsPopup () {
               <div className='absolute right-2 top-2 flex flex-row gap-2'>
                 <div
                   className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
-                  hidden={!v.downloading}
+                  hidden={!v.downloading && !v.paused}
                   onClick={async () => {
-                    await invoke('cancel_download', { name: v.version })
+                    if (v.downloading) {
+                      await invoke('cancel_download', { name: v.version })
+                    } else {
+                      setDownloadProgress(prev => {
+                        const i = prev.findIndex(d => d.version === v.version)
+                        if (i === -1) return prev
+                        const copy = [...prev]
+                        copy[i] = {
+                          ...copy[i],
+                          paused: false,
+                          downloading: true
+                        }
+                        return copy
+                      })
+                      const res = await invoke<string>('download', {
+                        url: v.url,
+                        name: v.version,
+                        executable: v.executable,
+                        hash: v.hash
+                      })
+
+                      if (res === '1') {
+                        setDownloadProgress(prev =>
+                          prev.filter(d => d.version !== v.version)
+                        )
+                        setDownloadedVersionsConfig(prev => {
+                          if (!prev) return prev
+
+                          const updated = {
+                            ...prev,
+                            list: {
+                              ...prev.list,
+                              [v.version]: Date.now()
+                            }
+                          }
+
+                          writeVersionsConfig(updated)
+                          return updated
+                        })
+                      } else if (res == '0') {
+                        setDownloadProgress(prev => {
+                          const i = prev.findIndex(d => d.version === v.version)
+                          if (i === -1) return prev
+                          if (prev[i].canceled) {
+                            return prev.filter((_, idx) => idx !== i)
+                          }
+                          const copy = [...prev]
+                          copy[i] = {
+                            ...copy[i],
+                            downloading: false,
+                            paused: true,
+                            failed: false
+                          }
+                          return copy
+                        })
+                      } else if (res == '-1') {
+                        setDownloadProgress(prev =>
+                          prev.map(d =>
+                            d.version === v.version
+                              ? {
+                                  ...d,
+                                  queued: false,
+                                  failed: true,
+                                  progress: 0
+                                }
+                              : d
+                          )
+                        )
+                        if (normalConfig?.settings.allowNotifications)
+                          await notifyUser(
+                            'Download Failed',
+                            `The download for version ${
+                              getVersionInfo(v.version)?.displayName
+                            } has failed.`
+                          )
+                        await getCurrentWindow().requestUserAttention(
+                          UserAttentionType.Critical
+                        )
+                      }
+                    }
                   }}
                 >
-                  <FontAwesomeIcon icon={faPause} className='w-6 h-6' />
-                </div>
-                <div
-                  className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
-                  hidden={!v.paused}
-                  onClick={async () => {
-                    await invoke<string>('download', {
-                      url: v.url,
-                      name: v.version,
-                      executable: v.executable,
-                      hash: v.hash
-                    })
-                  }}
-                >
-                  <FontAwesomeIcon icon={faPlay} className='w-6 h-6' />
+                  <FontAwesomeIcon
+                    icon={v.downloading ? faPause : faPlay}
+                    className='w-6 h-6'
+                  />
                 </div>
                 <div
                   className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
