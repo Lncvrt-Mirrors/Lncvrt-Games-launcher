@@ -1,0 +1,8 @@
+[build]
+target = "x86_64-win7-windows-msvc"
+
+[unstable]
+build-std = ["std", "panic_abort"]
+
+[toolchain]
+channel = "nightly"

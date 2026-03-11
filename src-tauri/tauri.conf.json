@@ -4,9 +4,9 @@
   "version": "1.6.5",
   "identifier": "xyz.lncvrt.games-launcher",
   "build": {
-    "beforeDevCommand": "next dev --webpack",
+    "beforeDevCommand": "bun next dev --webpack",
     "devUrl": "http://localhost:3000",
-    "beforeBuildCommand": "next build",
+    "beforeBuildCommand": "bun next build",
     "frontendDist": "../out"
   },
   "app": {
