@@ -180,71 +180,80 @@ export default function RootLayout ({
   }, [popupMode, selectedGame, pathname, viewingInfoFromDownloads])
 
   useEffect(() => {
-    let unlistenProgress: (() => void) | null = null
+    const unlisteners: (() => void)[] = []
 
-    listen<string>('download-size', event => {
-      const [displayName, sizeStr] = event.payload.split(':')
-      const size = Number(sizeStr)
-      setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === displayName)
-        if (i === -1) return prev
-        const copy = [...prev]
-        copy[i] = {
-          ...copy[i],
-          size
-        }
-        return copy
-      })
-    }).then(f => (unlistenProgress = f))
+    const setupListeners = async () => {
+      unlisteners.push(
+        await listen<string>('download-size', event => {
+          const [displayName, sizeStr] = event.payload.split(':')
+          const size = Number(sizeStr)
+          setDownloadProgress(prev => {
+            const i = prev.findIndex(d => d.version === displayName)
+            if (i === -1) return prev
+            const copy = [...prev]
+            copy[i] = { ...copy[i], size }
+            return copy
+          })
+        })
+      )
 
-    listen<string>('download-progress', async event => {
-      const [displayName, progStr, totalSizeStr, speedStr, etaSecsStr] =
-        event.payload.split(':')
-      const prog = Number(progStr)
-      const progBytes = Number(totalSizeStr)
-      const speed = Number(speedStr)
-      const etaSecs = Number(etaSecsStr)
-      setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === displayName)
-        if (i === -1) return prev
-        const copy = [...prev]
-        copy[i] = {
-          ...copy[i],
-          progress: prog,
-          progressBytes: progBytes,
-          speed,
-          etaSecs
-        }
-        return copy
-      })
-    }).then(f => (unlistenProgress = f))
+      unlisteners.push(
+        await listen<string>('download-progress', async event => {
+          const [displayName, progStr, totalSizeStr, speedStr, etaSecsStr] =
+            event.payload.split(':')
+          const prog = Number(progStr)
+          const progBytes = Number(totalSizeStr)
+          const speed = Number(speedStr)
+          const etaSecs = Number(etaSecsStr)
+          setDownloadProgress(prev => {
+            const i = prev.findIndex(d => d.version === displayName)
+            if (i === -1) return prev
+            const copy = [...prev]
+            copy[i] = {
+              ...copy[i],
+              progress: prog,
+              progressBytes: progBytes,
+              speed,
+              etaSecs
+            }
+            return copy
+          })
+        })
+      )
 
-    listen<string>('download-hash-checking', event => {
-      const displayName = event.payload
-      setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === displayName)
-        if (i === -1) return prev
-        const copy = [...prev]
-        copy[i] = { ...copy[i], hash_checking: true }
-        return copy
-      })
-    }).then(f => (unlistenProgress = f))
+      unlisteners.push(
+        await listen<string>('download-hash-checking', event => {
+          const displayName = event.payload
+          setDownloadProgress(prev => {
+            const i = prev.findIndex(d => d.version === displayName)
+            if (i === -1) return prev
+            const copy = [...prev]
+            copy[i] = { ...copy[i], hash_checking: true }
+            return copy
+          })
+        })
+      )
 
-    listen<string>('download-finishing', event => {
-      const displayName = event.payload
-      setDownloadProgress(prev => {
-        const i = prev.findIndex(d => d.version === displayName)
-        if (i === -1) return prev
-        const copy = [...prev]
-        copy[i] = { ...copy[i], hash_checking: false, finishing: true }
-        return copy
-      })
-    }).then(f => (unlistenProgress = f))
+      unlisteners.push(
+        await listen<string>('download-finishing', event => {
+          const displayName = event.payload
+          setDownloadProgress(prev => {
+            const i = prev.findIndex(d => d.version === displayName)
+            if (i === -1) return prev
+            const copy = [...prev]
+            copy[i] = { ...copy[i], hash_checking: false, finishing: true }
+            return copy
+          })
+        })
+      )
+    }
+
+    setupListeners()
 
     return () => {
-      unlistenProgress?.()
+      unlisteners.forEach(unlisten => unlisten())
     }
-  }, [downloadProgress])
+  }, [])
 
   useEffect(() => {
     ;(async () => {

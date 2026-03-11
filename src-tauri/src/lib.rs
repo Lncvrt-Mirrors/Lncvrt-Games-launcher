@@ -14,6 +14,7 @@ use std::{
     time::Duration,
 };
 use sysinfo::System;
+use tauri::window::{ProgressBarState, ProgressBarStatus};
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_os::platform;
 use tauri_plugin_prevent_default::Flags;
@@ -135,6 +136,7 @@ async fn download(
     hash: String,
 ) -> String {
     println!("[download] Starting download for '{}' from '{}'", name, url);
+    let window = app.get_webview_window("main").expect("main window missing");
 
     let client = reqwest::Client::new();
     let resp = match client.get(&url).send().await {
@@ -274,6 +276,10 @@ async fn download(
                 eta_secs,
                 chunk_count,
             );
+            let _ = window.set_progress_bar(ProgressBarState {
+                status: Some(ProgressBarStatus::Normal),
+                progress: Some(progress as u64),
+            });
         }
 
         let _ = app.emit(
@@ -292,6 +298,10 @@ async fn download(
             total_size,
             (downloaded as f64 / total_size as f64) * 100.0
         );
+        let _ = window.set_progress_bar(ProgressBarState {
+            status: Some(ProgressBarStatus::None),
+            progress: Some(0),
+        });
         return "-1".to_string();
     }
 
@@ -347,6 +357,10 @@ async fn download(
     if hash != download_hash {
         println!("[download] ERROR: Hash mismatch! File may be corrupt or tampered with.");
         let _ = tokio::fs::remove_file(download_part_path.clone()).await;
+        let _ = window.set_progress_bar(ProgressBarState {
+            status: Some(ProgressBarStatus::None),
+            progress: Some(0),
+        });
         return "-1".to_string();
     }
 
@@ -356,6 +370,10 @@ async fn download(
     println!("[download] Renaming .part -> .zip: {:?}", download_zip_path);
     if let Err(e) = tokio::fs::rename(download_part_path.clone(), download_zip_path.clone()).await {
         println!("[download] ERROR: Failed to rename .part to .zip: {}", e);
+        let _ = window.set_progress_bar(ProgressBarState {
+            status: Some(ProgressBarStatus::None),
+            progress: Some(0),
+        });
         return "-1".to_string();
     }
 
@@ -367,6 +385,10 @@ async fn download(
 
     if unzip_res == "-1" {
         println!("[download] ERROR: Unzip failed for '{}'", name);
+        let _ = window.set_progress_bar(ProgressBarState {
+            status: Some(ProgressBarStatus::None),
+            progress: Some(0),
+        });
         return "-1".to_string();
     }
 
@@ -374,6 +396,10 @@ async fn download(
         "[download] SUCCESS: '{}' downloaded, verified, and extracted",
         name
     );
+    let _ = window.set_progress_bar(ProgressBarState {
+        status: Some(ProgressBarStatus::None),
+        progress: Some(0),
+    });
     return "1".to_string();
 }
 
