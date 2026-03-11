@@ -228,7 +228,7 @@ export default function RootLayout ({
             const i = prev.findIndex(d => d.version === displayName)
             if (i === -1) return prev
             const copy = [...prev]
-            copy[i] = { ...copy[i], hash_checking: true }
+            copy[i] = { ...copy[i], hash_checking: true, downloading: false }
             return copy
           })
         })
@@ -261,6 +261,58 @@ export default function RootLayout ({
               ...copy[i],
               unzipped,
               unzipTotal
+            }
+            return copy
+          })
+        })
+      )
+
+      unlisteners.push(
+        await listen<string>('download-start', event => {
+          const displayName = event.payload
+          setDownloadProgress(prev => {
+            const i = prev.findIndex(d => d.version === displayName)
+            if (i === -1) return prev
+            const copy = [...prev]
+            copy[i] = {
+              ...copy[i],
+              downloading: true,
+              paused: false,
+              failed: false
+            }
+            return copy
+          })
+        })
+      )
+
+      unlisteners.push(
+        await listen<string>('download-stop', event => {
+          const displayName = event.payload
+          setDownloadProgress(prev => {
+            const i = prev.findIndex(d => d.version === displayName)
+            if (i === -1) return prev
+            const copy = [...prev]
+            copy[i] = { ...copy[i], downloading: false }
+            return copy
+          })
+        })
+      )
+
+      unlisteners.push(
+        await listen<string>('download-cancelled', event => {
+          const displayName = event.payload
+          setDownloadProgress(prev => {
+            const i = prev.findIndex(d => d.version === displayName)
+            if (i === -1) return prev
+            if (prev[i].canceled) {
+              return prev.filter((_, idx) => idx !== i)
+            }
+            const copy = [...prev]
+            copy[i] = {
+              ...copy[i],
+              downloading: false,
+              paused: true,
+              failed: false
             }
             return copy
           })
@@ -349,6 +401,9 @@ export default function RootLayout ({
             0,
             0,
             false,
+            false,
+            false,
+            false,
             true,
             false,
             0,
@@ -356,7 +411,10 @@ export default function RootLayout ({
             0,
             false,
             0,
-            0
+            0,
+            null,
+            null,
+            null
           )
       )
 
@@ -424,6 +482,19 @@ export default function RootLayout ({
         return
       }
 
+      setDownloadProgress(prev =>
+        prev.map(d =>
+          d.version === versionId
+            ? {
+                ...d,
+                url: data.data.url,
+                executable: info.executable,
+                hash: data.data.hash
+              }
+            : d
+        )
+      )
+
       const res = await invoke<string>('download', {
         url: data.data.url,
         name: info.id,
@@ -447,7 +518,7 @@ export default function RootLayout ({
           writeVersionsConfig(updated)
           return updated
         })
-      } else {
+      } else if (res !== '0') {
         setDownloadProgress(prev =>
           prev.map(d =>
             d.version === versionId

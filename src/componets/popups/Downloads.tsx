@@ -2,6 +2,9 @@ import { useGlobal } from '@/app/GlobalProvider'
 import prettyBytes from 'pretty-bytes'
 import ProgressBar from '../ProgressBar'
 import { formatEtaSmart } from '@/lib/Util'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCancel, faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
+import { invoke } from '@tauri-apps/api/core'
 
 export default function DownloadsPopup () {
   const {
@@ -19,7 +22,62 @@ export default function DownloadsPopup () {
         {downloadProgress.map((v, i) => {
           const queuePosition = downloadQueue.indexOf(v.version)
           return (
-            <div key={i} className='popup-entry flex flex-col justify-between'>
+            <div
+              key={i}
+              className='popup-entry flex flex-col justify-between relative'
+            >
+              <div className='absolute right-2 top-2 flex flex-row gap-2'>
+                <div
+                  className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
+                  hidden={!v.downloading}
+                  onClick={async () => {
+                    await invoke('cancel_download', { name: v.version })
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPause} className='w-6 h-6' />
+                </div>
+                <div
+                  className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
+                  hidden={!v.paused}
+                  onClick={async () => {
+                    await invoke<string>('download', {
+                      url: v.url,
+                      name: v.version,
+                      executable: v.executable,
+                      hash: v.hash
+                    })
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPlay} className='w-6 h-6' />
+                </div>
+                <div
+                  className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
+                  hidden={!v.downloading && !v.paused}
+                  onClick={async () => {
+                    if (!v.paused) {
+                      await invoke('cancel_download', { name: v.version })
+                      setDownloadProgress(prev => {
+                        const i = prev.findIndex(d => d.version === v.version)
+                        if (i === -1) return prev
+                        const copy = [...prev]
+                        copy[i] = {
+                          ...copy[i],
+                          canceled: true
+                        }
+                        return copy
+                      })
+                    } else {
+                      setDownloadProgress(prev => {
+                        const i = prev.findIndex(d => d.version === v.version)
+                        if (i === -1) return prev
+                        return prev.filter((_, idx) => idx !== i)
+                      })
+                    }
+                  }}
+                >
+                  <FontAwesomeIcon icon={faCancel} className='w-6 h-6' />
+                </div>
+              </div>
               <p className='text-2xl text-center'>
                 {getVersionInfo(v.version)?.displayName}
               </p>
