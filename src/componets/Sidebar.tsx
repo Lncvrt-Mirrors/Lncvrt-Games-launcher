@@ -153,11 +153,11 @@ export default function Sidebar () {
                     key={`${i.id}-${key}`}
                     draggable={false}
                     className={`link ${
-                      (pathname === '/game' &&
+                      ((pathname === '/game' &&
                         Number(params.get('id') || 0) == i.id) ||
-                      (i.id == 1 &&
-                        pathname === '/game/berrydash/leaderboards' &&
-                        category == Number(key))
+                        (i.id == 1 &&
+                          pathname === '/game/berrydash/leaderboards')) &&
+                      category == Number(key)
                         ? 'active'
                         : ''
                     } ml-auto w-47.5 ${
