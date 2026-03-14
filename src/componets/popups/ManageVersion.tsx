@@ -18,7 +18,7 @@ import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { writeVersionsConfig } from '@/lib/BazookaManager'
 import { openFolder } from '@/lib/Util'
 
-export default function VersionVersionPopup () {
+export default function ManageVersionPopup () {
   const {
     getGameInfo,
     getVersionInfo,

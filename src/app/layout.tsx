@@ -34,7 +34,7 @@ import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import VersionsDownloadPopup from '@/componets/popups/VersionsDownload'
 import GamesDownloadPopup from '@/componets/popups/GamesDownload'
 import DownloadsPopup from '@/componets/popups/Downloads'
-import VersionVersionPopup from '@/componets/popups/VersionVersion'
+import ManageVersionPopup from '@/componets/popups/ManageVersion'
 import { fetch } from '@tauri-apps/plugin-http'
 import { verifySignature } from '@/lib/Util'
 import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
@@ -711,7 +711,7 @@ export default function RootLayout ({
                       ) : popupMode === 1 ? (
                         <DownloadsPopup />
                       ) : popupMode === 2 ? (
-                        <VersionVersionPopup />
+                        <ManageVersionPopup />
                       ) : null}
                     </div>
                   </div>
