@@ -30,7 +30,8 @@ export default function Installs () {
     category,
     setCategory,
     setDownloadedVersionsConfig,
-    downloadVersions
+    downloadVersions,
+    downloadProgress
   } = useGlobal()
 
   const params = useSearchParams()
@@ -369,12 +370,13 @@ export default function Installs () {
                           }))
                         ) {
                           if (
-                            await ask(
+                            (await ask(
                               "You don't have BepInEx (the mod loader for Unity Games), would you like to install it now? It is about 1MB in size. If you choose yes, it will download the recommended BepInEx version for " +
                                 getVersionInfo(entry)?.displayName +
                                 '.',
                               { title: 'BepInEx not found!', kind: 'error' }
-                            )
+                            )) &&
+                            !downloadProgress.find(d => d.version == entry)
                           ) {
                             downloadVersions([
                               {
