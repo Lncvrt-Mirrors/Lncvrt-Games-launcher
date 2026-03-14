@@ -29,7 +29,7 @@ sysinfo = "0.38.4"
 sha2 = "0.10.9"
 tauri-plugin-clipboard-manager = "2.3.2"
 tauri-plugin-prevent-default = "4.0.4"
-openssl = { version = "0.10.75", features = ["v110", "vendored"] }
+openssl = { version = "0.10.76", features = ["v110", "vendored"] }
 base64 = "0.22.1"
 tauri-plugin-http = "2.5.7"
 dashmap = "6.1.0"

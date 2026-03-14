@@ -315,7 +315,6 @@ export default function Installs () {
                       <div
                         className='entry-info-item'
                         title='The date the game was installed.'
-                        onClick={e => e.stopPropagation()}
                       >
                         <p>
                           Installed{' '}
@@ -336,14 +335,12 @@ export default function Installs () {
                             entry
                           )
                         }
-                        onClick={e => e.stopPropagation()}
                       >
                         <FontAwesomeIcon icon={faWarning} color='#ffc800' />
                         <p>Uses wine</p>
                       </div>
                       <div
                         className='entry-info-item'
-                        onClick={e => e.stopPropagation()}
                         hidden={
                           !needsRevisionUpdate(
                             getVersionInfo(entry)?.lastRevision,
@@ -355,6 +352,14 @@ export default function Installs () {
                         <p>Needs revision update!</p>
                       </div>
                     </div>
+                    <button
+                      className='absolute right-0 bottom-0 button'
+                      title='Click to manage mods for this game!'
+                      onClick={e => e.stopPropagation()}
+                      hidden={!getVersionInfo(entry)?.modSupportDownload}
+                    >
+                      Mod Manager
+                    </button>
                   </div>
                 </div>
               ))

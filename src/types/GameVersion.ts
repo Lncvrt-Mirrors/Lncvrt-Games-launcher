@@ -8,6 +8,7 @@ export interface GameVersion {
   wine: number | undefined
   category: number
   lastRevision: number
-  download: number
+  download: number | undefined
   executable: string
+  modSupportDownload: number | undefined
 }
