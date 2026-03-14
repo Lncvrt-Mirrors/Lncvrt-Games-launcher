@@ -601,17 +601,17 @@ export default function RootLayout ({
               >
                 {outdated ? (
                   <div className='text-center'>
-                    <p className='text-8xl mb-4'>Outdated Launcher!</p>
-                    <p className='text-4xl mb-4'>
+                    <p className='text-6xl mb-4'>Outdated Launcher!</p>
+                    <p className='text-2xl mb-4'>
                       Please update to the latest version to continue.
                     </p>
                     <button
-                      className='button'
+                      className='button btntheme1'
                       onClick={() =>
-                        openUrl('https://games.lncvrt.xyz/berrydash/download')
+                        openUrl('https://games.lncvrt.xyz/download')
                       }
                     >
-                      Download latest version
+                      Download latest version!
                     </button>
                   </div>
                 ) : (
