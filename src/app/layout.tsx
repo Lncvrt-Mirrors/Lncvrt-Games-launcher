@@ -411,6 +411,8 @@ export default function RootLayout ({
       setIsProcessingQueue(true)
 
       const versionId = downloadQueue[0]
+      const downloadInfo = downloadProgress.find(d => d.version == versionId)
+      if (!downloadInfo) return
       const info = getVersionInfo(versionId)
 
       if (!info) {
@@ -433,10 +435,11 @@ export default function RootLayout ({
       )
 
       const downloadInfoRequest = await fetch(
-        'https://games.lncvrt.xyz/api/launcher/download?gameId=' +
-          info.id +
-          '&downloadId=' +
-          info.download
+        'https://games.lncvrt.xyz/api/launcher/download' +
+          (downloadInfo.type == 0
+            ? '?gameId=' + info.id + '&downloadId=' + info.download
+            : '?downloadId=' +
+              (downloadInfo.type == 1 ? info.modSupportDownload : ''))
       )
       const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
       const data = await downloadInfoRequest.json()
@@ -468,7 +471,7 @@ export default function RootLayout ({
             ? {
                 ...d,
                 url: data.data.url,
-                executable: info.executable,
+                executable: downloadInfo.type == 0 ? info.executable : null,
                 hash: data.data.hash
               }
             : d
@@ -478,8 +481,8 @@ export default function RootLayout ({
       const res = await invoke<string>('download', {
         url: data.data.url,
         name: info.id,
-        executable: info.executable,
-        hash: data.data.hash
+        hash: data.data.hash,
+        downloadType: downloadInfo.type
       })
 
       if (res === '1') {
@@ -542,6 +545,7 @@ export default function RootLayout ({
     isProcessingQueue,
     getVersionInfo,
     getGameInfo,
+    downloadProgress,
     normalConfig
   ])
 

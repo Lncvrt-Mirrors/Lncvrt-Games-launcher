@@ -360,7 +360,32 @@ export default function Installs () {
                     <button
                       className='absolute right-0 bottom-0 button'
                       title='Click to manage mods for this game!'
-                      onClick={e => e.stopPropagation()}
+                      onClick={async e => {
+                        e.stopPropagation()
+
+                        if (
+                          !(await exists('game/' + entry + '/BepInEx', {
+                            baseDir: BaseDirectory.AppLocalData
+                          }))
+                        ) {
+                          if (
+                            await ask(
+                              "You don't have BepInEx (the mod loader for Unity Games), would you like to install it now? It is about 1MB in size. If you choose yes, it will download the recommended BepInEx version for " +
+                                getVersionInfo(entry)?.displayName +
+                                '.',
+                              { title: 'BepInEx not found!', kind: 'error' }
+                            )
+                          ) {
+                            downloadVersions([
+                              {
+                                id: entry,
+                                type: 1
+                              }
+                            ])
+                          }
+                          return
+                        }
+                      }}
                       hidden={!getVersionInfo(entry)?.modSupportDownload}
                     >
                       Mod Manager

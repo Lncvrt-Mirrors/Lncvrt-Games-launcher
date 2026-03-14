@@ -38,7 +38,6 @@ fn is_cancelled(name: &str) -> bool {
     cancel_map().get(name).map(|v| *v).unwrap_or(false)
 }
 
-#[allow(unused)]
 fn is_running_by_path(path: &Path) -> bool {
     let sys = System::new_all();
     let target = match path.canonicalize() {
@@ -143,14 +142,13 @@ fn folder_size(app: AppHandle, version: String) -> String {
     }
 }
 
-#[allow(unused_variables)]
 #[tauri::command]
 async fn download(
     app: AppHandle,
     url: String,
     name: String,
-    executable: String,
     hash: String,
+    download_type: i8
 ) -> String {
     println!("[download] Starting download for '{}' from '{}'", name, url);
     let _ = app.emit("download-start", format!("{}", name));
@@ -267,14 +265,16 @@ async fn download(
             }
         }
     } else {
-        if let Ok(true) = tokio::fs::try_exists(&game_path.join(&name)).await {
-            println!(
-                "[download] Existing game dir found, removing: {:?}",
-                game_path.join(&name)
-            );
-            let _ = tokio::fs::remove_dir_all(&game_path.join(&name)).await;
+        if download_type == 0 {
+            if let Ok(true) = tokio::fs::try_exists(&game_path.join(&name)).await {
+                println!(
+                    "[download] Existing game dir found, removing: {:?}",
+                    game_path.join(&name)
+                );
+                let _ = tokio::fs::remove_dir_all(&game_path.join(&name)).await;
+            }
+            let _ = tokio::fs::create_dir_all(&game_path.join(&name)).await;
         }
-        let _ = tokio::fs::create_dir_all(&game_path.join(&name)).await;
 
         match tokio::fs::File::create(&download_part_path).await {
             Ok(f) => {
@@ -463,7 +463,11 @@ async fn download(
     let unzip_res = unzip_to_dir(
         app.clone(),
         download_zip_path.clone(),
-        game_path.join(&name),
+        if download_type == 2 {
+            game_path.join(&name).join("BepInEx").join("plugins")
+        } else {
+            game_path.join(&name)
+        },
         name.clone(),
     )
     .await;
