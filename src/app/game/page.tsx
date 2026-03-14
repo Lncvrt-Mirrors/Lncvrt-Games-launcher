@@ -276,7 +276,12 @@ export default function Installs () {
 
                         //reinstall
                         setSelectedVersionList([entry])
-                        downloadVersions([entry])
+                        downloadVersions([
+                          {
+                            id: entry,
+                            type: 0
+                          }
+                        ])
                       } else {
                         openFolder(entry)
                       }

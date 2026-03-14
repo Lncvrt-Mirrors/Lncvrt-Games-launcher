@@ -17,6 +17,7 @@ export class DownloadProgress {
     public unzipped: number,
     public url: string | null,
     public executable: string | null,
-    public hash: string | null
+    public hash: string | null,
+    public type: 0 | 1 | 2
   ) {}
 }

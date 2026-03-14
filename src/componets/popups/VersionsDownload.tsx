@@ -15,6 +15,7 @@ export default function VersionsDownloadPopup () {
     downloadVersions,
     getGameInfo
   } = useGlobal()
+
   if (!selectedGame) return <></>
 
   return (
@@ -78,7 +79,12 @@ export default function VersionsDownloadPopup () {
           className='button btntheme1 w-fit mt-2 -mb-4'
           onClick={() => {
             if (downloadedVersionsConfig) {
-              downloadVersions(selectedVersionList)
+              downloadVersions(
+                selectedVersionList.map(versionId => ({
+                  id: versionId,
+                  type: 0
+                }))
+              )
               setPopupMode(1)
             }
           }}

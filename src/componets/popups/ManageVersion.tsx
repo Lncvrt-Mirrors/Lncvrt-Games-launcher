@@ -196,7 +196,12 @@ export default function ManageVersionPopup () {
 
             //reinstall
             setSelectedVersionList([managingVersion])
-            downloadVersions([managingVersion])
+            downloadVersions([
+              {
+                id: managingVersion,
+                type: 0
+              }
+            ])
           }}
           title="Click to reinstall this game. This will NOT remove any progress or any save files. This WILL uninstall any modifications to the game's executable files."
           hidden={viewingInfoFromDownloads}

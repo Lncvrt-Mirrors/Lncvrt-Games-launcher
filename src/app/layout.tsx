@@ -361,22 +361,22 @@ export default function RootLayout ({
   }, [])
 
   const downloadVersions = useCallback(
-    async (list: string[]): Promise<void> => {
+    async (list: Array<{ id: string; type: 0 | 1 | 2 }>): Promise<void> => {
       if (list.length === 0) return
       setSelectedVersionList([])
 
       const newVersions = list.filter(
-        version =>
-          !downloadQueue.includes(version) &&
-          !downloadProgress.some(d => d.version === version)
+        item =>
+          !downloadQueue.includes(item.id) &&
+          !downloadProgress.some(d => d.version === item.id)
       )
 
       if (newVersions.length === 0) return
 
       const newDownloads = newVersions.map(
-        version =>
+        item =>
           new DownloadProgress(
-            version,
+            item.id,
             0,
             0,
             false,
@@ -393,12 +393,13 @@ export default function RootLayout ({
             0,
             null,
             null,
-            null
+            null,
+            item.type
           )
       )
 
       setDownloadProgress(prev => [...prev, ...newDownloads])
-      setDownloadQueue(prev => [...prev, ...newVersions])
+      setDownloadQueue(prev => [...prev, ...newVersions.map(v => v.id)])
     },
     [downloadQueue, downloadProgress]
   )

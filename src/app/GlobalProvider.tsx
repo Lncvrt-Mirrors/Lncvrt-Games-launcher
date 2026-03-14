@@ -42,7 +42,9 @@ type GlobalCtxType = {
   } | null
   viewingInfoFromDownloads: boolean
   version: string | null
-  downloadVersions: (list: string[]) => Promise<void>
+  downloadVersions: (
+    list: Array<{ id: string; type: 0 | 1 | 2 }>
+  ) => Promise<void>
   category: number
   setCategory: Dispatch<SetStateAction<number>>
   downloadQueue: string[]
