@@ -3,7 +3,12 @@ import prettyBytes from 'pretty-bytes'
 import ProgressBar from '../ProgressBar'
 import { formatEtaSmart } from '@/lib/Util'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCancel, faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCancel,
+  faPause,
+  faPlay,
+  faTrash
+} from '@fortawesome/free-solid-svg-icons'
 import { invoke } from '@tauri-apps/api/core'
 import { writeVersionsConfig } from '@/lib/BazookaManager'
 import { notifyUser } from '@/lib/Notifications'
@@ -150,6 +155,20 @@ export default function DownloadsPopup () {
                 >
                   <FontAwesomeIcon icon={faCancel} className='w-6 h-6' />
                 </div>
+                <div
+                  className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
+                  hidden={!v.failed && !v.queued}
+                  onClick={() => {
+                    setDownloadQueue(prev =>
+                      prev.filter(id => id !== v.version)
+                    )
+                    setDownloadProgress(prev =>
+                      prev.filter(d => d.version !== v.version)
+                    )
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTrash} className='w-6 h-6' />
+                </div>
               </div>
               <p className='text-2xl text-center'>
                 {getVersionInfo(v.version)?.displayName}
@@ -168,20 +187,6 @@ export default function DownloadsPopup () {
                         ? 'Starting soon...'
                         : `Queued (Position ${queuePosition + 1})`}
                     </span>
-                    <button
-                      className='button btntheme3 -ml-1.25'
-                      onClick={() => {
-                        setDownloadQueue(prev =>
-                          prev.filter(id => id !== v.version)
-                        )
-                        setDownloadProgress(prev =>
-                          prev.filter(d => d.version !== v.version)
-                        )
-                      }}
-                      title='Click to remove this version from the download queue.'
-                    >
-                      Remove
-                    </button>
                   </div>
                 ) : v.hash_checking ? (
                   <span className='text-blue-300 inline-block w-full text-center'>
