@@ -1,8 +1,8 @@
 'use client'
 
+import './Globals.css'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Sidebar from '@/componets/Sidebar'
-import './Globals.css'
 import { DownloadProgress } from '@/types/DownloadProgress'
 import { invoke } from '@tauri-apps/api/core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -30,14 +30,15 @@ import {
   requestPermission
 } from '@tauri-apps/plugin-notification'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
+import { fetch } from '@tauri-apps/plugin-http'
+import { verifySignature } from '@/lib/Util'
+import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
 
 import VersionsDownloadPopup from '@/componets/popups/VersionsDownload'
 import GamesDownloadPopup from '@/componets/popups/GamesDownload'
 import DownloadsPopup from '@/componets/popups/Downloads'
 import ManageVersionPopup from '@/componets/popups/ManageVersion'
-import { fetch } from '@tauri-apps/plugin-http'
-import { verifySignature } from '@/lib/Util'
-import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
+import ModDownloadsPopup from '@/componets/popups/ModDownloads'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -717,6 +718,8 @@ export default function RootLayout ({
                         <DownloadsPopup />
                       ) : popupMode === 2 ? (
                         <ManageVersionPopup />
+                      ) : popupMode === 3 ? (
+                        <ModDownloadsPopup />
                       ) : null}
                     </div>
                   </div>

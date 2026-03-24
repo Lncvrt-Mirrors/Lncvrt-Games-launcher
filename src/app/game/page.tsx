@@ -387,6 +387,10 @@ export default function Installs () {
                           }
                           return
                         }
+                        setManagingVersion(entry)
+                        setPopupMode(3)
+                        setShowPopup(true)
+                        setFadeOut(false)
                       }}
                       hidden={!getVersionInfo(entry)?.modSupportDownload}
                     >

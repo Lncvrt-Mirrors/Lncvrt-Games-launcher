@@ -148,7 +148,7 @@ async fn download(
     url: String,
     name: String,
     hash: String,
-    download_type: i8
+    download_type: i8,
 ) -> String {
     println!("[download] Starting download for '{}' from '{}'", name, url);
     let _ = app.emit("download-start", format!("{}", name));
