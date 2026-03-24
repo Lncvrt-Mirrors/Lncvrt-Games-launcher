@@ -53,6 +53,8 @@ type GlobalCtxType = {
   getSpecialVersionsList(game?: number | undefined): GameVersion[]
   selectedGame: number | null
   setViewingInfoFromDownloads: Dispatch<SetStateAction<boolean>>
+  showModInfo: number
+  setShowModInfo: Dispatch<SetStateAction<number>>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)
