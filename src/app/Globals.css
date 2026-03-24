@@ -130,8 +130,8 @@ body {
   @apply absolute;
 }
 
-.close-button {
-  @apply flex justify-center items-center absolute text-2xl text-gray-200 hover:text-white cursor-pointer h-12 w-12 p-3 rounded-lg left-2 top-2 transition-colors border;
+.popup-top-button {
+  @apply flex justify-center items-center absolute text-2xl text-gray-200 hover:text-white cursor-pointer h-12 w-12 p-3 rounded-lg top-2 transition-colors border;
 }
 
 *:focus {

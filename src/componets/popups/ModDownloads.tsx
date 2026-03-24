@@ -3,7 +3,11 @@
 import { useGlobal } from '@/app/GlobalProvider'
 import { verifySignature } from '@/lib/Util'
 import { Mod } from '@/types/Mod'
-import { faDownload, faGlobe } from '@fortawesome/free-solid-svg-icons'
+import {
+  faDownload,
+  faGlobe,
+  faRefresh
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { arch, platform } from '@tauri-apps/plugin-os'
 import { useEffect, useState } from 'react'
@@ -41,6 +45,25 @@ export default function ModDownloadsPopup () {
 
   return (
     <>
+      <button
+        className='popup-top-button btntheme1 right-2'
+        onClick={async () => {
+          setMods(0)
+          const response = await fetch(
+            `https://games.lncvrt.xyz/api/launcher/mods?platform=${platform()}&arch=${arch()}&version=${managingVersion}`
+          )
+          const signature = response.headers.get('x-signature') ?? ''
+          const data = await response.json()
+          if (await verifySignature(JSON.stringify(data), signature)) {
+            setMods(data as Mod[])
+          } else {
+            setMods(1)
+          }
+        }}
+        hidden={typeof mods == 'number'}
+      >
+        <FontAwesomeIcon icon={faRefresh} />
+      </button>
       <p className='text-xl text-center'>
         {versionInfo?.displayName} Mod Manager
       </p>
@@ -70,7 +93,40 @@ export default function ModDownloadsPopup () {
         ) : (
           <div className='flex flex-col items-center justify-center gap-2 p-2'>
             {tab == 0
-              ? null
+              ? mods
+                  .filter(
+                    v =>
+                      !downloadedVersionsConfig ||
+                      Object.keys(downloadedVersionsConfig.mods).includes(
+                        String(v.id)
+                      )
+                  )
+                  .map(v => {
+                    return (
+                      <div
+                        key={v.id}
+                        className='bg-(--col3) border border-(--col5) rounded-lg w-full h-16 flex flex-row'
+                      >
+                        <div className='flex flex-col justify-center h-full px-3 w-fit'>
+                          <p>
+                            <span className='text-lg'>{v.name}</span>{' '}
+                            <span className='text-green-300'>
+                              v{v.latestVersion}
+                            </span>
+                          </p>
+                          <p className='text-yellow-200'>
+                            Made by {v.creators[0]}
+                            {v.creators.length > 1
+                              ? ' + ' + (v.creators.length - 1) + ' more'
+                              : null}
+                          </p>
+                        </div>
+                        <div className='flex items-center h-full gap-2 px-3 ml-auto'>
+                          <button className='button btntheme3'>View</button>
+                        </div>
+                      </div>
+                    )
+                  })
               : mods
                   .filter(
                     v =>
