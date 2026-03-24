@@ -9,7 +9,12 @@ import { arch, platform } from '@tauri-apps/plugin-os'
 import { useEffect, useState } from 'react'
 
 export default function ModDownloadsPopup () {
-  const { getGameInfo, getVersionInfo, managingVersion } = useGlobal()
+  const {
+    getGameInfo,
+    getVersionInfo,
+    managingVersion,
+    downloadedVersionsConfig
+  } = useGlobal()
 
   const [mods, setMods] = useState<Mod[] | 0 | 1>(0)
   const [tab, setTab] = useState<number>(0)
@@ -40,7 +45,7 @@ export default function ModDownloadsPopup () {
         {versionInfo?.displayName} Mod Manager
       </p>
       {typeof mods != 'number' ? (
-        <div className='flex flex-row justify-center items-center -mb-2.5 gap-1.5'>
+        <div className='flex flex-row justify-center items-center -mb-2 mt-0.5 gap-1.5'>
           <button
             className={`button ${tab == 0 ? 'btntheme3' : 'btntheme2'}`}
             onClick={() => setTab(0)}
@@ -66,35 +71,43 @@ export default function ModDownloadsPopup () {
           <div className='flex flex-col items-center justify-center gap-2 p-2'>
             {tab == 0
               ? null
-              : mods.map(v => {
-                  return (
-                    <div
-                      key={v.id}
-                      className='bg-(--col3) border border-(--col5) rounded-lg w-full h-16 flex flex-row'
-                    >
-                      <div className='flex flex-col justify-center h-full px-3 w-fit'>
-                        <p>
-                          <span className='text-lg'>{v.name}</span>{' '}
-                          <span className='text-green-300'>
-                            v{v.latestVersion}
-                          </span>
-                        </p>
-                        <p className='text-yellow-200'>
-                          Made by {v.creators[0]}
-                          {v.creators.length < 2
-                            ? ' + ' + v.creators.length + ' more'
-                            : null}
-                        </p>
-                      </div>
-                      <div className='flex flex-row items-center h-full gap-2 px-3 ml-auto'>
-                        <p className='text-green-400'>
-                          <FontAwesomeIcon icon={faDownload} /> {v.downloads}
-                        </p>
-                        <button className='button btntheme3'>Get</button>
-                      </div>
-                    </div>
+              : mods
+                  .filter(
+                    v =>
+                      !downloadedVersionsConfig ||
+                      !Object.keys(downloadedVersionsConfig.mods).includes(
+                        String(v.id)
+                      )
                   )
-                })}
+                  .map(v => {
+                    return (
+                      <div
+                        key={v.id}
+                        className='bg-(--col3) border border-(--col5) rounded-lg w-full h-16 flex flex-row'
+                      >
+                        <div className='flex flex-col justify-center h-full px-3 w-fit'>
+                          <p>
+                            <span className='text-lg'>{v.name}</span>{' '}
+                            <span className='text-green-300'>
+                              v{v.latestVersion}
+                            </span>
+                          </p>
+                          <p className='text-yellow-200'>
+                            Made by {v.creators[0]}
+                            {v.creators.length > 1
+                              ? ' + ' + (v.creators.length - 1) + ' more'
+                              : null}
+                          </p>
+                        </div>
+                        <div className='flex flex-row items-center h-full gap-2 px-3 ml-auto'>
+                          <p className='text-green-400'>
+                            <FontAwesomeIcon icon={faDownload} /> {v.downloads}
+                          </p>
+                          <button className='button btntheme3'>Get</button>
+                        </div>
+                      </div>
+                    )
+                  })}
           </div>
         )}
       </div>
