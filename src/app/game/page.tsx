@@ -21,7 +21,6 @@ export default function Installs () {
     setFadeOut,
     setSelectedVersionList,
     downloadedVersionsConfig,
-    normalConfig,
     setManagingVersion,
     getVersionInfo,
     getGameInfo,
@@ -31,7 +30,9 @@ export default function Installs () {
     setCategory,
     setDownloadedVersionsConfig,
     downloadVersions,
-    downloadProgress
+    downloadProgress,
+    unixUseWine,
+    unixWineCommand
   } = useGlobal()
 
   const params = useSearchParams()
@@ -43,7 +44,7 @@ export default function Installs () {
   useEffect(() => {
     if (!showPopup) return
     setSelectedVersionList([])
-  }, [normalConfig, setSelectedVersionList, showPopup])
+  }, [setSelectedVersionList, showPopup])
 
   if (!id || !game) return <p>Invalid game</p>
 
@@ -129,11 +130,7 @@ export default function Installs () {
                   const info = getVersionInfo(v)
                   if (!info) return false
 
-                  if (
-                    platform() == 'linux' &&
-                    info.wine &&
-                    !normalConfig?.settings.useWineOnUnixWhenNeeded
-                  )
+                  if (platform() == 'linux' && info.wine && !unixUseWine)
                     return false
 
                   return info.game === id && info.category === Number(key)
@@ -168,8 +165,7 @@ export default function Installs () {
                                 if (
                                   platform() == 'linux' &&
                                   info.wine &&
-                                  !normalConfig?.settings
-                                    .useWineOnUnixWhenNeeded
+                                  !unixUseWine
                                 )
                                   return false
                                 return (
@@ -200,11 +196,7 @@ export default function Installs () {
               .filter(v => {
                 const info = getVersionInfo(v)
                 if (!info) return false
-                if (
-                  platform() == 'linux' &&
-                  info.wine &&
-                  !normalConfig?.settings.useWineOnUnixWhenNeeded
-                )
+                if (platform() == 'linux' && info.wine && !unixUseWine)
                   return false
                 return (
                   info.game === id &&
@@ -299,9 +291,9 @@ export default function Installs () {
                       useWine: !!(
                         platform() == 'linux' &&
                         verInfo.wine &&
-                        normalConfig?.settings.useWineOnUnixWhenNeeded
+                        unixUseWine
                       ),
-                      wineCommand: normalConfig?.settings.wineOnUnixCommand
+                      wineCommand: unixWineCommand
                     })
                   }}
                   onContextMenu={e => {

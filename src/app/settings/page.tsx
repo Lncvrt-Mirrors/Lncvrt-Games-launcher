@@ -1,181 +1,84 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Setting } from '@/componets/Setting'
-import { writeNormalConfig } from '@/lib/BazookaManager'
 import { useGlobal } from '@/app/GlobalProvider'
 import { copyToClipboard } from '@/lib/Clipboard'
 import { platform } from '@tauri-apps/plugin-os'
 
 export default function Settings () {
-  const [allowNotifications, setAllowNotifications] = useState(false)
-  const [alwaysShowGamesInSidebar, setAlwaysShowGamesInSidebar] =
-    useState(false)
-  const [useWineOnUnixWhenNeeded, setUseWineOnUnixWhenNeeded] = useState(false)
-  const [wineOnUnixCommand, setWineOnUnixCommand] = useState('wine %path%')
-  const [theme, setTheme] = useState(0)
-
-  const [loaded, setLoaded] = useState(false)
-  const { normalConfig, setNormalConfig, version } = useGlobal()
-
-  useEffect(() => {
-    ;(async () => {
-      while (normalConfig != null) {
-        setAllowNotifications(normalConfig.settings.allowNotifications)
-        setAlwaysShowGamesInSidebar(
-          normalConfig.settings.alwaysShowGamesInSidebar
-        )
-        setUseWineOnUnixWhenNeeded(
-          normalConfig.settings.useWineOnUnixWhenNeeded
-        )
-        setWineOnUnixCommand(normalConfig.settings.wineOnUnixCommand)
-        setTheme(normalConfig.settings.theme)
-        setLoaded(true)
-        break
-      }
-    })()
-  }, [normalConfig])
+  const {
+    settings,
+    version,
+    notificationsAllowed,
+    sidebarAlwaysShowGames,
+    unixUseWine,
+    unixWineCommand,
+    theme
+  } = useGlobal()
 
   return (
     <>
       <p className='text-3xl ml-4 mt-4'>Settings</p>
-      {loaded && (
-        <div className='ml-4 mt-4 bg-(--col1) border border-(--col3) rounded-lg p-4 w-fit h-fit'>
-          <Setting
-            label='Allow sending notifications'
-            value={allowNotifications}
-            onChange={async () => {
-              if (!normalConfig) return
-              setAllowNotifications(!allowNotifications)
-              setNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  allowNotifications: !allowNotifications
-                }
-              })
-              await writeNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  allowNotifications: !allowNotifications
-                }
-              })
-            }}
-            title='This setting does as you expect, allow the launcher to send notifications for when stuff like downloading is done.'
-          />
-          <Setting
-            label='Always show games in sidebar'
-            value={alwaysShowGamesInSidebar}
-            onChange={async () => {
-              if (!normalConfig) return
-              setAlwaysShowGamesInSidebar(!alwaysShowGamesInSidebar)
-              setNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  alwaysShowGamesInSidebar: !alwaysShowGamesInSidebar
-                }
-              })
-              await writeNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  alwaysShowGamesInSidebar: !alwaysShowGamesInSidebar
-                }
-              })
-            }}
-            title="This setting will make it so when you are on a page like this, the games won't disappear."
-          />
-          <Setting
-            label='Use wine when needed to launch games'
-            value={useWineOnUnixWhenNeeded}
-            onChange={async () => {
-              if (!normalConfig) return
-              setUseWineOnUnixWhenNeeded(!useWineOnUnixWhenNeeded)
-              setNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  useWineOnUnixWhenNeeded: !useWineOnUnixWhenNeeded
-                }
-              })
-              await writeNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  useWineOnUnixWhenNeeded: !useWineOnUnixWhenNeeded
-                }
-              })
-            }}
-            className={platform() == 'linux' ? '' : 'hidden'}
-          />
-          <p hidden={!(platform() == 'linux' && useWineOnUnixWhenNeeded)}>
-            Wine Command:
-          </p>
-          <input
-            type='text'
-            value={wineOnUnixCommand}
+      <div className='ml-4 mt-4 bg-(--col1) border border-(--col3) rounded-lg p-4 w-fit h-fit'>
+        <Setting
+          label='Allow sending notifications'
+          value={notificationsAllowed}
+          onChange={async () => {
+            await settings?.set('notificationsAllowed', !notificationsAllowed)
+          }}
+          title='This setting does as you expect, allow the launcher to send notifications for when stuff like downloading is done.'
+        />
+        <Setting
+          label='Always show games in sidebar'
+          value={sidebarAlwaysShowGames}
+          onChange={async () => {
+            await settings?.set(
+              'sidebarAlwaysShowGames',
+              !sidebarAlwaysShowGames
+            )
+          }}
+          title="This setting will make it so when you are on a page like this, the games won't disappear."
+        />
+        <Setting
+          label='Use wine when needed to launch games'
+          value={unixUseWine}
+          onChange={async () => {
+            await settings?.set('unixUseWine', !unixUseWine)
+          }}
+          className={platform() == 'linux' ? '' : 'hidden'}
+        />
+        <p hidden={!(platform() == 'linux' && unixUseWine)}>Wine Command:</p>
+        <input
+          type='text'
+          value={unixWineCommand}
+          onChange={async e => {
+            await settings?.set('unixUseWine', e.target.value)
+          }}
+          className={`input-field my-1 ${
+            platform() == 'linux' && unixUseWine ? '' : 'hidden'
+          }`}
+        ></input>
+        <div title='The theme you want the launcher to use.'>
+          <label className='text-lg'>Theme:</label>
+          <select
+            className='ml-2 bg-(--col2) border border-(--col4) rounded-md'
+            value={theme}
             onChange={async e => {
-              if (!normalConfig) return
-              setWineOnUnixCommand(e.target.value)
-              setNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  wineOnUnixCommand: e.target.value
-                }
-              })
-              await writeNormalConfig({
-                ...normalConfig,
-                settings: {
-                  ...normalConfig.settings,
-                  wineOnUnixCommand: e.target.value
-                }
-              })
+              await settings?.set('theme', e.target.value)
             }}
-            className={`input-field my-1 ${
-              platform() == 'linux' && useWineOnUnixWhenNeeded ? '' : 'hidden'
-            }`}
-          ></input>
-          <div title='The theme you want the launcher to use.'>
-            <label className='text-lg'>Theme:</label>
-            <select
-              className='ml-2 bg-(--col2) border border-(--col4) rounded-md'
-              value={theme}
-              onChange={async e => {
-                if (!normalConfig) return
-                const newTheme = parseInt(e.target.value)
-                setTheme(newTheme)
-                setNormalConfig({
-                  ...normalConfig,
-                  settings: {
-                    ...normalConfig.settings,
-                    theme: newTheme
-                  }
-                })
-                await writeNormalConfig({
-                  ...normalConfig,
-                  settings: {
-                    ...normalConfig.settings,
-                    theme: newTheme
-                  }
-                })
-              }}
-            >
-              <option value={0}>Dark (default)</option>
-              <option value={1}>Red</option>
-              <option value={2}>Blue</option>
-              <option value={3}>Purple</option>
-            </select>
-          </div>
+          >
+            <option value={'dark'}>Dark (default)</option>
+            <option value={'red'}>Red</option>
+            <option value={'blue'}>Blue</option>
+            <option value={'purple'}>Purple</option>
+          </select>
         </div>
-      )}
+      </div>
       <p
         className='fixed bottom-1.5 right-1.5 rounded-md cursor-pointer px-1 border z-100 transition-colors btntheme1'
-        onClick={async () => {
-          await copyToClipboard(`v${version}`, normalConfig)
-        }}
+        onClick={async () =>
+          await copyToClipboard(`v${version}`, notificationsAllowed)
+        }
         title='The current launcher version.'
       >
         v{version}

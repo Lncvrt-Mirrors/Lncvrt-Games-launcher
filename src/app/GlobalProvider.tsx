@@ -9,11 +9,11 @@ import {
 } from 'react'
 import { DownloadProgress } from '@/types/DownloadProgress'
 import { VersionsConfig } from '@/types/VersionsConfig'
-import { NormalConfig } from '@/types/NormalConfig'
 import { ServerVersionsResponse } from '@/types/ServerVersionsResponse'
 import { GameVersion } from '@/types/GameVersion'
 import { Game } from '@/types/Game'
 import { Mod } from '@/types/Mod'
+import { Store } from '@tauri-apps/plugin-store'
 
 type GlobalCtxType = {
   serverVersionList: ServerVersionsResponse | null
@@ -29,8 +29,6 @@ type GlobalCtxType = {
   setFadeOut: Dispatch<SetStateAction<boolean>>
   downloadedVersionsConfig: VersionsConfig | null
   setDownloadedVersionsConfig: Dispatch<SetStateAction<VersionsConfig | null>>
-  normalConfig: NormalConfig | null
-  setNormalConfig: Dispatch<SetStateAction<NormalConfig | null>>
   managingVersion: string | null
   setManagingVersion: Dispatch<SetStateAction<string | null>>
   setSelectedGame: Dispatch<SetStateAction<number | null>>
@@ -63,6 +61,12 @@ type GlobalCtxType = {
   setViewingInfoFromDownloads: Dispatch<SetStateAction<boolean>>
   showModInfo: Mod | null
   setShowModInfo: Dispatch<SetStateAction<Mod | null>>
+  settings: Store | null
+  notificationsAllowed: boolean
+  sidebarAlwaysShowGames: boolean
+  unixUseWine: boolean
+  unixWineCommand: string
+  theme: string
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)

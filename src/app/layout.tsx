@@ -7,13 +7,8 @@ import { DownloadProgress } from '@/types/DownloadProgress'
 import { invoke } from '@tauri-apps/api/core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
-import {
-  readNormalConfig,
-  readVersionsConfig,
-  writeVersionsConfig
-} from '@/lib/BazookaManager'
+import { readVersionsConfig, writeVersionsConfig } from '@/lib/BazookaManager'
 import { VersionsConfig } from '@/types/VersionsConfig'
-import { NormalConfig } from '@/types/NormalConfig'
 import { app } from '@tauri-apps/api'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { GlobalProvider } from './GlobalProvider'
@@ -24,12 +19,16 @@ import { Game } from '@/types/Game'
 import { listen } from '@tauri-apps/api/event'
 import { usePathname } from 'next/navigation'
 import { arch, platform } from '@tauri-apps/plugin-os'
-import { notifyUser } from '@/lib/Notifications'
 import {
   isPermissionGranted,
   requestPermission
 } from '@tauri-apps/plugin-notification'
-import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
+import {
+  BaseDirectory,
+  exists,
+  readTextFile,
+  remove
+} from '@tauri-apps/plugin-fs'
 import { fetch } from '@tauri-apps/plugin-http'
 import { verifySignature } from '@/lib/Util'
 import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
@@ -40,6 +39,8 @@ import DownloadsPopup from '@/componets/popups/Downloads'
 import ManageVersionPopup from '@/componets/popups/ManageVersion'
 import ModDownloadsPopup from '@/componets/popups/ModDownloads'
 import { Mod } from '@/types/Mod'
+import { load, Store } from '@tauri-apps/plugin-store'
+import { notifyUser } from '@/lib/Notifications'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -62,7 +63,6 @@ export default function RootLayout ({
 
   const [downloadedVersionsConfig, setDownloadedVersionsConfig] =
     useState<VersionsConfig | null>(null)
-  const [normalConfig, setNormalConfig] = useState<NormalConfig | null>(null)
 
   const [showPopup, setShowPopup] = useState(false)
   const [popupMode, setPopupMode] = useState<null | number>(null)
@@ -84,20 +84,25 @@ export default function RootLayout ({
   const pathname = usePathname()
   const revisionCheck = useRef(false)
 
+  const [settings, setSettings] = useState<Store | null>(null)
+
+  const [notificationsAllowed, setNotificationsAllowed] =
+    useState<boolean>(false)
+  const [sidebarAlwaysShowGames, setSidebarAlwaysShowGames] =
+    useState<boolean>(false)
+  const [unixUseWine, setUnixUseWine] = useState<boolean>(false)
+  const [unixWineCommand, setUnixWineCommand] = useState<string>('wine %path%')
+  const [theme, setTheme] = useState<string>('dark')
+
   function getSpecialVersionsList (game?: number): GameVersion[] {
-    if (!normalConfig || !serverVersionList) return []
+    if (!serverVersionList) return []
 
     return serverVersionList.versions
       .filter(
         v => !Object.keys(downloadedVersionsConfig?.list ?? []).includes(v.id)
       )
       .filter(v => {
-        if (
-          platformName == 'linux' &&
-          v.wine &&
-          !normalConfig.settings.useWineOnUnixWhenNeeded
-        )
-          return false
+        if (platformName == 'linux' && v.wine && unixUseWine) return false
 
         if (game && v.game != game) return false
         if (category != -1 && v.category != category) return false
@@ -150,8 +155,7 @@ export default function RootLayout ({
   } | null {
     if (!downloadedVersionsConfig || !serverVersionList) return null
 
-    const allowWine =
-      platformName !== 'linux' || normalConfig?.settings.useWineOnUnixWhenNeeded
+    const allowWine = platformName !== 'linux' || unixUseWine
 
     const installed = Object.keys(downloadedVersionsConfig.list).filter(v => {
       const info = getVersionInfo(v)
@@ -353,10 +357,85 @@ export default function RootLayout ({
         setLoadingText('Failed to download versions list.')
         return
       }
-      const normalConfig = await readNormalConfig()
+      const settingsLocal = await load('settings.json', {
+        autoSave: true,
+        defaults: {
+          version: client,
+          notificationsAllowed: true,
+          sidebarAlwaysShowGames: true,
+          unixUseWine: false,
+          unixWineCommand: 'wine %path%',
+          theme: 'dark'
+        }
+      })
+      settingsLocal.set('version', client)
+      const oldSettingsOptions = {
+        baseDir: BaseDirectory.AppLocalData
+      }
+      if (await exists('config.json', oldSettingsOptions)) {
+        const config = await readTextFile('config.json', oldSettingsOptions)
+        const raw = JSON.parse(config)
+        if (
+          raw.settings &&
+          raw.settings.theme &&
+          (raw.version == '1.0.0' ||
+            raw.version == '1.1.0' ||
+            raw.version == '1.1.1' ||
+            raw.version == '1.2.0' ||
+            raw.version == '1.3.0' ||
+            raw.version == '1.3.1' ||
+            raw.version == '1.4.0' ||
+            raw.version == '1.5.0' ||
+            raw.version == '1.5.1' ||
+            raw.version == '1.5.2' ||
+            raw.version == '1.5.3' ||
+            raw.version == '1.5.4')
+        ) {
+          const parsed = Number(raw.settings.theme)
+          if (parsed == 3) raw.settings.theme = 2
+          if (parsed == 4) raw.settings.theme = 3
+          else if (parsed != 0 && parsed != 1) raw.settings.theme = 0
+        }
+        if (raw.settings.allowNotifications)
+          settingsLocal?.set(
+            'notificationsAllowed',
+            Boolean(raw.settings.allowNotifications)
+          )
+        if (raw.settings.alwaysShowGamesInSidebar)
+          settingsLocal?.set(
+            'sidebarAlwaysShowGames',
+            Boolean(raw.settings.alwaysShowGamesInSidebar)
+          )
+        if (raw.settings.useWineOnUnixWhenNeeded)
+          settingsLocal?.set(
+            'unixUseWine',
+            Boolean(raw.settings.useWineOnUnixWhenNeeded)
+          )
+        if (raw.settings.wineOnUnixCommand)
+          settingsLocal?.set(
+            'unixWineCommand',
+            String(raw.settings.wineOnUnixCommand)
+          )
+        if (raw.settings.theme) {
+          const tempTheme = (() => {
+            switch (Number(raw.settings.theme)) {
+              case 1:
+                return 'red'
+              case 2:
+                return 'blue'
+              case 3:
+                return 'purple'
+              default:
+                return 'dark'
+            }
+          })()
+          settingsLocal?.set('theme', tempTheme)
+        }
+        await remove('config.json', oldSettingsOptions)
+      }
       const versionsConfig = await readVersionsConfig()
       setDownloadedVersionsConfig(versionsConfig)
-      setNormalConfig(normalConfig)
+      setSettings(settingsLocal)
       setLoading(false)
 
       if (!(await isPermissionGranted())) {
@@ -475,7 +554,7 @@ export default function RootLayout ({
               : d
           )
         )
-        if (normalConfig?.settings.allowNotifications)
+        if (await settings?.get<boolean>('notifications-allowed'))
           await notifyUser(
             'Download Failed',
             `The download for version ${info.displayName} has failed.`
@@ -560,7 +639,7 @@ export default function RootLayout ({
               : d
           )
         )
-        if (normalConfig?.settings.allowNotifications)
+        if (await settings?.get<boolean>('notifications-allowed'))
           await notifyUser(
             'Download Failed',
             `The download for version ${info.displayName} has failed.`
@@ -581,7 +660,7 @@ export default function RootLayout ({
     getVersionInfo,
     getGameInfo,
     downloadProgress,
-    normalConfig
+    settings
   ])
 
   useEffect(() => {
@@ -612,20 +691,36 @@ export default function RootLayout ({
     })()
   }, [serverVersionList, downloadedVersionsConfig, downloadVersions])
 
+  useEffect(() => {
+    if (!settings) return
+    const unlisteners: Promise<() => void>[] = []
+
+    function watch<T> (key: string, fn: (v: T | undefined) => void) {
+      settings!.get<T>(key).then(fn)
+      unlisteners.push(settings!.onKeyChange<T>(key, fn))
+    }
+
+    watch<string>('theme', v => setTheme(v ?? 'dark'))
+    watch<boolean>('notificationsAllowed', v =>
+      setNotificationsAllowed(v ?? true)
+    )
+    watch<boolean>('sidebarAlwaysShowGames', v =>
+      setSidebarAlwaysShowGames(v ?? true)
+    )
+    watch<boolean>('unixUseWine', v => setUnixUseWine(v ?? false))
+    watch<string>('unixWineCommand', v =>
+      setUnixWineCommand(v ?? 'wine %path%')
+    )
+
+    return () => {
+      unlisteners.forEach(u => u.then(fn => fn()))
+    }
+  }, [settings])
+
   return (
     <>
       <html lang='en' className={roboto.className}>
-        <body
-          className={
-            normalConfig?.settings.theme === 1
-              ? 'red-theme'
-              : normalConfig?.settings.theme === 2
-              ? 'blue-theme'
-              : normalConfig?.settings.theme === 3
-              ? 'purple-theme'
-              : 'dark-theme'
-          }
-        >
+        <body className={theme + '-theme'}>
           {loading ? (
             <>
               <div
@@ -675,8 +770,6 @@ export default function RootLayout ({
                 setFadeOut,
                 downloadedVersionsConfig,
                 setDownloadedVersionsConfig,
-                normalConfig,
-                setNormalConfig,
                 managingVersion,
                 setManagingVersion,
                 getVersionInfo,
@@ -696,7 +789,13 @@ export default function RootLayout ({
                 selectedGame,
                 setViewingInfoFromDownloads,
                 showModInfo,
-                setShowModInfo
+                setShowModInfo,
+                settings,
+                notificationsAllowed,
+                sidebarAlwaysShowGames,
+                unixUseWine,
+                unixWineCommand,
+                theme
               }}
             >
               <div

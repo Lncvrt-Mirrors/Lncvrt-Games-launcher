@@ -1,10 +1,11 @@
-import { NormalConfig } from '@/types/NormalConfig'
+import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { notifyUser } from './Notifications'
 
 export async function copyToClipboard (
   text: string,
-  normalConfig: NormalConfig | null
+  notificationsAllowed: boolean
 ) {
-  if (normalConfig?.settings.allowNotifications)
+  await writeText(text)
+  if (notificationsAllowed)
     await notifyUser('Copied', 'Text "' + text + '" copied to clipboard')
 }

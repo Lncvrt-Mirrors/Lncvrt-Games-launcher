@@ -21,8 +21,8 @@ export default function DownloadsPopup () {
     setDownloadProgress,
     downloadQueue,
     setDownloadQueue,
-    normalConfig,
-    setDownloadedVersionsConfig
+    setDownloadedVersionsConfig,
+    notificationsAllowed
   } = useGlobal()
 
   return (
@@ -123,7 +123,7 @@ export default function DownloadsPopup () {
                               : d
                           )
                         )
-                        if (normalConfig?.settings.allowNotifications)
+                        if (notificationsAllowed)
                           await notifyUser(
                             'Download Failed',
                             `The download for version ${

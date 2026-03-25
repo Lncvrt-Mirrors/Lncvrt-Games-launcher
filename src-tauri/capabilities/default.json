@@ -24,6 +24,9 @@
     "notification:default",
     "clipboard-manager:default",
     "clipboard-manager:allow-write-text",
+    "store:default",
+    "store:allow-load",
+    "store:allow-save",
     "fs:allow-applocaldata-read",
     "fs:allow-applocaldata-write",
     {

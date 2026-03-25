@@ -27,7 +27,6 @@ const lexend = Lexend({
 
 export default function Sidebar () {
   const {
-    normalConfig,
     getListOfGames,
     setShowPopup,
     setPopupMode,
@@ -36,7 +35,9 @@ export default function Sidebar () {
     downloadedVersionsConfig,
     getVersionInfo,
     category,
-    setCategory
+    setCategory,
+    sidebarAlwaysShowGames,
+    unixUseWine
   } = useGlobal()
 
   const pathname = usePathname()
@@ -104,7 +105,7 @@ export default function Sidebar () {
                     ? 'active'
                     : ''
                 } ml-auto w-50 ${
-                  normalConfig?.settings.alwaysShowGamesInSidebar ||
+                  sidebarAlwaysShowGames ||
                   pathname === '/' ||
                   pathname.startsWith('/game')
                     ? ''
@@ -136,11 +137,7 @@ export default function Sidebar () {
                     const info = getVersionInfo(v)
                     if (!info) return false
 
-                    if (
-                      platform() == 'linux' &&
-                      info.wine &&
-                      !normalConfig?.settings.useWineOnUnixWhenNeeded
-                    )
+                    if (platform() == 'linux' && info.wine && !unixUseWine)
                       return false
 
                     return info.game === i.id && info.category === Number(key)
@@ -161,7 +158,7 @@ export default function Sidebar () {
                         ? 'active'
                         : ''
                     } ml-auto w-47.5 ${
-                      normalConfig?.settings.alwaysShowGamesInSidebar ||
+                      sidebarAlwaysShowGames ||
                       pathname === '/' ||
                       pathname.startsWith('/game')
                         ? ''

@@ -20,7 +20,6 @@ export default function Installs () {
     setFadeOut,
     setSelectedVersionList,
     downloadedVersionsConfig,
-    normalConfig,
     setSelectedGame,
     getListOfGames,
     getVersionsAmountData,
@@ -32,7 +31,7 @@ export default function Installs () {
   useEffect(() => {
     if (!showPopup) return
     setSelectedVersionList([])
-  }, [normalConfig, setSelectedVersionList, showPopup])
+  }, [setSelectedVersionList, showPopup])
 
   return (
     <div className='mx-4 mt-4'>
