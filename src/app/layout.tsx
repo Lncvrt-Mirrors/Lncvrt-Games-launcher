@@ -39,6 +39,7 @@ import GamesDownloadPopup from '@/componets/popups/GamesDownload'
 import DownloadsPopup from '@/componets/popups/Downloads'
 import ManageVersionPopup from '@/componets/popups/ManageVersion'
 import ModDownloadsPopup from '@/componets/popups/ModDownloads'
+import { Mod } from '@/types/Mod'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -78,7 +79,7 @@ export default function RootLayout ({
   const [selectedGame, setSelectedGame] = useState<number | null>(null)
 
   const [category, setCategory] = useState<number>(-1)
-  const [showModInfo, setShowModInfo] = useState<number>(-1)
+  const [showModInfo, setShowModInfo] = useState<Mod | null>(null)
 
   const pathname = usePathname()
   const revisionCheck = useRef(false)
@@ -175,8 +176,8 @@ export default function RootLayout ({
     } else if (viewingInfoFromDownloads) {
       setViewingInfoFromDownloads(false)
       setPopupMode(0)
-    } else if (popupMode == 3 && showModInfo != -1) {
-      setShowModInfo(-1)
+    } else if (popupMode == 3 && showModInfo) {
+      setShowModInfo(null)
     } else {
       setFadeOut(true)
       setTimeout(() => setShowPopup(false), 200)
@@ -687,7 +688,7 @@ export default function RootLayout ({
                     className={`popup-overlay ${fadeOut ? 'fade-out' : ''}`}
                     onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                       if (e.target === e.currentTarget) {
-                        if (showModInfo != -1) setShowModInfo(-1)
+                        if (showModInfo) setShowModInfo(null)
                         if (viewingInfoFromDownloads) {
                           setPopupMode(0)
                           setViewingInfoFromDownloads(false)
@@ -710,7 +711,7 @@ export default function RootLayout ({
                               selectedGame &&
                               pathname === '/') ||
                             viewingInfoFromDownloads ||
-                            (popupMode == 3 && showModInfo != -1)
+                            (popupMode == 3 && showModInfo)
                               ? faChevronLeft
                               : faXmark
                           }

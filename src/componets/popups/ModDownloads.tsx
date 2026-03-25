@@ -4,17 +4,21 @@ import { useGlobal } from '@/app/GlobalProvider'
 import { verifySignature } from '@/lib/Util'
 import { Mod } from '@/types/Mod'
 import {
+  faArrowUpRightFromSquare,
+  faClock,
+  faCodeBranch,
   faDownload,
   faGlobe,
+  faPeopleGroup,
   faRefresh
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { message } from '@tauri-apps/plugin-dialog'
 import { arch, platform } from '@tauri-apps/plugin-os'
 import { useEffect, useState } from 'react'
 
 export default function ModDownloadsPopup () {
   const {
-    getGameInfo,
     getVersionInfo,
     managingVersion,
     downloadedVersionsConfig,
@@ -26,6 +30,7 @@ export default function ModDownloadsPopup () {
   const [tab, setTab] = useState<number>(0)
 
   useEffect(() => {
+    if (!managingVersion) return
     ;(async () => {
       const response = await fetch(
         `https://games.lncvrt.xyz/api/launcher/mods?platform=${platform()}&arch=${arch()}&version=${managingVersion}`
@@ -43,7 +48,6 @@ export default function ModDownloadsPopup () {
   if (!managingVersion) return <></>
 
   const versionInfo = getVersionInfo(managingVersion)
-  const gameInfo = getGameInfo(versionInfo?.game)
 
   return (
     <>
@@ -62,14 +66,21 @@ export default function ModDownloadsPopup () {
             setMods(1)
           }
         }}
-        hidden={typeof mods == 'number' || showModInfo != -1}
+        hidden={typeof mods == 'number' || showModInfo != null}
       >
         <FontAwesomeIcon icon={faRefresh} />
       </button>
       <p className='text-xl text-center'>
-        {versionInfo?.displayName} Mod Manager
+        {!showModInfo
+          ? versionInfo?.displayName + ' Mod Manager'
+          : showModInfo.name +
+            ' by ' +
+            showModInfo.creators[0] +
+            (showModInfo.creators.length > 1
+              ? ' + ' + (showModInfo.creators.length - 1) + ' more'
+              : '')}
       </p>
-      {typeof mods != 'number' && showModInfo == -1 ? (
+      {typeof mods != 'number' && !showModInfo ? (
         <div className='flex flex-row justify-center items-center -mb-2 mt-0.5 gap-1.5'>
           <button
             className={`button ${tab == 0 ? 'btntheme3' : 'btntheme2'}`}
@@ -92,7 +103,7 @@ export default function ModDownloadsPopup () {
           <p className='text-2xl flex justify-center items-center h-full'>
             {mods == 0 ? 'Loading' : 'Failed to load mods'}
           </p>
-        ) : (
+        ) : !showModInfo ? (
           <div className='flex flex-col items-center justify-center gap-2 p-2'>
             {mods
               .filter(
@@ -132,7 +143,7 @@ export default function ModDownloadsPopup () {
                       </p>
                       <button
                         className='button btntheme3'
-                        onClick={() => setShowModInfo(v.id)}
+                        onClick={() => setShowModInfo(v)}
                       >
                         {tab == 0 ? 'View' : 'Get'}
                       </button>
@@ -140,6 +151,89 @@ export default function ModDownloadsPopup () {
                   </div>
                 )
               })}
+          </div>
+        ) : (
+          <div className='flex flex-col h-full w-full items-center'>
+            <div className='flex flex-col p-2 h-fit w-fit bg-(--col3) border border-(--col5) rounded-lg m-2 items-center'>
+              <p>
+                <FontAwesomeIcon icon={faDownload} className='text-green-400' />{' '}
+                Downloads {showModInfo.downloads}
+              </p>
+              <p>
+                <FontAwesomeIcon icon={faClock} /> Released{' '}
+                {new Intl.DateTimeFormat(undefined).format(
+                  showModInfo.released * 1000
+                )}
+              </p>
+              <p>
+                <FontAwesomeIcon icon={faClock} /> Updated{' '}
+                {new Intl.DateTimeFormat(undefined).format(
+                  showModInfo.updated * 1000
+                )}
+              </p>
+              <p>
+                <FontAwesomeIcon icon={faCodeBranch} /> Version{' '}
+                {showModInfo.latestVersion}
+              </p>
+            </div>
+            <div className='flex flex-col p-2 bg-(--col3) border border-(--col5) rounded-lg h-full w-[calc(100%-16px)]'>
+              {showModInfo.description ?? '(No description added)'}
+            </div>
+            <div className='flex flex-row h-fit w-full gap-2 justify-center my-2'>
+              {Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+                String(showModInfo.id)
+              ) ? (
+                <button className='button btntheme2 w-fit'>
+                  <FontAwesomeIcon
+                    icon={faDownload}
+                    className='text-green-400'
+                  />{' '}
+                  Uninstall
+                </button>
+              ) : (
+                <button className='button btntheme2 w-fit'>
+                  <FontAwesomeIcon
+                    icon={faDownload}
+                    className='text-green-400'
+                  />{' '}
+                  Install
+                </button>
+              )}
+              <button
+                className='button btntheme2 w-fit'
+                onClick={async () => {
+                  await message(
+                    !showModInfo.changelog
+                      ? '(No changelog provided)'
+                      : atob(showModInfo?.changelog ?? ''),
+                    {
+                      title: 'Changelog for ' + showModInfo.name,
+                      kind: 'info'
+                    }
+                  )
+                }}
+              >
+                <FontAwesomeIcon
+                  icon={faArrowUpRightFromSquare}
+                  color='lightgray'
+                />{' '}
+                View changelog
+              </button>
+              <button
+                className='button btntheme2 w-fit'
+                hidden={showModInfo.creators.length < 2}
+                onClick={async () => {
+                  if (!versionInfo) return
+                  await message(showModInfo.creators.join(', '), {
+                    title: 'Creators for ' + showModInfo.name,
+                    kind: 'info'
+                  })
+                }}
+              >
+                <FontAwesomeIcon icon={faPeopleGroup} color='lightgray' /> View
+                all creators
+              </button>
+            </div>
           </div>
         )}
       </div>

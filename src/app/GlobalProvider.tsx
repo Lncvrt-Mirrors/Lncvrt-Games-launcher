@@ -13,6 +13,7 @@ import { NormalConfig } from '@/types/NormalConfig'
 import { ServerVersionsResponse } from '@/types/ServerVersionsResponse'
 import { GameVersion } from '@/types/GameVersion'
 import { Game } from '@/types/Game'
+import { Mod } from '@/types/Mod'
 
 type GlobalCtxType = {
   serverVersionList: ServerVersionsResponse | null
@@ -53,8 +54,8 @@ type GlobalCtxType = {
   getSpecialVersionsList(game?: number | undefined): GameVersion[]
   selectedGame: number | null
   setViewingInfoFromDownloads: Dispatch<SetStateAction<boolean>>
-  showModInfo: number
-  setShowModInfo: Dispatch<SetStateAction<number>>
+  showModInfo: Mod | null
+  setShowModInfo: Dispatch<SetStateAction<Mod | null>>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)

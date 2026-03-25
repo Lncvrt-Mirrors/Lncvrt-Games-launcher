@@ -1,14 +1,14 @@
 export type VersionsConfigData = {
   version: string
   list: Record<string, number>
-  mods: Record<string, string>
+  mods: Record<string, Record<string, number>>
 }
 
 export class VersionsConfig {
   constructor (
     public version: string,
     public list: Record<string, number> = {},
-    public mods: Record<string, string> = {}
+    public mods: Record<string, Record<string, number>> = {}
   ) {}
 
   static import (data: VersionsConfigData) {
