@@ -44,7 +44,14 @@ type GlobalCtxType = {
   viewingInfoFromDownloads: boolean
   version: string | null
   downloadVersions: (
-    list: Array<{ id: string; type: 0 | 1 | 2 }>
+    list: Array<{
+      id: string
+      type: 0 | 1 | 2
+      modDownload?: number
+      gameId?: number
+      modId?: number
+      modVersion?: string
+    }>
   ) => Promise<void>
   category: number
   setCategory: Dispatch<SetStateAction<number>>

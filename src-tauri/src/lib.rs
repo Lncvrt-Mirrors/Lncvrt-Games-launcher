@@ -149,6 +149,7 @@ async fn download(
     name: String,
     hash: String,
     download_type: i8,
+    mod_id: String,
 ) -> String {
     println!("[download] Starting download for '{}' from '{}'", name, url);
     let _ = app.emit("download-start", format!("{}", name));
@@ -464,7 +465,11 @@ async fn download(
         app.clone(),
         download_zip_path.clone(),
         if download_type == 2 {
-            game_path.join(&name).join("BepInEx").join("plugins")
+            game_path
+                .join(&name)
+                .join("BepInEx")
+                .join("plugins")
+                .join(&mod_id)
         } else {
             game_path.join(&name)
         },

@@ -171,7 +171,11 @@ export default function DownloadsPopup () {
                 </div>
               </div>
               <p className='text-2xl text-center'>
-                {v.type == 1 ? 'Mod Manager for ' : null}{' '}
+                {v.type == 1
+                  ? 'Mod Manager for '
+                  : v.type == 2
+                  ? 'Mod for '
+                  : null}{' '}
                 {getVersionInfo(v.version)?.displayName}
               </p>
               <div className='mt-6.25 flex items-center justify-between'>

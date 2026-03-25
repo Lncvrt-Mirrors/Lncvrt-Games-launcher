@@ -366,7 +366,16 @@ export default function RootLayout ({
   }, [])
 
   const downloadVersions = useCallback(
-    async (list: Array<{ id: string; type: 0 | 1 | 2 }>): Promise<void> => {
+    async (
+      list: Array<{
+        id: string
+        type: 0 | 1 | 2
+        modDownload?: number
+        gameId?: number
+        modId?: number
+        modVersion?: string
+      }>
+    ): Promise<void> => {
       if (list.length === 0) return
       setSelectedVersionList([])
 
@@ -399,7 +408,11 @@ export default function RootLayout ({
             null,
             null,
             null,
-            item.type
+            item.type,
+            item.modDownload ?? null,
+            item.gameId ?? null,
+            item.modId ?? null,
+            item.modVersion ?? null
           )
       )
 
@@ -444,7 +457,9 @@ export default function RootLayout ({
           (downloadInfo.type == 0
             ? '?gameId=' + info.id + '&downloadId=' + info.download
             : '?downloadId=' +
-              (downloadInfo.type == 1 ? info.modSupportDownload : ''))
+              (downloadInfo.type == 1
+                ? info.modSupportDownload
+                : downloadInfo.modDownload))
       )
       const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
       const data = await downloadInfoRequest.json()
@@ -487,25 +502,39 @@ export default function RootLayout ({
         url: data.data.url,
         name: info.id,
         hash: data.data.hash,
-        downloadType: downloadInfo.type
+        downloadType: downloadInfo.type,
+        modId: String(downloadInfo.modId ?? '')
       })
 
       if (res === '1') {
         setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
-        setDownloadedVersionsConfig(prev => {
-          if (!prev) return prev
+        if (downloadInfo.type != 1) {
+          setDownloadedVersionsConfig(prev => {
+            if (!prev) return prev
 
-          const updated = {
-            ...prev,
-            list: {
-              ...prev.list,
-              [versionId]: Date.now()
-            }
-          }
+            const updated =
+              downloadInfo.type == 2
+                ? {
+                    ...prev,
+                    mods: {
+                      ...prev.mods,
+                      [downloadInfo.modGame! + '-' + downloadInfo.modId!]: {
+                        [downloadInfo.modVersion!]: Date.now()
+                      }
+                    }
+                  }
+                : {
+                    ...prev,
+                    list: {
+                      ...prev.list,
+                      [versionId]: Date.now()
+                    }
+                  }
 
-          writeVersionsConfig(updated)
-          return updated
-        })
+            writeVersionsConfig(updated)
+            return updated
+          })
+        }
       } else if (res == '0') {
         setDownloadProgress(prev => {
           const i = prev.findIndex(d => d.version === info.id)

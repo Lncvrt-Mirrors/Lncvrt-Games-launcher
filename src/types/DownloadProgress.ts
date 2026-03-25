@@ -18,6 +18,10 @@ export class DownloadProgress {
     public url: string | null,
     public executable: string | null,
     public hash: string | null,
-    public type: 0 | 1 | 2
+    public type: 0 | 1 | 2,
+    public modDownload: number | null,
+    public modGame: number | null,
+    public modId: number | null,
+    public modVersion: string | null
   ) {}
 }

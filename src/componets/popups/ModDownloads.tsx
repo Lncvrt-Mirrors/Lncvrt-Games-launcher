@@ -1,6 +1,7 @@
 'use client'
 
 import { useGlobal } from '@/app/GlobalProvider'
+import { writeVersionsConfig } from '@/lib/BazookaManager'
 import { verifySignature } from '@/lib/Util'
 import { Mod } from '@/types/Mod'
 import {
@@ -10,10 +11,12 @@ import {
   faDownload,
   faGlobe,
   faPeopleGroup,
-  faRefresh
+  faRefresh,
+  faTrash
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { message } from '@tauri-apps/plugin-dialog'
+import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { arch, platform } from '@tauri-apps/plugin-os'
 import { useEffect, useState } from 'react'
 
@@ -23,7 +26,10 @@ export default function ModDownloadsPopup () {
     managingVersion,
     downloadedVersionsConfig,
     showModInfo,
-    setShowModInfo
+    setShowModInfo,
+    downloadVersions,
+    downloadProgress,
+    setDownloadedVersionsConfig
   } = useGlobal()
 
   const [mods, setMods] = useState<Mod[] | 0 | 1>(0)
@@ -106,16 +112,14 @@ export default function ModDownloadsPopup () {
         ) : !showModInfo ? (
           <div className='flex flex-col items-center justify-center gap-2 p-2'>
             {mods
-              .filter(
-                v =>
-                  !downloadedVersionsConfig ||
-                  (tab == 0
-                    ? Object.keys(downloadedVersionsConfig.mods).includes(
-                        String(v.id)
-                      )
-                    : !Object.keys(downloadedVersionsConfig.mods).includes(
-                        String(v.id)
-                      ))
+              .filter(v =>
+                tab == 0
+                  ? Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+                      String(versionInfo?.game + '-' + v.id)
+                    )
+                  : !Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+                      String(versionInfo?.game + '-' + v.id)
+                    )
               )
               .map(v => {
                 return (
@@ -181,17 +185,63 @@ export default function ModDownloadsPopup () {
             </div>
             <div className='flex flex-row h-fit w-full gap-2 justify-center my-2'>
               {Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
-                String(showModInfo.id)
+                String(versionInfo?.game + '-' + showModInfo.id)
               ) ? (
-                <button className='button btntheme2 w-fit'>
-                  <FontAwesomeIcon
-                    icon={faDownload}
-                    className='text-green-400'
-                  />{' '}
+                <button
+                  className='button btntheme2 w-fit'
+                  disabled={downloadProgress.length != 0}
+                  onClick={async () => {
+                    const path =
+                      'game/' +
+                      versionInfo?.id +
+                      '/BepInEx/plugins/' +
+                      showModInfo.id
+                    if (
+                      await exists(path, {
+                        baseDir: BaseDirectory.AppLocalData
+                      })
+                    )
+                      await remove(path, {
+                        baseDir: BaseDirectory.AppLocalData,
+                        recursive: true
+                      })
+                    setDownloadedVersionsConfig(prev => {
+                      if (!prev) return prev
+                      const updatedMods = Object.fromEntries(
+                        Object.entries(prev.mods).filter(
+                          ([k]) =>
+                            k !== versionInfo?.game + '-' + showModInfo.id
+                        )
+                      )
+                      const updatedConfig = {
+                        ...prev,
+                        mods: updatedMods
+                      }
+                      writeVersionsConfig(updatedConfig)
+                      return updatedConfig
+                    })
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTrash} className='text-red-400' />{' '}
                   Uninstall
                 </button>
               ) : (
-                <button className='button btntheme2 w-fit'>
+                <button
+                  className='button btntheme2 w-fit'
+                  onClick={() => {
+                    downloadVersions([
+                      {
+                        id: managingVersion,
+                        type: 2,
+                        modDownload: showModInfo.latestDownload,
+                        gameId: versionInfo?.game,
+                        modId: showModInfo.id,
+                        modVersion: showModInfo.latestVersion
+                      }
+                    ])
+                  }}
+                  disabled={downloadProgress.length != 0}
+                >
                   <FontAwesomeIcon
                     icon={faDownload}
                     className='text-green-400'
