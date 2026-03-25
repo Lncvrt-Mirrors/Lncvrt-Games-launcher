@@ -558,7 +558,12 @@ fn launch_game(
         }
     }
 
-    if platform() == "macos" {
+    let bepinex_folder = match app.path().app_local_data_dir() {
+        Ok(p) => p.join("game").join(&name).join("BepInEx"),
+        Err(_) => return,
+    };
+
+    if platform() == "macos" && !bepinex_folder.exists() {
         if let Err(_) = Command::new("open")
             .arg(&executable)
             .current_dir(&game_folder)
@@ -567,8 +572,18 @@ fn launch_game(
             eprintln!("Failed to launch game on macOS");
         }
     } else {
-        if let Err(_) = Command::new(&exe_path).current_dir(&game_folder).spawn() {
-            eprintln!("Failed to launch game");
+        if (platform() == "macos" || platform() == "linux") && bepinex_folder.exists() {
+            if let Err(_) = Command::new("./run_bepinex.sh")
+                .arg(&executable)
+                .current_dir(&game_folder)
+                .spawn()
+            {
+                eprintln!("Failed to launch game");
+            }
+        } else {
+            if let Err(_) = Command::new(&exe_path).current_dir(&game_folder).spawn() {
+                eprintln!("Failed to launch game");
+            }
         }
     }
 }
