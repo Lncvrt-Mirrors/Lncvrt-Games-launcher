@@ -37,7 +37,7 @@ export default function Sidebar () {
     category,
     setCategory,
     sidebarAlwaysShowGames,
-    unixUseWine
+    linuxUseWine
   } = useGlobal()
 
   const pathname = usePathname()
@@ -137,7 +137,7 @@ export default function Sidebar () {
                     const info = getVersionInfo(v)
                     if (!info) return false
 
-                    if (platform() == 'linux' && info.wine && !unixUseWine)
+                    if (platform() == 'linux' && info.wine && !linuxUseWine)
                       return false
 
                     return info.game === i.id && info.category === Number(key)

@@ -90,8 +90,9 @@ export default function RootLayout ({
     useState<boolean>(false)
   const [sidebarAlwaysShowGames, setSidebarAlwaysShowGames] =
     useState<boolean>(false)
-  const [unixUseWine, setUnixUseWine] = useState<boolean>(false)
-  const [unixWineCommand, setUnixWineCommand] = useState<string>('wine %path%')
+  const [linuxUseWine, setLinuxUseWine] = useState<boolean>(false)
+  const [linuxWineCommand, setLinuxWineCommand] =
+    useState<string>('wine %path%')
   const [theme, setTheme] = useState<string>('dark')
 
   function getSpecialVersionsList (game?: number): GameVersion[] {
@@ -102,7 +103,7 @@ export default function RootLayout ({
         v => !Object.keys(downloadedVersionsConfig?.list ?? []).includes(v.id)
       )
       .filter(v => {
-        if (platformName == 'linux' && v.wine && unixUseWine) return false
+        if (platformName == 'linux' && v.wine && linuxUseWine) return false
 
         if (game && v.game != game) return false
         if (category != -1 && v.category != category) return false
@@ -155,7 +156,7 @@ export default function RootLayout ({
   } | null {
     if (!downloadedVersionsConfig || !serverVersionList) return null
 
-    const allowWine = platformName !== 'linux' || unixUseWine
+    const allowWine = platformName !== 'linux' || linuxUseWine
 
     const installed = Object.keys(downloadedVersionsConfig.list).filter(v => {
       const info = getVersionInfo(v)
@@ -363,8 +364,8 @@ export default function RootLayout ({
           version: client,
           notificationsAllowed: true,
           sidebarAlwaysShowGames: true,
-          unixUseWine: false,
-          unixWineCommand: 'wine %path%',
+          linuxUseWine: false,
+          linuxWineCommand: 'wine %path%',
           theme: 'dark'
         }
       })
@@ -408,12 +409,12 @@ export default function RootLayout ({
           )
         if (raw.settings.useWineOnUnixWhenNeeded)
           settingsLocal?.set(
-            'unixUseWine',
+            'linuxUseWine',
             Boolean(raw.settings.useWineOnUnixWhenNeeded)
           )
         if (raw.settings.wineOnUnixCommand)
           settingsLocal?.set(
-            'unixWineCommand',
+            'linuxWineCommand',
             String(raw.settings.wineOnUnixCommand)
           )
         if (raw.settings.theme) {
@@ -707,9 +708,9 @@ export default function RootLayout ({
     watch<boolean>('sidebarAlwaysShowGames', v =>
       setSidebarAlwaysShowGames(v ?? true)
     )
-    watch<boolean>('unixUseWine', v => setUnixUseWine(v ?? false))
-    watch<string>('unixWineCommand', v =>
-      setUnixWineCommand(v ?? 'wine %path%')
+    watch<boolean>('linuxUseWine', v => setLinuxUseWine(v ?? false))
+    watch<string>('linuxWineCommand', v =>
+      setLinuxWineCommand(v ?? 'wine %path%')
     )
 
     return () => {
@@ -793,8 +794,8 @@ export default function RootLayout ({
                 settings,
                 notificationsAllowed,
                 sidebarAlwaysShowGames,
-                unixUseWine,
-                unixWineCommand,
+                linuxUseWine,
+                linuxWineCommand,
                 theme
               }}
             >

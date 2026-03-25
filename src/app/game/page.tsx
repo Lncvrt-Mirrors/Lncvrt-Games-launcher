@@ -31,8 +31,8 @@ export default function Installs () {
     setDownloadedVersionsConfig,
     downloadVersions,
     downloadProgress,
-    unixUseWine,
-    unixWineCommand
+    linuxUseWine,
+    linuxWineCommand
   } = useGlobal()
 
   const params = useSearchParams()
@@ -130,7 +130,7 @@ export default function Installs () {
                   const info = getVersionInfo(v)
                   if (!info) return false
 
-                  if (platform() == 'linux' && info.wine && !unixUseWine)
+                  if (platform() == 'linux' && info.wine && !linuxUseWine)
                     return false
 
                   return info.game === id && info.category === Number(key)
@@ -165,7 +165,7 @@ export default function Installs () {
                                 if (
                                   platform() == 'linux' &&
                                   info.wine &&
-                                  !unixUseWine
+                                  !linuxUseWine
                                 )
                                   return false
                                 return (
@@ -196,7 +196,7 @@ export default function Installs () {
               .filter(v => {
                 const info = getVersionInfo(v)
                 if (!info) return false
-                if (platform() == 'linux' && info.wine && !unixUseWine)
+                if (platform() == 'linux' && info.wine && !linuxUseWine)
                   return false
                 return (
                   info.game === id &&
@@ -291,9 +291,9 @@ export default function Installs () {
                       useWine: !!(
                         platform() == 'linux' &&
                         verInfo.wine &&
-                        unixUseWine
+                        linuxUseWine
                       ),
-                      wineCommand: unixWineCommand
+                      wineCommand: linuxWineCommand
                     })
                   }}
                   onContextMenu={e => {

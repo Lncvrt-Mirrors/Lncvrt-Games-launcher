@@ -11,8 +11,8 @@ export default function Settings () {
     version,
     notificationsAllowed,
     sidebarAlwaysShowGames,
-    unixUseWine,
-    unixWineCommand,
+    linuxUseWine,
+    linuxWineCommand,
     theme
   } = useGlobal()
 
@@ -40,22 +40,22 @@ export default function Settings () {
           title="This setting will make it so when you are on a page like this, the games won't disappear."
         />
         <Setting
-          label='Use wine when needed to launch games'
-          value={unixUseWine}
+          label='Use wine if needed'
+          value={linuxUseWine}
           onChange={async () => {
-            await settings?.set('unixUseWine', !unixUseWine)
+            await settings?.set('linuxUseWine', !linuxUseWine)
           }}
           className={platform() == 'linux' ? '' : 'hidden'}
         />
-        <p hidden={!(platform() == 'linux' && unixUseWine)}>Wine Command:</p>
+        <p hidden={!(platform() == 'linux' && linuxUseWine)}>Wine Command:</p>
         <input
           type='text'
-          value={unixWineCommand}
+          value={linuxWineCommand}
           onChange={async e => {
-            await settings?.set('unixUseWine', e.target.value)
+            await settings?.set('linuxWineCommand', e.target.value)
           }}
           className={`input-field my-1 ${
-            platform() == 'linux' && unixUseWine ? '' : 'hidden'
+            platform() == 'linux' && linuxWineCommand ? '' : 'hidden'
           }`}
         ></input>
         <div title='The theme you want the launcher to use.'>
