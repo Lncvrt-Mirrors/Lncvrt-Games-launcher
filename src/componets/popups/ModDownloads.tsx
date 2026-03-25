@@ -17,6 +17,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { message } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
+import { fetch } from '@tauri-apps/plugin-http'
 import { arch, platform } from '@tauri-apps/plugin-os'
 import { useEffect, useState } from 'react'
 

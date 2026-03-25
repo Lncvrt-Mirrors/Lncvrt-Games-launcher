@@ -2,9 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
   "permissions": [
     "core:default",
     "opener:default",
@@ -30,15 +28,11 @@
     "fs:allow-applocaldata-write",
     {
       "identifier": "fs:scope",
-      "allow": [
-        { "path": "$APPLOCALDATA/game/**" }
-      ]
+      "allow": [{ "path": "$APPLOCALDATA/game/**" }]
     },
     {
       "identifier": "opener:allow-open-path",
-      "allow": [
-        { "path": "$APPLOCALDATA/game/**" }
-      ]
+      "allow": [{ "path": "$APPLOCALDATA/game/**" }]
     },
     {
       "identifier": "http:default",
@@ -51,7 +45,8 @@
         { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/berry" },
         { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/coin" },
         { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/legacy" },
-        { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/total" }
+        { "url": "https://games.lncvrt.xyz/api/berrydash/leaderboard/total" },
+        { "url": "https://games.lncvrt.xyz/api/launcher/mods" }
       ]
     }
   ]
