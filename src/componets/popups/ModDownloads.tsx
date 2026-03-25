@@ -105,9 +105,25 @@ export default function ModDownloadsPopup () {
         </div>
       ) : null}
       <div className='popup-content h-full'>
-        {typeof mods == 'number' ? (
+        {typeof mods == 'number' ||
+        (!showModInfo &&
+          mods.filter(v =>
+            tab == 0
+              ? Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+                  String(versionInfo?.game + '-' + v.id)
+                )
+              : !Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+                  String(versionInfo?.game + '-' + v.id)
+                )
+          ).length == 0) ? (
           <p className='text-2xl flex justify-center items-center h-full'>
-            {mods == 0 ? 'Loading' : 'Failed to load mods'}
+            {typeof mods == 'number'
+              ? mods == 0
+                ? 'Loading'
+                : 'Failed to load mods'
+              : tab == 0
+              ? 'No mods installed'
+              : 'No mods available to download'}
           </p>
         ) : !showModInfo ? (
           <div className='flex flex-col items-center justify-center gap-2 p-2'>
