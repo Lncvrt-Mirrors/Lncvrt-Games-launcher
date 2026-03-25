@@ -180,7 +180,8 @@ export default function ModDownloadsPopup () {
                     </div>
                     <div className='flex flex-row items-center h-full gap-2 px-3 ml-auto'>
                       <p className='text-green-400' hidden={tab == 0}>
-                        <FontAwesomeIcon icon={faDownload} /> {v.downloads}
+                        <FontAwesomeIcon icon={faDownload} />{' '}
+                        {v.downloads.toLocaleString()}
                       </p>
                       <button
                         className='button btntheme3'
@@ -246,7 +247,7 @@ export default function ModDownloadsPopup () {
             <div className='flex flex-col p-2 h-fit w-fit bg-(--col3) border border-(--col5) rounded-lg m-2 items-center'>
               <p>
                 <FontAwesomeIcon icon={faDownload} className='text-green-400' />{' '}
-                Downloads {showModInfo.downloads}
+                Downloads {showModInfo.downloads.toLocaleString()}
               </p>
               <p>
                 <FontAwesomeIcon icon={faClock} /> Released{' '}

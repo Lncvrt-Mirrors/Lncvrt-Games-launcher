@@ -298,14 +298,14 @@ export default function BerryDashLeaderboards () {
                           : selected === 2
                           ? 'Coins'
                           : 'Score'}
-                        : {item.value.toLocaleString('en-US')}
+                        : {item.value.toLocaleString()}
                       </p>
                     ) : isAccount ? (
                       <p>
                         {selected === 3 ? 'Level' : 'XP'}:{' '}
                         {selected === 3
-                          ? calculateLevel(item.xp).toLocaleString('en-US')
-                          : item.xp.toLocaleString('en-US')}
+                          ? calculateLevel(item.xp).toLocaleString()
+                          : item.xp.toLocaleString()}
                       </p>
                     ) : null}
                   </div>
