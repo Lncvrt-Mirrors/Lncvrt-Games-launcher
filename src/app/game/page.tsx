@@ -194,7 +194,7 @@ export default function Installs () {
               .sort((a, b) => {
                 const infoA = getVersionInfo(a)
                 const infoB = getVersionInfo(b)
-                if (!infoA || !infoB) return -1
+                if (!infoA || !infoB) return 0
                 return infoB.place - infoA.place
               })
               .filter(v => {
