@@ -58,28 +58,42 @@ export default function DownloadsPopup () {
                       const res = await invoke<string>('download', {
                         url: v.url,
                         name: v.version,
-                        executable: v.executable,
-                        hash: v.hash
+                        hash: v.hash,
+                        downloadType: v.type,
+                        modId: String(v.modId ?? '')
                       })
 
                       if (res === '1') {
                         setDownloadProgress(prev =>
                           prev.filter(d => d.version !== v.version)
                         )
-                        setDownloadedVersionsConfig(prev => {
-                          if (!prev) return prev
+                        if (v.type != 1) {
+                          setDownloadedVersionsConfig(prev => {
+                            if (!prev) return prev
 
-                          const updated = {
-                            ...prev,
-                            list: {
-                              ...prev.list,
-                              [v.version]: Date.now()
-                            }
-                          }
+                            const updated =
+                              v.type == 2
+                                ? {
+                                    ...prev,
+                                    mods: {
+                                      ...prev.mods,
+                                      [v.modGame! + '-' + v.modId!]: {
+                                        [v.modVersion!]: Date.now()
+                                      }
+                                    }
+                                  }
+                                : {
+                                    ...prev,
+                                    list: {
+                                      ...prev.list,
+                                      [v.version]: Date.now()
+                                    }
+                                  }
 
-                          writeVersionsConfig(updated)
-                          return updated
-                        })
+                            writeVersionsConfig(updated)
+                            return updated
+                          })
+                        }
                       } else if (res == '0') {
                         setDownloadProgress(prev => {
                           const i = prev.findIndex(d => d.version === v.version)
