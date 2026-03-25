@@ -455,11 +455,12 @@ export default function RootLayout ({
       const downloadInfoRequest = await fetch(
         'https://games.lncvrt.xyz/api/launcher/download' +
           (downloadInfo.type == 0
-            ? '?gameId=' + info.id + '&downloadId=' + info.download
+            ? '?versionId=' + info.id + '&downloadId=' + info.download
             : '?downloadId=' +
               (downloadInfo.type == 1
                 ? info.modSupportDownload
-                : downloadInfo.modDownload))
+                : downloadInfo.modDownload)) +
+          (downloadInfo.type == 2 ? '&modId=' + downloadInfo.modId : '')
       )
       const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
       const data = await downloadInfoRequest.json()

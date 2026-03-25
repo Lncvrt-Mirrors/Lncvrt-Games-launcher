@@ -138,6 +138,14 @@ export default function ModDownloadsPopup () {
                     )
               )
               .map(v => {
+                const localVersion =
+                  tab == 0
+                    ? Object.keys(
+                        downloadedVersionsConfig?.mods?.[
+                          versionInfo?.game + '-' + v.id
+                        ] ?? {}
+                      )[0]
+                    : null
                 return (
                   <div
                     key={v.id}
@@ -146,8 +154,21 @@ export default function ModDownloadsPopup () {
                     <div className='flex flex-col justify-center h-full px-3 w-fit'>
                       <p>
                         <span className='text-lg'>{v.name}</span>{' '}
-                        <span className='text-green-300'>
-                          v{v.latestVersion}
+                        <span
+                          className={
+                            tab != 0 || v.latestVersion == localVersion
+                              ? 'text-green-300'
+                              : 'text-red-300'
+                          }
+                        >
+                          v{tab == 0 ? localVersion : v.latestVersion}
+                        </span>
+                        <span
+                          className='text-green-300'
+                          hidden={tab != 0 || v.latestVersion == localVersion}
+                        >
+                          {' '}
+                          (available: v{v.latestVersion})
                         </span>
                       </p>
                       <p className='text-yellow-200'>
@@ -161,6 +182,54 @@ export default function ModDownloadsPopup () {
                       <p className='text-green-400' hidden={tab == 0}>
                         <FontAwesomeIcon icon={faDownload} /> {v.downloads}
                       </p>
+                      <button
+                        className='button btntheme3'
+                        onClick={async () => {
+                          const path =
+                            'game/' +
+                            versionInfo?.id +
+                            '/BepInEx/plugins/' +
+                            v.id
+                          if (
+                            await exists(path, {
+                              baseDir: BaseDirectory.AppLocalData
+                            })
+                          )
+                            await remove(path, {
+                              baseDir: BaseDirectory.AppLocalData,
+                              recursive: true
+                            })
+                          setDownloadedVersionsConfig(prev => {
+                            if (!prev) return prev
+                            const updatedMods = Object.fromEntries(
+                              Object.entries(prev.mods).filter(
+                                ([k]) => k !== versionInfo?.game + '-' + v.id
+                              )
+                            )
+                            const updatedConfig = {
+                              ...prev,
+                              mods: updatedMods
+                            }
+                            writeVersionsConfig(updatedConfig)
+                            return updatedConfig
+                          })
+
+                          downloadVersions([
+                            {
+                              id: managingVersion,
+                              type: 2,
+                              modDownload: v.latestDownload,
+                              gameId: versionInfo?.game,
+                              modId: v.id,
+                              modVersion: v.latestVersion
+                            }
+                          ])
+                        }}
+                        hidden={tab != 0 || v.latestVersion == localVersion}
+                        disabled={downloadProgress.length != 0}
+                      >
+                        Update
+                      </button>
                       <button
                         className='button btntheme3'
                         onClick={() => setShowModInfo(v)}
@@ -197,7 +266,9 @@ export default function ModDownloadsPopup () {
               </p>
             </div>
             <div className='flex flex-col p-2 bg-(--col3) border border-(--col5) rounded-lg h-full w-[calc(100%-16px)]'>
-              {showModInfo.description ?? '(No description added)'}
+              {showModInfo.description
+                ? atob(showModInfo.description)
+                : '(No description added)'}
             </div>
             <div className='flex flex-row h-fit w-full gap-2 justify-center my-2'>
               {Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
