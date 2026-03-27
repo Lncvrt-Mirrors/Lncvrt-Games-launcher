@@ -1,6 +1,6 @@
 'use client'
 
-import { Setting } from '@/componets/Setting'
+import { Setting } from '@/components/Setting'
 import { useGlobal } from '@/app/GlobalProvider'
 import { copyToClipboard } from '@/lib/Clipboard'
 import { platform } from '@tauri-apps/plugin-os'
