@@ -693,6 +693,32 @@ export default function RootLayout ({
   }, [serverVersionList, downloadedVersionsConfig, downloadVersions])
 
   useEffect(() => {
+    if (
+      downloadProgress.length === 0 &&
+      downloadQueue.length === 0 &&
+      showPopup &&
+      popupMode === 1
+    ) {
+      setTimeout(async () => {
+        if (notificationsAllowed) {
+          await notifyUser('Downloads Complete', 'All downloads finished!')
+        }
+        await getCurrentWindow().requestUserAttention(
+          UserAttentionType.Informational
+        )
+        closePopup()
+      }, 0)
+    }
+  }, [
+    downloadProgress,
+    downloadQueue,
+    showPopup,
+    popupMode,
+    closePopup,
+    notificationsAllowed
+  ])
+
+  useEffect(() => {
     if (!settings) return
     const unlisteners: Promise<() => void>[] = []
 
