@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  overscroll-behavior: none;
+}
+
 body {
   @apply bg-(--col0) text-white select-none;
 }
