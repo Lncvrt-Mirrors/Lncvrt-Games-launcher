@@ -33,6 +33,7 @@ base64 = "0.22.1"
 tauri-plugin-http = "2.5.7"
 dashmap = "6.1.0"
 tauri-plugin-store = "2.4.2"
+hex = "0.4.3"
 
 [target.'cfg(any(target_os = "windows", target_os = "linux"))'.dependencies]
 sysinfo = "0.38.4"

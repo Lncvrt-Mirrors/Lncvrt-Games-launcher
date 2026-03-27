@@ -154,25 +154,19 @@ async fn download(
     download_type: i8,
     mod_id: String,
 ) -> String {
-    println!("[download] Starting download for '{}' from '{}'", name, url);
     let _ = app.emit("download-start", format!("{}", name));
     let window = app.get_webview_window("main").expect("main window missing");
 
     let downloads_path = match app.path().app_local_data_dir() {
         Ok(p) => p.join("downloads"),
-        Err(e) => {
-            println!(
-                "[download] ERROR: Failed to resolve app_local_data_dir: {}",
-                e
-            );
+        Err(_) => {
             let _ = &app.emit("download-stop", format!("{}", name));
             return "-1".to_string();
         }
     };
     let game_path = match app.path().app_local_data_dir() {
         Ok(p) => p.join("game"),
-        Err(e) => {
-            println!("[download] ERROR: Failed to resolve game path: {}", e);
+        Err(_) => {
             let _ = &app.emit("download-stop", format!("{}", name));
             return "-1".to_string();
         }
@@ -180,18 +174,12 @@ async fn download(
 
     let download_part_path = downloads_path.join(format!("{}.part", name));
     let download_zip_path = downloads_path.join(format!("{}.zip", name));
-    println!("[download] Part file: {:?}", download_part_path);
-    println!("[download] Zip file:  {:?}", download_zip_path);
 
     let _ = tokio::fs::create_dir_all(&downloads_path).await;
 
     let resume_from: u64 = match tokio::fs::metadata(&download_part_path).await {
         Ok(meta) => {
             let size = meta.len();
-            println!(
-                "[download] Found existing .part file ({} bytes), will attempt to resume",
-                size
-            );
             size
         }
         Err(_) => 0,
@@ -201,16 +189,11 @@ async fn download(
     let mut request = client.get(&url);
     if resume_from > 0 {
         request = request.header("Range", format!("bytes={}-", resume_from));
-        println!("[download] Requesting range: bytes={}-", resume_from);
     }
 
     let resp = match request.send().await {
-        Ok(r) => {
-            println!("[download] HTTP request succeeded, status: {}", r.status());
-            r
-        }
-        Err(e) => {
-            println!("[download] ERROR: HTTP request failed: {:?}", e);
+        Ok(r) => r,
+        Err(_) => {
             let _ = &app.emit("download-stop", format!("{}", name));
             return "-1".to_string();
         }
@@ -219,19 +202,11 @@ async fn download(
     let status = resp.status();
 
     let actual_resume_from = if resume_from > 0 && status == reqwest::StatusCode::OK {
-        println!(
-            "[download] Server does not support range requests (got 200), restarting from scratch"
-        );
         let _ = tokio::fs::remove_file(&download_part_path).await;
         0
     } else if resume_from > 0 && status == reqwest::StatusCode::PARTIAL_CONTENT {
-        println!("[download] Server accepted range request (206 Partial Content)");
         resume_from
     } else if resume_from > 0 {
-        println!(
-            "[download] Unexpected status {} while resuming, restarting",
-            status
-        );
         let _ = tokio::fs::remove_file(&download_part_path).await;
         0
     } else {
@@ -240,13 +215,6 @@ async fn download(
 
     let remaining_size = resp.content_length().unwrap_or(0);
     let total_size = actual_resume_from + remaining_size;
-    println!(
-        "[download] Resume offset: {} bytes | Remaining: {} bytes | Total: {} bytes ({:.2} MB)",
-        actual_resume_from,
-        remaining_size,
-        total_size,
-        total_size as f64 / 1_048_576.0
-    );
     let _ = app.emit("download-size", format!("{}:{}", &name, &total_size));
 
     let mut file = if actual_resume_from > 0 {
@@ -255,15 +223,8 @@ async fn download(
             .open(&download_part_path)
             .await
         {
-            Ok(f) => {
-                println!("[download] Opened .part file in append mode for resume");
-                f
-            }
-            Err(e) => {
-                println!(
-                    "[download] ERROR: Failed to open .part file for append: {}",
-                    e
-                );
+            Ok(f) => f,
+            Err(_) => {
                 let _ = &app.emit("download-stop", format!("{}", name));
                 return "-1".to_string();
             }
@@ -271,22 +232,14 @@ async fn download(
     } else {
         if download_type == 0 {
             if let Ok(true) = tokio::fs::try_exists(&game_path.join(&name)).await {
-                println!(
-                    "[download] Existing game dir found, removing: {:?}",
-                    game_path.join(&name)
-                );
                 let _ = tokio::fs::remove_dir_all(&game_path.join(&name)).await;
             }
             let _ = tokio::fs::create_dir_all(&game_path.join(&name)).await;
         }
 
         match tokio::fs::File::create(&download_part_path).await {
-            Ok(f) => {
-                println!("[download] Created new .part file");
-                f
-            }
-            Err(e) => {
-                println!("[download] ERROR: Failed to create .part file: {}", e);
+            Ok(f) => f,
+            Err(_) => {
                 let _ = &app.emit("download-stop", format!("{}", name));
                 return "-1".to_string();
             }
@@ -301,7 +254,6 @@ async fn download(
 
     while let Ok(Some(chunk_result)) = timeout(Duration::from_secs(5), stream.next()).await {
         if is_cancelled(&name) {
-            println!("[download] Cancelled '{}' during chunk loop", name);
             cancel_map().remove(&name);
             let _ = window.set_progress_bar(ProgressBarState {
                 status: Some(ProgressBarStatus::None),
@@ -312,11 +264,7 @@ async fn download(
 
         let chunk = match chunk_result {
             Ok(c) => c,
-            Err(e) => {
-                println!(
-                    "[download] ERROR: Failed to read chunk #{}: {}",
-                    chunk_count, e
-                );
+            Err(_) => {
                 let _ = &app.emit("download-stop", format!("{}", name));
                 return "-1".to_string();
             }
@@ -324,11 +272,7 @@ async fn download(
 
         chunk_count += 1;
 
-        if let Err(e) = file.write_all(&chunk).await {
-            println!(
-                "[download] ERROR: Failed to write chunk #{} to disk: {}",
-                chunk_count, e
-            );
+        if let Err(_) = file.write_all(&chunk).await {
             let _ = &app.emit("download-stop", format!("{}", name));
             return "-1".to_string();
         }
@@ -355,15 +299,6 @@ async fn download(
         };
 
         if chunk_count % 50 == 0 || downloaded == total_size {
-            println!(
-                "[download] [{:.1}%] {:.2} MB / {:.2} MB | Speed: {:.1} KB/s | ETA: {:.1}s | Chunks: {}",
-                progress,
-                downloaded as f64 / 1_048_576.0,
-                total_size as f64 / 1_048_576.0,
-                speed / 1024.0,
-                eta_secs,
-                chunk_count,
-            );
             let _ = window.set_progress_bar(ProgressBarState {
                 status: Some(ProgressBarStatus::Normal),
                 progress: Some(progress as u64),
@@ -380,12 +315,6 @@ async fn download(
     }
 
     if total_size > 0 && downloaded < total_size {
-        println!(
-            "[download] ERROR: Download incomplete — got {} of {} bytes ({:.1}% complete)",
-            downloaded,
-            total_size,
-            (downloaded as f64 / total_size as f64) * 100.0
-        );
         let _ = window.set_progress_bar(ProgressBarState {
             status: Some(ProgressBarStatus::None),
             progress: Some(0),
@@ -393,36 +322,21 @@ async fn download(
         return "-1".to_string();
     }
 
-    println!(
-        "[download] Download complete: {} bytes total in {:.2}s (this session)",
-        downloaded,
-        start.elapsed().as_secs_f64()
-    );
-    println!("[download] Verifying SHA-512 hash...");
     let _ = app.emit("download-hash-checking", format!("{}", &name));
 
     let download_hash = {
         let mut file = match tokio::fs::File::open(&download_part_path).await {
             Ok(f) => f,
-            Err(e) => {
-                println!(
-                    "[download] ERROR: Failed to open .part file for hashing: {}",
-                    e
-                );
+            Err(_) => {
                 return "-1".to_string();
             }
         };
         let mut hasher = Sha512::new();
-        let mut bytes_hashed: u64 = 0;
         let mut buffer = [0u8; 8192];
         loop {
             let bytes_read = match file.read(&mut buffer).await {
                 Ok(n) => n,
-                Err(e) => {
-                    println!(
-                        "[download] ERROR: Failed to read file during hashing: {}",
-                        e
-                    );
+                Err(_) => {
                     return "-1".to_string();
                 }
             };
@@ -430,18 +344,12 @@ async fn download(
                 break;
             }
             hasher.update(&buffer[..bytes_read]);
-            bytes_hashed += bytes_read as u64;
         }
         drop(file);
-        println!("[download] Hashed {} bytes", bytes_hashed);
-        format!("{:x}", hasher.finalize())
+        hex::encode(hasher.finalize())
     };
 
-    println!("[download] Expected hash: {}", hash);
-    println!("[download] Computed hash: {}", download_hash);
-
     if hash != download_hash {
-        println!("[download] ERROR: Hash mismatch! Deleting corrupt .part file.");
         let _ = tokio::fs::remove_file(&download_part_path).await;
         let _ = window.set_progress_bar(ProgressBarState {
             status: Some(ProgressBarStatus::None),
@@ -450,10 +358,7 @@ async fn download(
         return "-1".to_string();
     }
 
-    println!("[download] Hash verified OK");
-    println!("[download] Renaming .part -> .zip: {:?}", download_zip_path);
-    if let Err(e) = tokio::fs::rename(&download_part_path, &download_zip_path).await {
-        println!("[download] ERROR: Failed to rename .part to .zip: {}", e);
+    if let Err(_) = tokio::fs::rename(&download_part_path, &download_zip_path).await {
         let _ = window.set_progress_bar(ProgressBarState {
             status: Some(ProgressBarStatus::None),
             progress: Some(0),
@@ -463,7 +368,6 @@ async fn download(
 
     let _ = tokio::fs::create_dir_all(&game_path.join(&name)).await;
 
-    println!("[download] Unzipping to: {:?}", game_path.join(&name));
     let unzip_res = unzip_to_dir(
         app.clone(),
         download_zip_path.clone(),
@@ -480,11 +384,9 @@ async fn download(
     )
     .await;
 
-    println!("[download] Removing zip file: {:?}", download_zip_path);
     let _ = tokio::fs::remove_file(&download_zip_path).await;
 
     if unzip_res == "-1" {
-        println!("[download] ERROR: Unzip failed for '{}'", name);
         let _ = window.set_progress_bar(ProgressBarState {
             status: Some(ProgressBarStatus::None),
             progress: Some(0),
@@ -492,10 +394,6 @@ async fn download(
         return "-1".to_string();
     }
 
-    println!(
-        "[download] SUCCESS: '{}' downloaded, verified, and extracted",
-        &name
-    );
     let _ = window.set_progress_bar(ProgressBarState {
         status: Some(ProgressBarStatus::None),
         progress: Some(0),
@@ -615,7 +513,6 @@ fn verify_signature(body: String, signature: String, public_key: String) -> bool
 
 #[tauri::command]
 async fn cancel_download(name: String) {
-    println!("[cancel_download] Cancellation requested for '{}'", name);
     cancel_map().insert(name.clone(), true);
 }
 
