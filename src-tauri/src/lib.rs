@@ -15,7 +15,6 @@ use std::{
     process::Command,
     time::Duration,
 };
-use sysinfo::System;
 use tauri::window::{ProgressBarState, ProgressBarStatus};
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_os::platform;
@@ -24,6 +23,9 @@ use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
 use zip::result::ZipError;
+
+#[cfg(any(target_os = "windows", target_os = "linux"))]
+use sysinfo::System;
 
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
@@ -38,6 +40,7 @@ fn is_cancelled(name: &str) -> bool {
     cancel_map().get(name).map(|v| *v).unwrap_or(false)
 }
 
+#[cfg(any(target_os = "windows", target_os = "linux"))]
 fn is_running_by_path(path: &Path) -> bool {
     let sys = System::new_all();
     let target = match path.canonicalize() {

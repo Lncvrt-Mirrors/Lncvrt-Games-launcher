@@ -25,8 +25,7 @@ tauri-plugin-fs = "2.4.5"
 zip = "8.4.0"
 tauri-plugin-dialog = "2.6.0"
 tauri-plugin-notification = "2.3.3"
-sysinfo = "0.38.4"
-sha2 = "0.10.9"
+sha2 = "0.11.0"
 tauri-plugin-clipboard-manager = "2.3.2"
 tauri-plugin-prevent-default = "4.0.4"
 openssl = { version = "0.10.76", features = ["v110", "vendored"] }
@@ -35,9 +34,18 @@ tauri-plugin-http = "2.5.7"
 dashmap = "6.1.0"
 tauri-plugin-store = "2.4.2"
 
+[target.'cfg(any(target_os = "windows", target_os = "linux"))'.dependencies]
+sysinfo = "0.38.4"
+
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2.4.0"
 tauri-plugin-window-state = "2.4.1"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 tauri-plugin-decorum = "1.1.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
