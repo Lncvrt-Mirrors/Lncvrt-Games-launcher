@@ -1,8 +1,8 @@
 'use client'
 
 import { Setting } from '@/components/Setting'
-import { useGlobal } from '@/app/GlobalProvider'
-import { copyToClipboard } from '@/lib/Clipboard'
+import { useGlobal } from '@/providers/GlobalProvider'
+import { copyToClipboard } from '@/lib/clipboard'
 import { platform } from '@tauri-apps/plugin-os'
 
 export default function Settings () {

@@ -3,36 +3,33 @@
 import { useEffect } from 'react'
 import '@/app/Installs.css'
 import { invoke } from '@tauri-apps/api/core'
-import { useGlobal } from '@/app/GlobalProvider'
+import { useGlobal } from '@/providers/GlobalProvider'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ask } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
-import { writeVersionsConfig } from '@/lib/BazookaManager'
-import { openFolder } from '@/lib/Util'
+import { openFolder } from '@/lib/util'
 
 export default function Installs () {
   const {
+    versionsList,
+    serverVersionList,
     showPopup,
     setShowPopup,
     setPopupMode,
     setFadeOut,
     setSelectedVersionList,
-    downloadedVersionsConfig,
     setManagingVersion,
-    getVersionInfo,
-    getGameInfo,
     setSelectedGame,
-    serverVersionList,
     category,
     setCategory,
-    setDownloadedVersionsConfig,
     downloadVersions,
     downloadProgress,
     linuxUseWine,
-    linuxWineCommand
+    linuxWineCommand,
+    versions
   } = useGlobal()
 
   const params = useSearchParams()
@@ -55,10 +52,7 @@ export default function Installs () {
     if (!lastRevision) return false
     return (
       lastRevision > 0 &&
-      (downloadedVersionsConfig == undefined
-        ? 0
-        : downloadedVersionsConfig?.list[version]) /
-        1000 <=
+      (versionsList == undefined ? 0 : versionsList[version]) / 1000 <=
         lastRevision
     )
   }
@@ -122,12 +116,11 @@ export default function Installs () {
         >
           {category == -1 &&
             Object.entries(game.categoryNames)
-              .sort(([a], [b]) => Number(b) - Number(a))
               .filter(([key]) => {
-                const count = Object.keys(
-                  downloadedVersionsConfig?.list ?? {}
-                ).filter(v => {
-                  const info = getVersionInfo(v)
+                const count = Object.keys(versionsList).filter(v => {
+                  const info = serverVersionList?.versions.find(
+                    vf => vf.id == v
+                  )
                   if (!info) return false
 
                   if (platform() == 'linux' && info.wine && !linuxUseWine)
@@ -138,6 +131,7 @@ export default function Installs () {
 
                 return count >= 1
               })
+              .sort(([a], [b]) => Number(b) - Number(a))
               .map(([key, value]) => {
                 return (
                   <div
@@ -157,10 +151,10 @@ export default function Installs () {
                         <p>
                           {(() => {
                             const count =
-                              Object.keys(
-                                downloadedVersionsConfig?.list ?? []
-                              ).filter(v => {
-                                const info = getVersionInfo(v)
+                              Object.keys(versionsList).filter(v => {
+                                const info = serverVersionList?.versions.find(
+                                  vf => vf.id == v
+                                )
                                 if (!info) return false
                                 if (
                                   platform() == 'linux' &&
@@ -181,44 +175,40 @@ export default function Installs () {
                   </div>
                 )
               })}
-          {Object.keys(downloadedVersionsConfig?.list ?? []).filter(v => {
-            const info = getVersionInfo(v)
-            if (!info) return false
-            return info.game === id
-          }).length != 0 ? (
-            Object.keys(downloadedVersionsConfig?.list ?? [])
-              .sort((a, b) => {
-                const infoA = getVersionInfo(a)
-                const infoB = getVersionInfo(b)
-                if (!infoA || !infoB) return 0
-                return infoB.place - infoA.place
-              })
-              .filter(v => {
-                const info = getVersionInfo(v)
-                if (!info) return false
-                if (platform() == 'linux' && info.wine && !linuxUseWine)
-                  return false
-                return (
-                  info.game === id &&
-                  (category == -1
-                    ? info.category == -1
-                    : info.category == category)
-                )
-              })
-              .map(entry => (
+          {Object.keys(versionsList)
+            .filter(v => {
+              const info = serverVersionList?.versions.find(vf => vf.id == v)
+              if (!info) return false
+              if (platform() == 'linux' && info.wine && !linuxUseWine)
+                return false
+              return (
+                info.game === id &&
+                (category == -1
+                  ? info.category == -1
+                  : info.category == category)
+              )
+            })
+            .sort((a, b) => {
+              const infoA = serverVersionList?.versions.find(vf => vf.id == a)
+              const infoB = serverVersionList?.versions.find(vf => vf.id == b)
+              if (!infoA || !infoB) return 0
+              return infoB.place - infoA.place
+            })
+            .map(v => {
+              const versionInfo = serverVersionList?.versions.find(
+                vf => vf.id == v
+              )
+              if (!versionInfo) return
+
+              return (
                 <div
-                  key={entry}
+                  key={v}
                   className={'downloads-entry'}
                   title={
                     'Click to launch game. Right-click to manage this version install'
                   }
                   onClick={async () => {
-                    if (
-                      needsRevisionUpdate(
-                        getVersionInfo(entry)?.lastRevision,
-                        entry
-                      )
-                    ) {
+                    if (needsRevisionUpdate(versionInfo.lastRevision, v)) {
                       const answer = await ask(
                         'Before proceeding, if you do not want your installation directory wiped just yet, please backup the files to another directory. When you click "Yes", it will be wiped. Click "No" if you want to open the installation folder instead.',
                         {
@@ -242,55 +232,45 @@ export default function Installs () {
                         setFadeOut(false)
 
                         //uninstall
-                        setDownloadedVersionsConfig(prev => {
-                          if (!prev) return prev
-                          const updatedList = Object.fromEntries(
-                            Object.entries(prev.list).filter(
-                              ([k]) => k !== entry
+                        versions?.set(
+                          'list',
+                          Object.fromEntries(
+                            Object.entries(versionsList).filter(
+                              ([k]) => k !== v
                             )
                           )
-                          const updatedConfig = {
-                            ...prev,
-                            list: updatedList
-                          }
-                          writeVersionsConfig(updatedConfig)
-                          return updatedConfig
-                        })
+                        )
 
                         if (
-                          await exists('game/' + entry, {
+                          await exists('game/' + v, {
                             baseDir: BaseDirectory.AppLocalData
                           })
                         )
-                          await remove('game/' + entry, {
+                          await remove('game/' + v, {
                             baseDir: BaseDirectory.AppLocalData,
                             recursive: true
                           })
 
                         //reinstall
-                        setSelectedVersionList([entry])
+                        setSelectedVersionList([v])
                         downloadVersions([
                           {
-                            id: entry,
+                            id: v,
                             type: 0
                           }
                         ])
                       } else {
-                        openFolder(entry)
+                        openFolder(v)
                       }
                       return
                     }
-                    const verInfo = getVersionInfo(entry)
-                    if (verInfo == undefined) return
-                    const gameInfo = getGameInfo(verInfo.game)
-                    if (gameInfo == undefined) return
                     invoke('launch_game', {
-                      name: verInfo.id,
-                      executable: verInfo.executable,
-                      displayName: verInfo.displayName,
+                      name: versionInfo.id,
+                      executable: versionInfo.executable,
+                      displayName: versionInfo.displayName,
                       useWine: !!(
                         platform() == 'linux' &&
-                        verInfo.wine &&
+                        versionInfo.wine &&
                         linuxUseWine
                       ),
                       wineCommand: linuxWineCommand
@@ -298,16 +278,14 @@ export default function Installs () {
                   }}
                   onContextMenu={e => {
                     e.preventDefault()
-                    setManagingVersion(entry)
+                    setManagingVersion(v)
                     setPopupMode(2)
                     setShowPopup(true)
                     setFadeOut(false)
                   }}
                 >
                   <div className='h-18 w-screen relative'>
-                    <p className='text-2xl'>
-                      {getVersionInfo(entry)?.displayName}{' '}
-                    </p>
+                    <p className='text-2xl'>{versionInfo.displayName}</p>
 
                     <div className='flex gap-2 absolute left-0 bottom-0'>
                       <div
@@ -317,7 +295,7 @@ export default function Installs () {
                         <p>
                           Installed{' '}
                           {new Intl.DateTimeFormat(undefined).format(
-                            downloadedVersionsConfig?.list[entry]
+                            versionsList[v]
                           )}
                         </p>
                       </div>
@@ -325,13 +303,8 @@ export default function Installs () {
                         className='entry-info-item'
                         title='This version is using wine. It cannot be guarenteed to work fully and might not work at all.'
                         hidden={
-                          !(
-                            platform() == 'linux' && getVersionInfo(entry)?.wine
-                          ) ||
-                          needsRevisionUpdate(
-                            getVersionInfo(entry)?.lastRevision,
-                            entry
-                          )
+                          !(platform() == 'linux' && versionInfo.wine) ||
+                          needsRevisionUpdate(versionInfo.lastRevision, v)
                         }
                       >
                         <FontAwesomeIcon icon={faWarning} color='#ffc800' />
@@ -340,10 +313,7 @@ export default function Installs () {
                       <div
                         className='entry-info-item'
                         hidden={
-                          !needsRevisionUpdate(
-                            getVersionInfo(entry)?.lastRevision,
-                            entry
-                          )
+                          !needsRevisionUpdate(versionInfo.lastRevision, v)
                         }
                       >
                         <FontAwesomeIcon icon={faWarning} color='#ffc800' />
@@ -357,45 +327,41 @@ export default function Installs () {
                         e.stopPropagation()
 
                         if (
-                          !(await exists('game/' + entry + '/BepInEx', {
+                          !(await exists('game/' + v + '/BepInEx', {
                             baseDir: BaseDirectory.AppLocalData
                           }))
                         ) {
                           if (
                             (await ask(
                               "You don't have BepInEx (the mod loader for Unity Games), would you like to install it now? It is about 1MB in size. If you choose yes, it will download the recommended BepInEx version for " +
-                                getVersionInfo(entry)?.displayName +
+                                versionInfo.displayName +
                                 '.',
                               { title: 'BepInEx not found!', kind: 'error' }
                             )) &&
-                            !downloadProgress.find(d => d.version == entry)
+                            !downloadProgress.find(d => d.version == v)
                           ) {
                             downloadVersions([
                               {
-                                id: entry,
+                                id: v,
                                 type: 1
                               }
                             ])
                           }
                           return
                         }
-                        setManagingVersion(entry)
+                        setManagingVersion(v)
                         setPopupMode(3)
                         setShowPopup(true)
                         setFadeOut(false)
                       }}
-                      hidden={!getVersionInfo(entry)?.modSupportDownload}
+                      hidden={!versionInfo.modSupportDownload}
                     >
                       Mod Manager
                     </button>
                   </div>
                 </div>
-              ))
-          ) : (
-            <div className='flex justify-center items-center h-full'>
-              <p className='text-3xl'>No versions installed</p>
-            </div>
-          )}
+              )
+            })}
         </div>
       </div>
     </div>

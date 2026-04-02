@@ -1,4 +1,4 @@
-import './Setting.css'
+import '@/styles/setting.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import { SettingProps } from '@/types/SettingProps'

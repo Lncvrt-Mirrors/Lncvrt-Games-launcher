@@ -1,7 +1,7 @@
-import { useGlobal } from '@/app/GlobalProvider'
+import { useGlobal } from '@/providers/GlobalProvider'
 import prettyBytes from 'pretty-bytes'
-import ProgressBar from '../ProgressBar'
-import { formatEtaSmart } from '@/lib/Util'
+import ProgressBar from '@/components/ProgressBar'
+import { formatEtaSmart } from '@/lib/util'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCancel,
@@ -10,19 +10,20 @@ import {
   faTrash
 } from '@fortawesome/free-solid-svg-icons'
 import { invoke } from '@tauri-apps/api/core'
-import { writeVersionsConfig } from '@/lib/BazookaManager'
-import { notifyUser } from '@/lib/Notifications'
+import { notifyUser } from '@/lib/notifications'
 import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
 
 export default function DownloadsPopup () {
   const {
     downloadProgress,
-    getVersionInfo,
     setDownloadProgress,
     downloadQueue,
     setDownloadQueue,
-    setDownloadedVersionsConfig,
-    notificationsAllowed
+    notificationsAllowed,
+    versionsList,
+    modsList,
+    versions,
+    serverVersionList
   } = useGlobal()
 
   return (
@@ -68,31 +69,19 @@ export default function DownloadsPopup () {
                           prev.filter(d => d.version !== v.version)
                         )
                         if (v.type != 1) {
-                          setDownloadedVersionsConfig(prev => {
-                            if (!prev) return prev
-
-                            const updated =
-                              v.type == 2
-                                ? {
-                                    ...prev,
-                                    mods: {
-                                      ...prev.mods,
-                                      [v.modGame! + '-' + v.modId!]: {
-                                        [v.modVersion!]: Date.now()
-                                      }
-                                    }
-                                  }
-                                : {
-                                    ...prev,
-                                    list: {
-                                      ...prev.list,
-                                      [v.version]: Date.now()
-                                    }
-                                  }
-
-                            writeVersionsConfig(updated)
-                            return updated
-                          })
+                          if (v.type == 2) {
+                            versions?.set('mods', {
+                              ...modsList,
+                              [v.modGame! + '-' + v.modId!]: {
+                                [v.modVersion!]: Date.now()
+                              }
+                            })
+                          } else {
+                            versions?.set('list', {
+                              ...versionsList,
+                              [v.version]: Date.now()
+                            })
+                          }
                         }
                       } else if (res == '0') {
                         setDownloadProgress(prev => {
@@ -127,7 +116,9 @@ export default function DownloadsPopup () {
                           await notifyUser(
                             'Download Failed',
                             `The download for version ${
-                              getVersionInfo(v.version)?.displayName
+                              serverVersionList?.versions.find(
+                                vf => vf.id == v.version
+                              )?.displayName
                             } has failed.`
                           )
                         await getCurrentWindow().requestUserAttention(
@@ -186,11 +177,14 @@ export default function DownloadsPopup () {
               </div>
               <p className='text-2xl text-center'>
                 {v.type == 1
-                  ? 'Mod Manager for '
+                  ? 'Mod loader for '
                   : v.type == 2
                   ? 'Mod for '
                   : null}{' '}
-                {getVersionInfo(v.version)?.displayName}
+                {
+                  serverVersionList?.versions.find(vf => vf.id == v.version)
+                    ?.displayName
+                }
               </p>
               <div className='mt-6.25 flex items-center justify-between'>
                 {v.failed || v.queued ? (

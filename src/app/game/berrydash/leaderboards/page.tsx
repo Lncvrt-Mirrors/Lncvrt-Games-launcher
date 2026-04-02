@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { BirdColor } from '@/types/BerryDash/BirdColor'
-import { GetIconForUser } from '@/lib/BerryDash'
+import { GetIconForUser } from '@/lib/berrydashutil'
 import Image from 'next/image'
 import './styles.css'
 import { useRouter } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { fetch } from '@tauri-apps/plugin-http'
-import { verifySignature } from '@/lib/Util'
+import { verifySignature } from '@/lib/util'
 
 interface BaseEntry {
   id: number

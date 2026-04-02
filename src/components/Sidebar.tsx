@@ -1,6 +1,6 @@
 'use client'
 
-import './Sidebar.css'
+import '@/styles/sidebar.css'
 import Icon from '@/assets/Icon.png'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -13,7 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { faDiscord } from '@fortawesome/free-brands-svg-icons'
 import { platform } from '@tauri-apps/plugin-os'
-import { useGlobal } from '@/app/GlobalProvider'
+import { useGlobal } from '@/providers/GlobalProvider'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -27,13 +27,12 @@ const lexend = Lexend({
 
 export default function Sidebar () {
   const {
-    getListOfGames,
+    serverVersionList,
+    versionsList,
     setShowPopup,
     setPopupMode,
     setFadeOut,
     downloadProgress,
-    downloadedVersionsConfig,
-    getVersionInfo,
     category,
     setCategory,
     sidebarAlwaysShowGames,
@@ -90,10 +89,12 @@ export default function Sidebar () {
         >
           <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Games
         </Link>
-        {getListOfGames()
-          .sort((a, b) => {
-            return a.id - b.id
-          })
+        {serverVersionList?.games
+          .filter(g =>
+            serverVersionList.versions
+              .filter(v => v.game === g.id)
+              .some(v => Object.keys(versionsList).includes(v.id))
+          )
           .map(i => (
             <React.Fragment key={i.id}>
               <div
@@ -131,10 +132,10 @@ export default function Sidebar () {
               {Object.entries(i.categoryNames)
                 .sort(([a], [b]) => Number(b) - Number(a))
                 .filter(([key]) => {
-                  const count = Object.keys(
-                    downloadedVersionsConfig?.list ?? {}
-                  ).filter(v => {
-                    const info = getVersionInfo(v)
+                  const count = Object.keys(versionsList).filter(v => {
+                    const info = serverVersionList.versions.find(
+                      vf => vf.id == v
+                    )
                     if (!info) return false
 
                     if (platform() == 'linux' && info.wine && !linuxUseWine)

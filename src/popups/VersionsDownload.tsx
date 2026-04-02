@@ -1,22 +1,23 @@
-import { useGlobal } from '@/app/GlobalProvider'
+import { useGlobal } from '@/providers/GlobalProvider'
 import { faAdd, faInfo, faRemove } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default function VersionsDownloadPopup () {
   const {
+    serverVersionList,
+    getSpecialVersionsList,
     selectedVersionList,
     setSelectedVersionList,
     setManagingVersion,
     setPopupMode,
-    getSpecialVersionsList,
     selectedGame,
     setViewingInfoFromDownloads,
-    downloadedVersionsConfig,
-    downloadVersions,
-    getGameInfo
+    downloadVersions
   } = useGlobal()
 
-  if (!selectedGame) return <></>
+  const game = serverVersionList?.games.find(g => g.id === selectedGame)
+
+  if (!selectedGame || !game) return <></>
 
   return (
     <>
@@ -78,24 +79,18 @@ export default function VersionsDownloadPopup () {
         <button
           className='button btntheme1 w-fit mt-2 -mb-4'
           onClick={() => {
-            if (downloadedVersionsConfig) {
-              downloadVersions(
-                selectedVersionList.map(versionId => ({
-                  id: versionId,
-                  type: 0
-                }))
-              )
-              setPopupMode(1)
-            }
+            downloadVersions(
+              selectedVersionList.map(versionId => ({
+                id: versionId,
+                type: 0
+              }))
+            )
+            setPopupMode(1)
           }}
           disabled={selectedVersionList.length == 0}
-          title={
-            selectedVersionList.length == 0
-              ? 'Select at least one version to download'
-              : `Download ${selectedVersionList.length} version${
-                  selectedVersionList.length == 1 ? '' : 's'
-                } of ${getGameInfo(selectedGame)?.name}`
-          }
+          title={`Download ${selectedVersionList.length} version${
+            selectedVersionList.length == 1 ? '' : 's'
+          } of ${game.name}`}
         >
           Download {selectedVersionList.length} version
           {selectedVersionList.length == 1 ? '' : 's'}

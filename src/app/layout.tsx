@@ -1,21 +1,14 @@
 'use client'
 
-import './Globals.css'
+import '@/styles/globals.css'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import { DownloadProgress } from '@/types/DownloadProgress'
-import { invoke } from '@tauri-apps/api/core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
-import { readVersionsConfig, writeVersionsConfig } from '@/lib/BazookaManager'
-import { VersionsConfig } from '@/types/VersionsConfig'
 import { app } from '@tauri-apps/api'
 import { openUrl } from '@tauri-apps/plugin-opener'
-import { GlobalProvider } from './GlobalProvider'
+import { GlobalProvider } from '../providers/GlobalProvider'
 import { Roboto } from 'next/font/google'
 import { ServerVersionsResponse } from '@/types/ServerVersionsResponse'
-import { GameVersion } from '@/types/GameVersion'
-import { Game } from '@/types/Game'
 import { listen } from '@tauri-apps/api/event'
 import { usePathname } from 'next/navigation'
 import { arch, platform } from '@tauri-apps/plugin-os'
@@ -30,17 +23,21 @@ import {
   remove
 } from '@tauri-apps/plugin-fs'
 import { fetch } from '@tauri-apps/plugin-http'
-import { verifySignature } from '@/lib/Util'
+import { verifySignature } from '@/lib/util'
 import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
-
-import VersionsDownloadPopup from '@/components/popups/VersionsDownload'
-import GamesDownloadPopup from '@/components/popups/GamesDownload'
-import DownloadsPopup from '@/components/popups/Downloads'
-import ManageVersionPopup from '@/components/popups/ManageVersion'
-import ModDownloadsPopup from '@/components/popups/ModDownloads'
 import { Mod } from '@/types/Mod'
 import { load, Store } from '@tauri-apps/plugin-store'
-import { notifyUser } from '@/lib/Notifications'
+import { notifyUser } from '@/lib/notifications'
+
+import VersionsDownloadPopup from '@/popups/VersionsDownload'
+import GamesDownloadPopup from '@/popups/GamesDownload'
+import DownloadsPopup from '@/popups/Downloads'
+import ManageVersionPopup from '@/popups/ManageVersion'
+import ModDownloadsPopup from '@/popups/ModDownloads'
+import { GameVersion } from '@/types/GameVersion'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { invoke } from '@tauri-apps/api/core'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -60,9 +57,6 @@ export default function RootLayout ({
   const [serverVersionList, setServerVersionList] =
     useState<null | ServerVersionsResponse>(null)
   const [selectedVersionList, setSelectedVersionList] = useState<string[]>([])
-
-  const [downloadedVersionsConfig, setDownloadedVersionsConfig] =
-    useState<VersionsConfig | null>(null)
 
   const [showPopup, setShowPopup] = useState(false)
   const [popupMode, setPopupMode] = useState<null | number>(null)
@@ -85,6 +79,7 @@ export default function RootLayout ({
   const revisionCheck = useRef(false)
 
   const [settings, setSettings] = useState<Store | null>(null)
+  const [versions, setVersions] = useState<Store | null>(null)
 
   const [notificationsAllowed, setNotificationsAllowed] =
     useState<boolean>(false)
@@ -95,13 +90,16 @@ export default function RootLayout ({
     useState<string>('wine %path%')
   const [theme, setTheme] = useState<string>('dark')
 
+  const [versionsList, setVersionsList] = useState<Record<string, number>>({})
+  const [modsList, setModsList] = useState<
+    Record<string, Record<string, number>>
+  >({})
+
   function getSpecialVersionsList (game?: number): GameVersion[] {
     if (!serverVersionList) return []
 
     return serverVersionList.versions
-      .filter(
-        v => !Object.keys(downloadedVersionsConfig?.list ?? []).includes(v.id)
-      )
+      .filter(v => !Object.keys(versionsList).includes(v.id))
       .filter(v => {
         if (platformName == 'linux' && v.wine && linuxUseWine) return false
 
@@ -116,62 +114,6 @@ export default function RootLayout ({
         if (b.game !== a.game) return a.game - b.game
         return 0
       })
-  }
-
-  const getVersionInfo = useCallback(
-    (id: string | undefined): GameVersion | undefined => {
-      if (!id) return undefined
-      return serverVersionList?.versions.find(v => v.id === id)
-    },
-    [serverVersionList]
-  )
-
-  const getGameInfo = useCallback(
-    (game: number | undefined): Game | undefined => {
-      if (!game) return undefined
-      return serverVersionList?.games.find(g => g.id === game)
-    },
-    [serverVersionList]
-  )
-
-  function getListOfGames (): Game[] {
-    if (!downloadedVersionsConfig?.list) return []
-
-    const gamesMap = new Map<number, Game>()
-
-    Object.keys(downloadedVersionsConfig.list).forEach(i => {
-      const version = getVersionInfo(i)
-      if (!version) return
-      const game = getGameInfo(version.game)
-      if (!game) return
-      gamesMap.set(game.id, game)
-    })
-
-    return Array.from(gamesMap.values())
-  }
-
-  function getVersionsAmountData (gameId: number): {
-    installed: number
-    total: number
-  } | null {
-    if (!downloadedVersionsConfig || !serverVersionList) return null
-
-    const allowWine = platformName !== 'linux' || linuxUseWine
-
-    const installed = Object.keys(downloadedVersionsConfig.list).filter(v => {
-      const info = getVersionInfo(v)
-      if (!info) return false
-      if (info.wine && !allowWine) return false
-      return getGameInfo(info.game)?.id === gameId
-    }).length
-
-    const total = serverVersionList.versions.filter(v => {
-      if (!v) return false
-      if (v.wine && !allowWine) return false
-      return getGameInfo(v.game)?.id === gameId
-    }).length
-
-    return { installed, total }
   }
 
   const closePopup = useCallback(() => {
@@ -369,12 +311,21 @@ export default function RootLayout ({
           theme: 'dark'
         }
       })
+      const versionsLocal = await load('versions.json', {
+        autoSave: true,
+        defaults: {
+          version: client,
+          list: {},
+          mods: {}
+        }
+      })
       settingsLocal.set('version', client)
-      const oldSettingsOptions = {
+      versionsLocal.set('version', client)
+      const legacyOptions = {
         baseDir: BaseDirectory.AppLocalData
       }
-      if (await exists('config.json', oldSettingsOptions)) {
-        const config = await readTextFile('config.json', oldSettingsOptions)
+      if (await exists('config.json', legacyOptions)) {
+        const config = await readTextFile('config.json', legacyOptions)
         const raw = JSON.parse(config)
         if (
           raw.settings &&
@@ -432,11 +383,10 @@ export default function RootLayout ({
           })()
           settingsLocal?.set('theme', tempTheme)
         }
-        await remove('config.json', oldSettingsOptions)
+        await remove('config.json', legacyOptions)
       }
-      const versionsConfig = await readVersionsConfig()
-      setDownloadedVersionsConfig(versionsConfig)
       setSettings(settingsLocal)
+      setVersions(versionsLocal)
       setLoading(false)
 
       if (!(await isPermissionGranted())) {
@@ -511,7 +461,7 @@ export default function RootLayout ({
       const versionId = downloadQueue[0]
       const downloadInfo = downloadProgress.find(d => d.version == versionId)
       if (!downloadInfo) return
-      const info = getVersionInfo(versionId)
+      const info = serverVersionList?.versions.find(vf => vf.id == versionId)
 
       if (!info) {
         setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
@@ -520,7 +470,7 @@ export default function RootLayout ({
         return
       }
 
-      const gameInfo = getGameInfo(info.game)
+      const gameInfo = serverVersionList?.games.find(vf => vf.id == info.game)
       if (!gameInfo) {
         setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
         setDownloadQueue(prev => prev.slice(1))
@@ -590,31 +540,19 @@ export default function RootLayout ({
       if (res === '1') {
         setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
         if (downloadInfo.type != 1) {
-          setDownloadedVersionsConfig(prev => {
-            if (!prev) return prev
-
-            const updated =
-              downloadInfo.type == 2
-                ? {
-                    ...prev,
-                    mods: {
-                      ...prev.mods,
-                      [downloadInfo.modGame! + '-' + downloadInfo.modId!]: {
-                        [downloadInfo.modVersion!]: Date.now()
-                      }
-                    }
-                  }
-                : {
-                    ...prev,
-                    list: {
-                      ...prev.list,
-                      [versionId]: Date.now()
-                    }
-                  }
-
-            writeVersionsConfig(updated)
-            return updated
-          })
+          if (downloadInfo.type == 2) {
+            versions?.set('mods', {
+              ...modsList,
+              [downloadInfo.modGame! + '-' + downloadInfo.modId!]: {
+                [downloadInfo.modVersion!]: Date.now()
+              }
+            })
+          } else {
+            versions?.set('list', {
+              ...versionsList,
+              [versionId]: Date.now()
+            })
+          }
         }
       } else if (res == '0') {
         setDownloadProgress(prev => {
@@ -658,20 +596,20 @@ export default function RootLayout ({
   }, [
     downloadQueue,
     isProcessingQueue,
-    getVersionInfo,
-    getGameInfo,
     downloadProgress,
-    settings
+    serverVersionList,
+    settings,
+    versions,
+    versionsList,
+    modsList
   ])
 
   useEffect(() => {
     if (revisionCheck.current) return
-    if (!serverVersionList || !downloadedVersionsConfig) return
+    if (!serverVersionList) return
     revisionCheck.current = true
     ;(async () => {
-      for (const [key, value] of Object.entries(
-        downloadedVersionsConfig.list
-      )) {
+      for (const [key, value] of Object.entries(versionsList)) {
         const verInfo = serverVersionList.versions.find(item => item.id === key)
 
         if (
@@ -690,7 +628,7 @@ export default function RootLayout ({
         }
       }
     })()
-  }, [serverVersionList, downloadedVersionsConfig, downloadVersions])
+  }, [serverVersionList, downloadVersions, versionsList])
 
   useEffect(() => {
     if (
@@ -719,30 +657,40 @@ export default function RootLayout ({
   ])
 
   useEffect(() => {
-    if (!settings) return
+    if (!settings || !versions) return
     const unlisteners: Promise<() => void>[] = []
 
-    function watch<T> (key: string, fn: (v: T | undefined) => void) {
+    function watchSettings<T> (key: string, fn: (v: T | undefined) => void) {
       settings!.get<T>(key).then(fn)
       unlisteners.push(settings!.onKeyChange<T>(key, fn))
     }
 
-    watch<string>('theme', v => setTheme(v ?? 'dark'))
-    watch<boolean>('notificationsAllowed', v =>
+    function watchVersions<T> (key: string, fn: (v: T | undefined) => void) {
+      versions!.get<T>(key).then(fn)
+      unlisteners.push(versions!.onKeyChange<T>(key, fn))
+    }
+
+    watchSettings<string>('theme', v => setTheme(v ?? 'dark'))
+    watchSettings<boolean>('notificationsAllowed', v =>
       setNotificationsAllowed(v ?? true)
     )
-    watch<boolean>('sidebarAlwaysShowGames', v =>
+    watchSettings<boolean>('sidebarAlwaysShowGames', v =>
       setSidebarAlwaysShowGames(v ?? true)
     )
-    watch<boolean>('linuxUseWine', v => setLinuxUseWine(v ?? false))
-    watch<string>('linuxWineCommand', v =>
+    watchSettings<boolean>('linuxUseWine', v => setLinuxUseWine(v ?? false))
+    watchSettings<string>('linuxWineCommand', v =>
       setLinuxWineCommand(v ?? 'wine %path%')
+    )
+
+    watchVersions<Record<string, number>>('list', v => setVersionsList(v ?? {}))
+    watchVersions<Record<string, Record<string, number>>>('mods', v =>
+      setModsList(v ?? {})
     )
 
     return () => {
       unlisteners.forEach(u => u.then(fn => fn()))
     }
-  }, [settings])
+  }, [settings, versions])
 
   return (
     <>
@@ -795,15 +743,9 @@ export default function RootLayout ({
                 setPopupMode,
                 fadeOut,
                 setFadeOut,
-                downloadedVersionsConfig,
-                setDownloadedVersionsConfig,
                 managingVersion,
                 setManagingVersion,
-                getVersionInfo,
-                getGameInfo,
-                getListOfGames,
                 setSelectedGame,
-                getVersionsAmountData,
                 viewingInfoFromDownloads,
                 version,
                 downloadVersions,
@@ -812,17 +754,20 @@ export default function RootLayout ({
                 downloadQueue,
                 setDownloadQueue,
                 closePopup,
-                getSpecialVersionsList,
                 selectedGame,
                 setViewingInfoFromDownloads,
                 showModInfo,
                 setShowModInfo,
+                getSpecialVersionsList,
                 settings,
+                versions,
                 notificationsAllowed,
                 sidebarAlwaysShowGames,
                 linuxUseWine,
                 linuxWineCommand,
-                theme
+                theme,
+                versionsList,
+                modsList
               }}
             >
               <div

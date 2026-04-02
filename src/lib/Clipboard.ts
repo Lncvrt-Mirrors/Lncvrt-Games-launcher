@@ -1,5 +1,5 @@
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
-import { notifyUser } from './Notifications'
+import { notifyUser } from './notifications'
 
 export async function copyToClipboard (
   text: string,

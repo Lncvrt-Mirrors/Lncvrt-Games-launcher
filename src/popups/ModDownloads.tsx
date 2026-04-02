@@ -1,8 +1,7 @@
 'use client'
 
-import { useGlobal } from '@/app/GlobalProvider'
-import { writeVersionsConfig } from '@/lib/BazookaManager'
-import { verifySignature } from '@/lib/Util'
+import { useGlobal } from '@/providers/GlobalProvider'
+import { verifySignature } from '@/lib/util'
 import { Mod } from '@/types/Mod'
 import {
   faArrowUpRightFromSquare,
@@ -23,14 +22,14 @@ import { useEffect, useState } from 'react'
 
 export default function ModDownloadsPopup () {
   const {
-    getVersionInfo,
+    modsList,
+    serverVersionList,
     managingVersion,
-    downloadedVersionsConfig,
     showModInfo,
     setShowModInfo,
     downloadVersions,
     downloadProgress,
-    setDownloadedVersionsConfig
+    versions
   } = useGlobal()
 
   const [mods, setMods] = useState<Mod[] | 0 | 1>(0)
@@ -52,9 +51,11 @@ export default function ModDownloadsPopup () {
     })()
   }, [managingVersion])
 
-  if (!managingVersion) return <></>
+  if (!managingVersion || !serverVersionList) return <></>
 
-  const versionInfo = getVersionInfo(managingVersion)
+  const versionInfo = serverVersionList.versions.find(
+    v => v.id == managingVersion
+  )
 
   return (
     <>
@@ -110,10 +111,10 @@ export default function ModDownloadsPopup () {
         (!showModInfo &&
           mods.filter(v =>
             tab == 0
-              ? Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+              ? Object.keys(modsList).includes(
                   String(versionInfo?.game + '-' + v.id)
                 )
-              : !Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+              : !Object.keys(modsList).includes(
                   String(versionInfo?.game + '-' + v.id)
                 )
           ).length == 0) ? (
@@ -131,10 +132,10 @@ export default function ModDownloadsPopup () {
             {mods
               .filter(v =>
                 tab == 0
-                  ? Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+                  ? Object.keys(modsList).includes(
                       String(versionInfo?.game + '-' + v.id)
                     )
-                  : !Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+                  : !Object.keys(modsList).includes(
                       String(versionInfo?.game + '-' + v.id)
                     )
               )
@@ -142,9 +143,7 @@ export default function ModDownloadsPopup () {
                 const localVersion =
                   tab == 0
                     ? Object.keys(
-                        downloadedVersionsConfig?.mods?.[
-                          versionInfo?.game + '-' + v.id
-                        ] ?? {}
+                        modsList[versionInfo?.game + '-' + v.id] ?? {}
                       )[0]
                     : null
                 return (
@@ -201,20 +200,14 @@ export default function ModDownloadsPopup () {
                               baseDir: BaseDirectory.AppLocalData,
                               recursive: true
                             })
-                          setDownloadedVersionsConfig(prev => {
-                            if (!prev) return prev
-                            const updatedMods = Object.fromEntries(
-                              Object.entries(prev.mods).filter(
+                          versions?.set(
+                            'mods',
+                            Object.fromEntries(
+                              Object.entries(modsList).filter(
                                 ([k]) => k !== versionInfo?.game + '-' + v.id
                               )
                             )
-                            const updatedConfig = {
-                              ...prev,
-                              mods: updatedMods
-                            }
-                            writeVersionsConfig(updatedConfig)
-                            return updatedConfig
-                          })
+                          )
 
                           downloadVersions([
                             {
@@ -273,7 +266,7 @@ export default function ModDownloadsPopup () {
                 : '(No description added)'}
             </div>
             <div className='flex flex-row h-fit w-full gap-2 justify-center my-2'>
-              {Object.keys(downloadedVersionsConfig?.mods ?? []).includes(
+              {Object.keys(modsList).includes(
                 String(versionInfo?.game + '-' + showModInfo.id)
               ) ? (
                 <button
@@ -294,21 +287,15 @@ export default function ModDownloadsPopup () {
                         baseDir: BaseDirectory.AppLocalData,
                         recursive: true
                       })
-                    setDownloadedVersionsConfig(prev => {
-                      if (!prev) return prev
-                      const updatedMods = Object.fromEntries(
-                        Object.entries(prev.mods).filter(
+                    versions?.set(
+                      'mods',
+                      Object.fromEntries(
+                        Object.entries(modsList).filter(
                           ([k]) =>
                             k !== versionInfo?.game + '-' + showModInfo.id
                         )
                       )
-                      const updatedConfig = {
-                        ...prev,
-                        mods: updatedMods
-                      }
-                      writeVersionsConfig(updatedConfig)
-                      return updatedConfig
-                    })
+                    )
                   }}
                 >
                   <FontAwesomeIcon icon={faTrash} className='text-red-400' />{' '}

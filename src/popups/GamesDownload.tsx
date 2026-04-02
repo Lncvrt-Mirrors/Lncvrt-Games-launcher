@@ -1,4 +1,4 @@
-import { useGlobal } from '@/app/GlobalProvider'
+import { useGlobal } from '@/providers/GlobalProvider'
 import {
   faCheck,
   faCode,
@@ -9,18 +9,18 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default function GamesDownloadPopup () {
-  const { serverVersionList, getVersionsAmountData, setSelectedGame } =
-    useGlobal()
+  const { serverVersionList, setSelectedGame, versionsList } = useGlobal()
 
   return (
     <>
       <p className='text-xl text-center'>Select a game to download</p>
       <div className='popup-content'>
         {serverVersionList?.games
-          .filter(v => {
-            const data = getVersionsAmountData(v.id)
-            if (!data) return false
-            if (data.total > 0) return true
+          .filter(i => {
+            const gameVersions = serverVersionList.versions.filter(
+              vf => vf.game === i.id
+            )
+            if (gameVersions.length > 0) return true
           })
           .map((v, i) => (
             <div key={i} className='popup-entry'>
@@ -32,9 +32,15 @@ export default function GamesDownloadPopup () {
                 >
                   <p>
                     {(() => {
-                      const data = getVersionsAmountData(v.id)
-                      if (!data) return 'N/A'
-                      return `${data.installed}/${data.total}`
+                      const gameVersions = serverVersionList.versions.filter(
+                        vf => vf.game === v.id
+                      )
+                      const installed = gameVersions.filter(v =>
+                        Object.keys(versionsList).includes(v.id)
+                      ).length
+                      return gameVersions.length
+                        ? `${installed}/${gameVersions.length}`
+                        : 'N/A'
                     })()}{' '}
                     versions installed
                   </p>
@@ -74,11 +80,7 @@ export default function GamesDownloadPopup () {
               <button
                 className='button btntheme3 right-2 bottom-2'
                 onClick={() => setSelectedGame(v.id)}
-                title={`Click to download specific versions of the game. You have ${(() => {
-                  const data = getVersionsAmountData(v.id)
-                  if (!data) return 'N/A'
-                  return `${data.installed} of ${data.total}`
-                })()} versions downloaded.`}
+                title='Click to download more versions of the game.'
               >
                 <>
                   <FontAwesomeIcon icon={faDownload} /> Download

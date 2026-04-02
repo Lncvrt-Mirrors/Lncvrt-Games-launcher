@@ -9,28 +9,26 @@ import {
   faWarning
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useGlobal } from '@/app/GlobalProvider'
+import { useGlobal } from '@/providers/GlobalProvider'
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
 import prettyBytes from 'pretty-bytes'
 import { message } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
-import { writeVersionsConfig } from '@/lib/BazookaManager'
-import { openFolder } from '@/lib/Util'
+import { openFolder } from '@/lib/util'
 
 export default function ManageVersionPopup () {
   const {
-    getGameInfo,
-    getVersionInfo,
+    versionsList,
+    serverVersionList,
     managingVersion,
-    downloadedVersionsConfig,
     viewingInfoFromDownloads,
     setManagingVersion,
     closePopup,
-    setDownloadedVersionsConfig,
     setPopupMode,
     setSelectedVersionList,
-    downloadVersions
+    downloadVersions,
+    versions
   } = useGlobal()
   const [versionSize, setVersionSize] = useState<number>(0)
 
@@ -43,10 +41,14 @@ export default function ManageVersionPopup () {
     })
   }, [managingVersion, setVersionSize, viewingInfoFromDownloads])
 
-  if (!managingVersion || !downloadedVersionsConfig) return <></>
+  if (!managingVersion) return <></>
 
-  const versionInfo = getVersionInfo(managingVersion)
-  const gameInfo = getGameInfo(versionInfo?.game)
+  const versionInfo = serverVersionList?.versions.find(
+    vf => vf.id == managingVersion
+  )
+  const gameInfo = serverVersionList?.games.find(
+    vf => vf.id == versionInfo?.game
+  )
 
   return (
     <>
@@ -59,7 +61,7 @@ export default function ManageVersionPopup () {
           <p>
             Installed{' '}
             {new Intl.DateTimeFormat(undefined).format(
-              downloadedVersionsConfig.list[managingVersion] ?? 0
+              versionsList[managingVersion] ?? 0
             )}
           </p>
         </div>
@@ -135,18 +137,14 @@ export default function ManageVersionPopup () {
           onClick={async () => {
             closePopup()
 
-            setDownloadedVersionsConfig(prev => {
-              if (!prev) return prev
-              const updatedList = Object.fromEntries(
-                Object.entries(prev.list).filter(([k]) => k !== managingVersion)
+            versions?.set(
+              'list',
+              Object.fromEntries(
+                Object.entries(versionsList).filter(
+                  ([k]) => k !== managingVersion
+                )
               )
-              const updatedConfig = {
-                ...prev,
-                list: updatedList
-              }
-              writeVersionsConfig(updatedConfig)
-              return updatedConfig
-            })
+            )
 
             if (
               await exists('game/' + managingVersion, {
@@ -171,18 +169,14 @@ export default function ManageVersionPopup () {
             setPopupMode(1)
 
             //uninstall
-            setDownloadedVersionsConfig(prev => {
-              if (!prev) return prev
-              const updatedList = Object.fromEntries(
-                Object.entries(prev.list).filter(([k]) => k !== managingVersion)
+            versions?.set(
+              'list',
+              Object.fromEntries(
+                Object.entries(versionsList).filter(
+                  ([k]) => k !== managingVersion
+                )
               )
-              const updatedConfig = {
-                ...prev,
-                list: updatedList
-              }
-              writeVersionsConfig(updatedConfig)
-              return updatedConfig
-            })
+            )
 
             if (
               await exists('game/' + managingVersion, {

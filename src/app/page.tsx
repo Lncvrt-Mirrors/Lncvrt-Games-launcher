@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import './Installs.css'
-import { useGlobal } from './GlobalProvider'
+import { useGlobal } from '../providers/GlobalProvider'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCheck,
@@ -14,15 +14,14 @@ import { useRouter } from 'next/navigation'
 
 export default function Installs () {
   const {
+    versionsList,
+    serverVersionList,
     showPopup,
     setShowPopup,
     setPopupMode,
     setFadeOut,
     setSelectedVersionList,
-    downloadedVersionsConfig,
     setSelectedGame,
-    getListOfGames,
-    getVersionsAmountData,
     setCategory
   } = useGlobal()
 
@@ -58,74 +57,76 @@ export default function Installs () {
               : 'h-[calc(100vh-84px)]'
           }`}
         >
-          {downloadedVersionsConfig &&
-          Object.keys(downloadedVersionsConfig.list).length ? (
-            getListOfGames()
-              .sort((a, b) => {
-                return a.id - b.id
-              })
-              .map(i => (
-                <div
-                  key={i.id}
-                  className={'downloads-entry'}
-                  title={'Click to view game installs'}
-                  onClick={() => {
-                    setCategory(-1)
-                    router.push('/game?id=' + i.id)
-                  }}
-                >
-                  <div className='h-18 w-screen relative'>
-                    <p className='text-2xl'>{i.name}</p>
+          {serverVersionList?.games
+            .filter(g =>
+              serverVersionList.versions
+                .filter(v => v.game === g.id)
+                .some(v => Object.keys(versionsList).includes(v.id))
+            )
+            .map(i => (
+              <div
+                key={i.id}
+                className={'downloads-entry'}
+                title={'Click to view game installs'}
+                onClick={() => {
+                  setCategory(-1)
+                  router.push('/game?id=' + i.id)
+                }}
+              >
+                <div className='h-18 w-screen relative'>
+                  <p className='text-2xl'>{i.name}</p>
 
-                    <div className='flex gap-2 absolute left-0 bottom-0'>
-                      <div
-                        className='entry-info-item'
-                        title='The amount of versions installed of this game in installed/installable format.'
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <p>
-                          {(() => {
-                            const data = getVersionsAmountData(i.id)
-                            if (!data) return 'N/A'
-                            return `${data.installed}/${data.total}`
-                          })()}{' '}
-                          versions installed
-                        </p>
-                      </div>
-                      <div
-                        className='entry-info-item'
-                        hidden={!i.official}
-                        title='This game is official.'
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <FontAwesomeIcon icon={faCheck} color='#19c84b' />
-                        <p>Official</p>
-                      </div>
-                      <div
-                        className='entry-info-item'
-                        hidden={i.official}
-                        title={
-                          i.verified
-                            ? 'This game is verified to be safe'
-                            : 'This game is not verified to be save. Proceed with caution.'
-                        }
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <FontAwesomeIcon
-                          icon={i.verified ? faShieldHalved : faWarning}
-                          color={i.verified ? '#19c84b' : '#ffc800'}
-                        />
-                        <p>{i.verified ? 'Verified' : 'Unverified'}</p>
-                      </div>
+                  <div className='flex gap-2 absolute left-0 bottom-0'>
+                    <div
+                      className='entry-info-item'
+                      title='The amount of versions installed of this game in installed/installable format.'
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <p>
+                        {(() => {
+                          const gameVersions =
+                            serverVersionList.versions.filter(
+                              v => v.game === i.id
+                            )
+                          const installed = gameVersions.filter(v =>
+                            Object.keys(versionsList).includes(v.id)
+                          ).length
+                          return gameVersions.length
+                            ? `${installed}/${gameVersions.length}`
+                            : 'N/A'
+                        })()}{' '}
+                        versions installed
+                      </p>
+                    </div>
+                    <div
+                      className='entry-info-item'
+                      hidden={!i.official}
+                      title='This game is official.'
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <FontAwesomeIcon icon={faCheck} color='#19c84b' />
+                      <p>Official</p>
+                    </div>
+                    <div
+                      className='entry-info-item'
+                      hidden={i.official}
+                      title={
+                        i.verified
+                          ? 'This game is verified to be safe'
+                          : 'This game is not verified to be save. Proceed with caution.'
+                      }
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <FontAwesomeIcon
+                        icon={i.verified ? faShieldHalved : faWarning}
+                        color={i.verified ? '#19c84b' : '#ffc800'}
+                      />
+                      <p>{i.verified ? 'Verified' : 'Unverified'}</p>
                     </div>
                   </div>
                 </div>
-              ))
-          ) : (
-            <div className='flex justify-center items-center h-full'>
-              <p className='text-3xl'>No games installed</p>
-            </div>
-          )}
+              </div>
+            ))}
         </div>
       </div>
     </div>

@@ -8,12 +8,10 @@ import {
   SetStateAction
 } from 'react'
 import { DownloadProgress } from '@/types/DownloadProgress'
-import { VersionsConfig } from '@/types/VersionsConfig'
 import { ServerVersionsResponse } from '@/types/ServerVersionsResponse'
-import { GameVersion } from '@/types/GameVersion'
-import { Game } from '@/types/Game'
 import { Mod } from '@/types/Mod'
 import { Store } from '@tauri-apps/plugin-store'
+import { GameVersion } from '@/types/GameVersion'
 
 type GlobalCtxType = {
   serverVersionList: ServerVersionsResponse | null
@@ -27,18 +25,9 @@ type GlobalCtxType = {
   setPopupMode: Dispatch<SetStateAction<number | null>>
   fadeOut: boolean
   setFadeOut: Dispatch<SetStateAction<boolean>>
-  downloadedVersionsConfig: VersionsConfig | null
-  setDownloadedVersionsConfig: Dispatch<SetStateAction<VersionsConfig | null>>
   managingVersion: string | null
   setManagingVersion: Dispatch<SetStateAction<string | null>>
   setSelectedGame: Dispatch<SetStateAction<number | null>>
-  getVersionInfo: (id: string | undefined) => GameVersion | undefined
-  getGameInfo: (game: number | undefined) => Game | undefined
-  getListOfGames(): Game[]
-  getVersionsAmountData: (gameId: number) => {
-    installed: number
-    total: number
-  } | null
   viewingInfoFromDownloads: boolean
   version: string | null
   downloadVersions: (
@@ -56,17 +45,20 @@ type GlobalCtxType = {
   downloadQueue: string[]
   setDownloadQueue: Dispatch<SetStateAction<string[]>>
   closePopup: () => void
-  getSpecialVersionsList(game?: number | undefined): GameVersion[]
   selectedGame: number | null
   setViewingInfoFromDownloads: Dispatch<SetStateAction<boolean>>
   showModInfo: Mod | null
   setShowModInfo: Dispatch<SetStateAction<Mod | null>>
+  getSpecialVersionsList: (game?: number) => GameVersion[]
   settings: Store | null
+  versions: Store | null
   notificationsAllowed: boolean
   sidebarAlwaysShowGames: boolean
   linuxUseWine: boolean
   linuxWineCommand: string
   theme: string
+  versionsList: Record<string, number>
+  modsList: Record<string, Record<string, number>>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)
