@@ -13,7 +13,6 @@ import { useGlobal } from '@/providers/GlobalProvider'
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
 import prettyBytes from 'pretty-bytes'
-import { message } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { openFolder } from '@/lib/util'
 
@@ -111,13 +110,7 @@ export default function ManageVersionPopup () {
         </div>
         <div
           className='entry-info-item btntheme2'
-          onClick={async () => {
-            if (!versionInfo) return
-            await message(atob(versionInfo.changelog), {
-              title: 'Changelog for ' + versionInfo.displayName,
-              kind: 'info'
-            })
-          }}
+          onClick={() => setPopupMode(4)}
           hidden={!versionInfo?.changelog}
         >
           <p>View Changelog</p>

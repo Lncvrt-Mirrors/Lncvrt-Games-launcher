@@ -28,16 +28,17 @@ import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
 import { Mod } from '@/types/Mod'
 import { load, Store } from '@tauri-apps/plugin-store'
 import { notifyUser } from '@/lib/notifications'
+import { GameVersion } from '@/types/GameVersion'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { invoke } from '@tauri-apps/api/core'
 
 import VersionsDownloadPopup from '@/popups/VersionsDownload'
 import GamesDownloadPopup from '@/popups/GamesDownload'
 import DownloadsPopup from '@/popups/Downloads'
 import ManageVersionPopup from '@/popups/ManageVersion'
 import ModDownloadsPopup from '@/popups/ModDownloads'
-import { GameVersion } from '@/types/GameVersion'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
-import { invoke } from '@tauri-apps/api/core'
+import VersionChangelogPopup from '@/popups/VersionChangelog'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -125,6 +126,8 @@ export default function RootLayout ({
       setPopupMode(0)
     } else if (popupMode == 3 && showModInfo) {
       setShowModInfo(null)
+    } else if (popupMode == 4) {
+      setPopupMode(2)
     } else {
       setFadeOut(true)
       setTimeout(() => setShowPopup(false), 200)
@@ -812,7 +815,8 @@ export default function RootLayout ({
                               selectedGame &&
                               pathname === '/') ||
                             viewingInfoFromDownloads ||
-                            (popupMode == 3 && showModInfo)
+                            (popupMode == 3 && showModInfo) ||
+                            popupMode == 4
                               ? faChevronLeft
                               : faXmark
                           }
@@ -828,6 +832,8 @@ export default function RootLayout ({
                         <ManageVersionPopup />
                       ) : popupMode === 3 ? (
                         <ModDownloadsPopup />
+                      ) : popupMode === 4 ? (
+                        <VersionChangelogPopup />
                       ) : null}
                     </div>
                   </div>

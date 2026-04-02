@@ -149,3 +149,7 @@ body {
 .entry-info-item {
   @apply flex flex-row items-center gap-1 border text-gray-300 py-1 px-2 rounded-md w-fit text-[16px] transition-colors cursor-pointer;
 }
+
+code {
+  @apply bg-(--col4) border border-(--col6) rounded-lg px-1 py-0.5 text-sm;
+}
