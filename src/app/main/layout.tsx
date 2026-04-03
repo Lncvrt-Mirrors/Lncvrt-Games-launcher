@@ -5,7 +5,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import { DownloadProgress } from '@/types/DownloadProgress'
 import { app } from '@tauri-apps/api'
-import { openUrl } from '@tauri-apps/plugin-opener'
 import { GlobalProvider } from '@/providers/GlobalProvider'
 import { Roboto } from 'next/font/google'
 import { ServerVersionsResponse } from '@/types/ServerVersionsResponse'
@@ -51,7 +50,6 @@ export default function RootLayout ({
 }) {
   const [loading, setLoading] = useState(true)
   const [loadingText, setLoadingText] = useState('Loading...')
-  const [outdated, setOutdated] = useState(false)
   const [version, setVersion] = useState<string | null>(null)
   const [platformName, setPlatformName] = useState<string | null>(null)
 
@@ -266,27 +264,6 @@ export default function RootLayout ({
       setPlatformName(platform())
       const client = await app.getVersion()
       setVersion(client)
-      if (process.env.NODE_ENV === 'production') {
-        try {
-          const response = await fetch(
-            'https://games.lncvrt.xyz/api/launcher/latest'
-          )
-          const signature = response.headers.get('x-signature') ?? ''
-          const data = await response.text()
-          if (await verifySignature(data, signature)) {
-            if (data !== client) {
-              setOutdated(true)
-              return
-            }
-          } else {
-            setLoadingText('Failed to check latest version.')
-            return
-          }
-        } catch {
-          setLoadingText('Failed to check latest version.')
-          return
-        }
-      }
       try {
         const response = await fetch(
           `https://games.lncvrt.xyz/api/launcher/versions?platform=${platform()}&arch=${arch()}`
@@ -712,24 +689,7 @@ export default function RootLayout ({
                     : 'h-screen'
                 } flex items-center justify-center`}
               >
-                {outdated ? (
-                  <div className='text-center'>
-                    <p className='text-6xl mb-4'>Outdated Launcher!</p>
-                    <p className='text-2xl mb-4'>
-                      Please update to the latest version to continue.
-                    </p>
-                    <button
-                      className='button btntheme1'
-                      onClick={() =>
-                        openUrl('https://games.lncvrt.xyz/download')
-                      }
-                    >
-                      Download latest version!
-                    </button>
-                  </div>
-                ) : (
-                  <p className='text-7xl text-center'>{loadingText}</p>
-                )}
+                <p className='text-7xl text-center'>{loadingText}</p>
               </div>
             </>
           ) : (

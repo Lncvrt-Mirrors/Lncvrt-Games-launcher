@@ -19,7 +19,6 @@ use tauri::window::{ProgressBarState, ProgressBarStatus};
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_os::platform;
 use tauri_plugin_prevent_default::Flags;
-use tauri_plugin_updater::UpdaterExt;
 use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
@@ -30,6 +29,9 @@ use sysinfo::System;
 
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
+
+#[cfg(not(debug_assertions))]
+use tauri_plugin_updater::UpdaterExt;
 
 static CANCEL_MAP: OnceLock<DashMap<String, bool>> = OnceLock::new();
 
@@ -561,35 +563,52 @@ pub fn run() {
             cancel_download
         ])
         .setup(|app| {
+            let window = app.get_webview_window("main").unwrap();
+
             #[cfg(target_os = "windows")]
             {
                 use tauri_plugin_decorum::WebviewWindowExt;
-                if let Some(main_window) = app.get_webview_window("main") {
-                    if let Err(e) = main_window.create_overlay_titlebar() {
-                        eprintln!("Failed to create overlay titlebar: {:?}", e);
-                    }
+                if let Err(e) = window.create_overlay_titlebar() {
+                    eprintln!("Failed to create overlay titlebar: {:?}", e);
                 }
             }
-            let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                update(handle).await.unwrap();
-            });
+            #[cfg(not(debug_assertions))]
+            {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    update(handle, window.clone()).await.unwrap();
+                });
+            }
+            #[cfg(debug_assertions)]
+            {
+                let mut new_url = window.url().unwrap();
+                new_url.set_path("/main");
+                window.navigate(new_url).unwrap();
+            }
+
             Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
-    let window = app.get_webview_window("main").unwrap();
-
+#[cfg(not(debug_assertions))]
+async fn update(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+) -> tauri_plugin_updater::Result<()> {
     let target = {
         #[cfg(target_os = "linux")]
         {
             if std::path::Path::new("/etc/debian_version").exists() {
                 "linux-debian"
-            } else {
+            } else if std::path::Path::new("/etc/redhat-release").exists() {
                 "linux-fedora"
+            } else {
+                let mut new_url = window.url().unwrap();
+                new_url.set_path("/update/outdated");
+                window.navigate(new_url).unwrap();
+                return Ok(());
             }
         }
         #[cfg(not(target_os = "linux"))]
