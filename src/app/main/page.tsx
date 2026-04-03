@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
 import './Installs.css'
-import { useGlobal } from '../providers/GlobalProvider'
+import { useEffect } from 'react'
+import { useGlobal } from '@/providers/GlobalProvider'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCheck,
@@ -70,7 +70,7 @@ export default function Installs () {
                 title={'Click to view game installs'}
                 onClick={() => {
                   setCategory(-1)
-                  router.push('/game?id=' + i.id)
+                  router.push('/main/game?id=' + i.id)
                 }}
               >
                 <div className='h-18 w-screen relative'>

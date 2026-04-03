@@ -19,6 +19,7 @@ use tauri::window::{ProgressBarState, ProgressBarStatus};
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_os::platform;
 use tauri_plugin_prevent_default::Flags;
+use tauri_plugin_updater::UpdaterExt;
 use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
@@ -520,6 +521,7 @@ async fn cancel_download(name: String) {
 pub fn run() {
     #[allow(unused_variables)]
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(
@@ -568,8 +570,45 @@ pub fn run() {
                     }
                 }
             }
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                update(handle).await.unwrap();
+            });
             Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
+    let window = app.get_webview_window("main").unwrap();
+
+    if let Some(update) = app.updater()?.check().await? {
+        let mut new_url = window.url().unwrap();
+        new_url.set_path("/update/updating");
+        window.navigate(new_url).unwrap();
+
+        let mut downloaded = 0;
+
+        update
+            .download_and_install(
+                |chunk_length, content_length| {
+                    downloaded += chunk_length;
+                    println!("downloaded {downloaded} from {content_length:?}");
+                },
+                || {
+                    println!("download finished");
+                },
+            )
+            .await?;
+
+        println!("update installed");
+        app.restart();
+    }
+
+    let mut new_url = window.url().unwrap();
+    new_url.set_path("/main");
+    window.navigate(new_url).unwrap();
+
+    Ok(())
 }

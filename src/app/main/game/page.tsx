@@ -1,7 +1,7 @@
 'use client'
 
+import '../Installs.css'
 import { useEffect } from 'react'
-import '@/app/Installs.css'
 import { invoke } from '@tauri-apps/api/core'
 import { useGlobal } from '@/providers/GlobalProvider'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -75,7 +75,7 @@ export default function Installs () {
           <button
             className='button btntheme1'
             onClick={() => {
-              router.push('/game/berrydash/leaderboards')
+              router.push('/main/game/berrydash/leaderboards')
             }}
             title='View the leaderboards for this game.'
             hidden={game.id != 1}

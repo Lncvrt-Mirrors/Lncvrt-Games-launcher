@@ -1,10 +1,10 @@
 'use client'
 
+import './styles.css'
 import { useCallback, useEffect, useState } from 'react'
 import { BirdColor } from '@/types/BerryDash/BirdColor'
 import { GetIconForUser } from '@/lib/berrydashutil'
 import Image from 'next/image'
-import './styles.css'
 import { useRouter } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { fetch } from '@tauri-apps/plugin-http'
@@ -174,7 +174,7 @@ export default function BerryDashLeaderboards () {
           <button
             className='button btntheme1'
             onClick={() => {
-              if (selected == -1) router.push('/game?id=1')
+              if (selected == -1) router.push('/main/game?id=1')
               else {
                 setSelected(-1)
                 setSelectedBerryOption(0)

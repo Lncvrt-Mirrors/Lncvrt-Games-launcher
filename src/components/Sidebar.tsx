@@ -82,9 +82,11 @@ export default function Sidebar () {
       <nav className='nav-links overflow-auto pt-2'>
         <Link
           draggable={false}
-          href='/'
+          href='/main'
           className={`link relative flex items-center ${
-            pathname === '/' || pathname.startsWith('/game') ? 'active' : ''
+            pathname === '/main' || pathname.startsWith('/main/game')
+              ? 'active'
+              : ''
           }`}
         >
           <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Games
@@ -100,21 +102,22 @@ export default function Sidebar () {
               <div
                 draggable={false}
                 className={`link ${
-                  (pathname === '/game' &&
+                  (pathname === '/main/game' &&
                     Number(params.get('id') || 0) == i.id) ||
-                  (i.id == 1 && pathname === '/game/berrydash/leaderboards')
+                  (i.id == 1 &&
+                    pathname === '/main/game/berrydash/leaderboards')
                     ? 'active'
                     : ''
                 } ml-auto w-50 ${
                   sidebarAlwaysShowGames ||
                   pathname === '/' ||
-                  pathname.startsWith('/game')
+                  pathname.startsWith('/main/game')
                     ? ''
                     : 'hidden'
                 }`}
                 onClick={() => {
                   setCategory(-1)
-                  router.push('/game?id=' + i.id)
+                  router.push('/main/game?id=' + i.id)
                 }}
               >
                 <div className='flex items-center'>
@@ -151,23 +154,23 @@ export default function Sidebar () {
                     key={`${i.id}-${key}`}
                     draggable={false}
                     className={`link ${
-                      ((pathname === '/game' &&
+                      ((pathname === '/main/game' &&
                         Number(params.get('id') || 0) == i.id) ||
                         (i.id == 1 &&
-                          pathname === '/game/berrydash/leaderboards')) &&
+                          pathname === '/main/game/berrydash/leaderboards')) &&
                       category == Number(key)
                         ? 'active'
                         : ''
                     } ml-auto w-47.5 ${
                       sidebarAlwaysShowGames ||
                       pathname === '/' ||
-                      pathname.startsWith('/game')
+                      pathname.startsWith('/main/game')
                         ? ''
                         : 'hidden'
                     }`}
                     onClick={() => {
                       setCategory(Number(key))
-                      router.push('/game?id=' + i.id)
+                      router.push('/main/game?id=' + i.id)
                     }}
                   >
                     <div className='flex items-center'>
@@ -180,8 +183,8 @@ export default function Sidebar () {
           ))}
         <Link
           draggable={false}
-          href='/settings'
-          className={`link ${pathname === '/settings' ? 'active' : ''}`}
+          href='/main/settings'
+          className={`link ${pathname === '/main/settings' ? 'active' : ''}`}
         >
           <FontAwesomeIcon icon={faCog} className='mr-1' /> Settings
         </Link>
