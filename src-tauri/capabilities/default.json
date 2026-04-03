@@ -31,7 +31,7 @@
     "fs:allow-applocaldata-write",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "$APPLOCALDATA/game/**" }]
+      "allow": [{ "path": "$APPLOCALDATA/game/**" }, { "path": "$APPCONFIG/versions.json" }]
     },
     {
       "identifier": "opener:allow-open-path",

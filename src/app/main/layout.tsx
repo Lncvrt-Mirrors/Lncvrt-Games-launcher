@@ -17,6 +17,7 @@ import {
 } from '@tauri-apps/plugin-notification'
 import {
   BaseDirectory,
+  copyFile,
   exists,
   readTextFile,
   remove
@@ -280,6 +281,29 @@ export default function RootLayout ({
         setLoadingText('Failed to download versions list.')
         return
       }
+      const legacyOptions = {
+        baseDir: BaseDirectory.AppLocalData
+      }
+      if (
+        platform() == 'windows' &&
+        (await exists('versions.json', legacyOptions))
+      ) {
+        if (
+          await exists('versions.json', {
+            baseDir: BaseDirectory.AppConfig
+          })
+        )
+          await remove('versions.json', {
+            baseDir: BaseDirectory.AppConfig
+          })
+
+        await copyFile('versions.json', 'versions.json', {
+          fromPathBaseDir: BaseDirectory.AppLocalData,
+          toPathBaseDir: BaseDirectory.AppConfig
+        })
+        await remove('versions.json', legacyOptions)
+      }
+
       const settingsLocal = await load('settings.json', {
         autoSave: true,
         defaults: {
@@ -301,9 +325,6 @@ export default function RootLayout ({
       })
       settingsLocal.set('version', client)
       versionsLocal.set('version', client)
-      const legacyOptions = {
-        baseDir: BaseDirectory.AppLocalData
-      }
       if (await exists('config.json', legacyOptions)) {
         const config = await readTextFile('config.json', legacyOptions)
         const raw = JSON.parse(config)
