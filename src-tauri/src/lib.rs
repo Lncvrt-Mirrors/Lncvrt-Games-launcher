@@ -583,7 +583,28 @@ pub fn run() {
 async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
     let window = app.get_webview_window("main").unwrap();
 
-    if let Some(update) = app.updater()?.check().await? {
+    let target = {
+        #[cfg(target_os = "linux")]
+        {
+            if std::path::Path::new("/etc/debian_version").exists() {
+                "linux-debian"
+            } else {
+                "linux-fedora"
+            }
+        }
+        #[cfg(not(target_os = "linux"))]
+        {
+            tauri_plugin_updater::target().unwrap_or("unknown".to_string())
+        }
+    };
+
+    if let Some(update) = app
+        .updater_builder()
+        .target(target)
+        .build()?
+        .check()
+        .await?
+    {
         let mut new_url = window.url().unwrap();
         new_url.set_path("/update/updating");
         window.navigate(new_url).unwrap();
