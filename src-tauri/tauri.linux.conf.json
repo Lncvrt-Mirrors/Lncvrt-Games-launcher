@@ -27,7 +27,7 @@
   "bundle": {
     "active": true,
     "targets": ["deb", "rpm"],
-    "icon": ["icons/*.png"],
+    "icon": ["icons/icon.png"],
     "createUpdaterArtifacts": true
   },
   "plugins": {
