@@ -581,7 +581,7 @@ pub fn run() {
             }
             #[cfg(debug_assertions)]
             {
-                let mut new_url = window.url().unwrap();
+                let mut new_url = app.config().build.dev_url.clone().unwrap();
                 new_url.set_path("/main");
                 window.navigate(new_url).unwrap();
             }
