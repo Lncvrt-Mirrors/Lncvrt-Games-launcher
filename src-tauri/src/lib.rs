@@ -467,7 +467,7 @@ fn launch_game(
         Err(_) => return,
     };
 
-    if platform() == "macos" && !bepinex_folder.exists() {
+    if platform() == "macos" && !bepinex_folder.exists() && executable.ends_with(".app") {
         if let Err(_) = Command::new("open")
             .arg(&executable)
             .current_dir(&game_folder)
