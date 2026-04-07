@@ -64,7 +64,7 @@ export default function Installs () {
           className={`text-3xl truncate ${
             category != -1
               ? 'w-[calc(100vw-495px)]'
-              : game.id == 1
+              : game.id == 1 || game.id == 9
               ? 'w-[calc(100vw-560px)]'
               : 'w-[calc(100vw-440px)]'
           }`}
@@ -81,6 +81,22 @@ export default function Installs () {
             hidden={game.id != 1}
           >
             Leaderboards
+          </button>
+          <button
+            className='button btntheme1'
+            onClick={() =>
+              invoke('open_new_window', {
+                title: 'XPS Dashboard',
+                name: 'xpsdashboard',
+                url: 'https://xps.lncvrt.xyz/dashboard/',
+                width: 1280,
+                height: 720
+              })
+            }
+            title='Open the GDPS Dashboard!'
+            hidden={game.id != 9 || category != -1}
+          >
+            Dashboard
           </button>
           <button
             className='button btntheme1'

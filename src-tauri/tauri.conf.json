@@ -10,15 +10,7 @@
     "frontendDist": "../out"
   },
   "app": {
-    "windows": [
-      {
-        "title": "Lncvrt Games Launcher",
-        "width": 1000,
-        "height": 600,
-        "minWidth": 875,
-        "minHeight": 500
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": null
     }

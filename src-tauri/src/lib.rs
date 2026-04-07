@@ -519,6 +519,31 @@ async fn cancel_download(name: String) {
     cancel_map().insert(name.clone(), true);
 }
 
+#[tauri::command]
+fn open_new_window(
+    app: tauri::AppHandle,
+    title: String,
+    name: String,
+    url: String,
+    width: f64,
+    height: f64,
+) {
+    if let Some(window) = app.get_webview_window(&name) {
+        let _ = window.show();
+        return;
+    };
+
+    tauri::WebviewWindowBuilder::new(
+        &app,
+        name,
+        tauri::WebviewUrl::External(url.parse().unwrap()),
+    )
+    .inner_size(width, height)
+    .title(title)
+    .build()
+    .unwrap();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[allow(unused_variables)]
@@ -560,7 +585,8 @@ pub fn run() {
             launch_game,
             folder_size,
             verify_signature,
-            cancel_download
+            cancel_download,
+            open_new_window
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
