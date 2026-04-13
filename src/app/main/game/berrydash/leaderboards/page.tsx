@@ -85,10 +85,12 @@ export default function BerryDashLeaderboards () {
   const [selected, setSelected] = useState<number>(-1)
   const [selectedBerryOption, setSelectedBerryOption] = useState<number>(0)
   const [entries, setEntries] = useState<(LeaderboardEntry | Account)[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
 
   const router = useRouter()
 
   const Refresh = useCallback(async () => {
+    setLoading(true)
     try {
       if (selected == 3 || selected == 4) {
         const response = await fetch(
@@ -145,6 +147,7 @@ export default function BerryDashLeaderboards () {
     } catch {
       setEntries([])
     }
+    setLoading(false)
   }, [selected, selectedBerryOption])
 
   useEffect(() => {
@@ -160,6 +163,25 @@ export default function BerryDashLeaderboards () {
       <div className='flex justify-between items-center mb-4'>
         <p className='text-3xl'>Berry Dash Leaderboards</p>
         <div className='flex gap-2'>
+          {selected == 1 && (
+            <div className='flex justify-center'>
+              <select
+                className='bg-(--col2) border border-(--col4) rounded-md'
+                value={selectedBerryOption}
+                onChange={e => setSelectedBerryOption(Number(e.target.value))}
+              >
+                <option value='0'>Normal Berry</option>
+                <option value='1'>Poison Berry</option>
+                <option value='2'>Slow Berry</option>
+                <option value='3'>Ultra Berry</option>
+                <option value='4'>Speedy Berry</option>
+                <option value='5'>Coin Berry</option>
+                <option value='6'>Random Berry</option>
+                <option value='7'>Anti Berry</option>
+                <option value='8'>Golden Berry</option>
+              </select>
+            </div>
+          )}
           <button
             className='button btntheme1'
             onClick={() => {
@@ -242,15 +264,15 @@ export default function BerryDashLeaderboards () {
               </button>
             </div>
           </>
+        ) : loading ? (
+          <p className='flex justify-center items-center text-6xl h-full'>
+            Loading
+          </p>
         ) : (
           <>
             <div
               className={`flex flex-col gap-2 overflow-y-auto ${
-                selected == 1
-                  ? platform() == 'windows'
-                    ? 'h-[calc(100vh-156px)]'
-                    : 'h-[calc(100vh-124px)]'
-                  : platform() == 'windows'
+                platform() == 'windows'
                   ? 'h-[calc(100vh-128px)]'
                   : 'h-[calc(100vh-96px)]'
               } px-1`}
@@ -312,25 +334,6 @@ export default function BerryDashLeaderboards () {
                 )
               })}
             </div>
-            {selected == 1 && (
-              <div className='flex justify-center'>
-                <select
-                  className='mt-1.25 bg-(--col2) border border-(--col4) rounded-md'
-                  value={selectedBerryOption}
-                  onChange={e => setSelectedBerryOption(Number(e.target.value))}
-                >
-                  <option value='0'>Normal Berry</option>
-                  <option value='1'>Poison Berry</option>
-                  <option value='2'>Slow Berry</option>
-                  <option value='3'>Ultra Berry</option>
-                  <option value='4'>Speedy Berry</option>
-                  <option value='5'>Coin Berry</option>
-                  <option value='6'>Random Berry</option>
-                  <option value='7'>Anti Berry</option>
-                  <option value='8'>Golden Berry</option>
-                </select>
-              </div>
-            )}
           </>
         )}
       </div>

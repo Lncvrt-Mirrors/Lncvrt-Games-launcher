@@ -59,10 +59,11 @@ export default function Sidebar () {
         }}
       ></div>
       <div
-        className={`flex items-center h-10 w-60 ${
+        className={
+          'flex items-center h-10 w-60 ' +
           (platform() == 'windows' ? 'pl-1 pt-1' : 'pl-2 pt-2') +
           (platform() == 'macos' ? ' mt-7' : '')
-        }`}
+        }
         onMouseDown={e => {
           if (platform() != 'macos') return
           if (e.buttons === 1) {
