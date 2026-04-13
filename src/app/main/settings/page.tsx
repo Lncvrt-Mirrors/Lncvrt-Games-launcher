@@ -51,12 +51,11 @@ export default function Settings () {
         <input
           type='text'
           value={linuxWineCommand}
-          onChange={async e => {
+          onChange={async e =>
             await settings?.set('linuxWineCommand', e.target.value)
-          }}
-          className={`input-field my-1 ${
-            platform() == 'linux' && linuxWineCommand ? '' : 'hidden'
-          }`}
+          }
+          className='input-field my-1'
+          hidden={!(platform() == 'linux' && linuxUseWine)}
         ></input>
         <div title='The theme you want the launcher to use.'>
           <label className='text-lg'>Theme:</label>

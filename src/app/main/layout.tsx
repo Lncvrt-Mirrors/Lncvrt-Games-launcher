@@ -506,7 +506,7 @@ export default function RootLayout ({
               : d
           )
         )
-        if (await settings?.get<boolean>('notifications-allowed'))
+        if (await settings?.get<boolean>('notificationsAllowed'))
           await notifyUser(
             'Download Failed',
             `The download for version ${info.displayName} has failed.`
@@ -579,7 +579,7 @@ export default function RootLayout ({
               : d
           )
         )
-        if (await settings?.get<boolean>('notifications-allowed'))
+        if (await settings?.get<boolean>('notificationsAllowed'))
           await notifyUser(
             'Download Failed',
             `The download for version ${info.displayName} has failed.`
