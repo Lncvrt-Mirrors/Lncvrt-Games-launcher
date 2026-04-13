@@ -32,6 +32,13 @@ export default function Installs () {
     setSelectedVersionList([])
   }, [setSelectedVersionList, showPopup])
 
+  const filteredGames =
+    serverVersionList?.games.filter(g =>
+      serverVersionList.versions
+        .filter(v => v.game === g.id)
+        .some(v => Object.keys(versionsList).includes(v.id))
+    ) ?? []
+
   return (
     <div className='mx-4 mt-4'>
       <div className='flex justify-between items-center mb-4'>
@@ -57,13 +64,12 @@ export default function Installs () {
               : 'h-[calc(100vh-84px)]'
           }`}
         >
-          {serverVersionList?.games
-            .filter(g =>
-              serverVersionList.versions
-                .filter(v => v.game === g.id)
-                .some(v => Object.keys(versionsList).includes(v.id))
-            )
-            .map(i => (
+          {filteredGames.length == 0 ? (
+            <div className='flex justify-center items-center h-full'>
+              <p className='text-3xl'>No games installed</p>
+            </div>
+          ) : (
+            filteredGames.map(i => (
               <div
                 key={i.id}
                 className={'downloads-entry'}
@@ -84,10 +90,9 @@ export default function Installs () {
                     >
                       <p>
                         {(() => {
-                          const gameVersions =
-                            serverVersionList.versions.filter(
-                              v => v.game === i.id
-                            )
+                          const gameVersions = (
+                            serverVersionList?.versions ?? []
+                          ).filter(v => v.game === i.id)
                           const installed = gameVersions.filter(v =>
                             Object.keys(versionsList).includes(v.id)
                           ).length
@@ -126,7 +131,8 @@ export default function Installs () {
                   </div>
                 </div>
               </div>
-            ))}
+            ))
+          )}
         </div>
       </div>
     </div>

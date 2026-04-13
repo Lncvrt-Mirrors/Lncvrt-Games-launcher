@@ -57,6 +57,16 @@ export default function Installs () {
     )
   }
 
+  const filteredVersions = Object.keys(versionsList).filter(v => {
+    const info = serverVersionList?.versions.find(vf => vf.id == v)
+    if (!info) return false
+    if (platform() == 'linux' && info.wine && !linuxUseWine) return false
+    return (
+      info.game === id &&
+      (category == -1 ? info.category == -1 : info.category == category)
+    )
+  })
+
   return (
     <div className='mx-4 mt-4'>
       <div className='flex justify-between items-center mb-4'>
@@ -191,19 +201,22 @@ export default function Installs () {
                   </div>
                 )
               })}
-          {Object.keys(versionsList)
-            .filter(v => {
-              const info = serverVersionList?.versions.find(vf => vf.id == v)
-              if (!info) return false
-              if (platform() == 'linux' && info.wine && !linuxUseWine)
-                return false
-              return (
-                info.game === id &&
-                (category == -1
-                  ? info.category == -1
-                  : info.category == category)
-              )
-            })
+          {filteredVersions.length === 0 &&
+            (category !== -1 ||
+              Object.keys(versionsList).filter(v => {
+                const info = serverVersionList?.versions.find(vf => vf.id == v)
+                if (!info) return false
+
+                if (platform() == 'linux' && info.wine && !linuxUseWine)
+                  return false
+
+                return info.game === id
+              }).length === 0) && (
+              <div className='flex justify-center items-center h-full'>
+                <p className='text-3xl'>No versions installed</p>
+              </div>
+            )}
+          {filteredVersions
             .sort((a, b) => {
               const infoA = serverVersionList?.versions.find(vf => vf.id == a)
               const infoB = serverVersionList?.versions.find(vf => vf.id == b)
