@@ -101,7 +101,7 @@ export default function RootLayout ({
     return serverVersionList.versions
       .filter(v => !Object.keys(versionsList).includes(v.id))
       .filter(v => {
-        if (platformName == 'linux' && v.wine && linuxUseWine) return false
+        if (platformName == 'linux' && v.wine && !linuxUseWine) return false
 
         if (game && v.game != game) return false
         if (category != -1 && v.category != category) return false
