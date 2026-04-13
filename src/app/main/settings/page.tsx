@@ -66,7 +66,7 @@ export default function Settings () {
               await settings?.set('theme', e.target.value)
             }}
           >
-            <option value={'dark'}>Dark (default)</option>
+            <option value={'dark'}>Dark</option>
             <option value={'red'}>Red</option>
             <option value={'blue'}>Blue</option>
             <option value={'purple'}>Purple</option>
