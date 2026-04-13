@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { fetch } from '@tauri-apps/plugin-http'
 import { verifySignature } from '@/lib/util'
+import Dropdown from '@/components/Dropdown'
 
 interface BaseEntry {
   id: number
@@ -165,21 +166,21 @@ export default function BerryDashLeaderboards () {
         <div className='flex gap-2'>
           {selected == 1 && (
             <div className='flex justify-center'>
-              <select
-                className='bg-(--col2) border border-(--col4) rounded-md'
+              <Dropdown
                 value={selectedBerryOption}
-                onChange={e => setSelectedBerryOption(Number(e.target.value))}
-              >
-                <option value='0'>Normal Berry</option>
-                <option value='1'>Poison Berry</option>
-                <option value='2'>Slow Berry</option>
-                <option value='3'>Ultra Berry</option>
-                <option value='4'>Speedy Berry</option>
-                <option value='5'>Coin Berry</option>
-                <option value='6'>Random Berry</option>
-                <option value='7'>Anti Berry</option>
-                <option value='8'>Golden Berry</option>
-              </select>
+                options={[
+                  { label: 'Normal Berry', value: 0 },
+                  { label: 'Poison Berry', value: 1 },
+                  { label: 'Slow Berry', value: 2 },
+                  { label: 'Ultra Berry', value: 3 },
+                  { label: 'Speedy Berry', value: 4 },
+                  { label: 'Coin Berry', value: 5 },
+                  { label: 'Random Berry', value: 6 },
+                  { label: 'Anti Berry', value: 7 },
+                  { label: 'Golden Berry', value: 8 }
+                ]}
+                onChange={e => setSelectedBerryOption(Number(e))}
+              />
             </div>
           )}
           <button

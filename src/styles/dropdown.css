@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+.dropdown {
+  @apply relative w-40;
+}
+
+.dropdown-btn {
+  @apply w-full flex items-center justify-between px-3 py-1.5 rounded-md cursor-pointer bg-(--col2) hover:bg-(--col3) border border-(--col4) hover:border-(--col5) text-white;
+}
+
+.dropdown-arrow {
+  @apply w-4 h-4 transition-transform stroke-current stroke-2 fill-none;
+}
+
+.dropdown-arrow.open {
+  @apply rotate-180;
+}
+
+.dropdown-menu {
+  @apply absolute z-50 mt-1 w-full rounded-md shadow-lg overflow-hidden bg-(--col2) border border-(--col4) divide-y divide-(--col4);
+}
+
+.dropdown-item {
+  @apply px-3 py-1.5 cursor-pointer transition-colors hover:bg-(--col3);
+}
+
+.dropdown-item.active {
+  @apply bg-(--col3) hover:bg-(--col4);
+}

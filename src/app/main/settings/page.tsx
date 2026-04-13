@@ -4,6 +4,7 @@ import { Setting } from '@/components/Setting'
 import { useGlobal } from '@/providers/GlobalProvider'
 import { copyToClipboard } from '@/lib/clipboard'
 import { platform } from '@tauri-apps/plugin-os'
+import Dropdown from '@/components/Dropdown'
 
 export default function Settings () {
   const {
@@ -57,20 +58,25 @@ export default function Settings () {
           className='input-field my-1'
           hidden={!(platform() == 'linux' && linuxUseWine)}
         ></input>
-        <div title='The theme you want the launcher to use.'>
-          <label className='text-lg'>Theme:</label>
-          <select
-            className='ml-2 bg-(--col2) border border-(--col4) rounded-md'
-            value={theme}
-            onChange={async e => {
-              await settings?.set('theme', e.target.value)
-            }}
+        <div className='flex flex-row gap-2 items-center'>
+          <p
+            title='The theme you want the launcher to use.'
+            className='text-lg'
           >
-            <option value={'dark'}>Dark</option>
-            <option value={'red'}>Red</option>
-            <option value={'blue'}>Blue</option>
-            <option value={'purple'}>Purple</option>
-          </select>
+            Theme:
+          </p>
+          <Dropdown
+            value={theme}
+            options={[
+              { label: 'Dark', value: 'dark' },
+              { label: 'Red', value: 'red' },
+              { label: 'Blue', value: 'blue' },
+              { label: 'Purple', value: 'purple' }
+            ]}
+            onChange={async val => {
+              await settings?.set('theme', val)
+            }}
+          />
         </div>
       </div>
       <p

@@ -17,7 +17,7 @@
         "url": "/update/checking",
         "width": 1000,
         "height": 632,
-        "minWidth": 900,
+        "minWidth": 1000,
         "minHeight": 532,
         "decorations": false,
         "shadow": true
