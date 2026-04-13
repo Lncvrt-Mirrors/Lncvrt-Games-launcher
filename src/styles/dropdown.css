@@ -1,11 +1,14 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 .dropdown {
   @apply relative w-40;
 }
 
 .dropdown-btn {
-  @apply w-full flex items-center justify-between px-3 py-1.5 rounded-md cursor-pointer bg-(--col2) hover:bg-(--col3) border border-(--col4) hover:border-(--col5) text-white;
+  @apply w-full flex items-center justify-between px-3 py-1.5 rounded-md cursor-pointer
+         bg-(--col2) hover:bg-(--col3)
+         border border-(--col4) hover:border-(--col5)
+         text-white;
 }
 
 .dropdown-arrow {
@@ -17,13 +20,41 @@
 }
 
 .dropdown-menu {
-  @apply absolute z-50 mt-1 w-full rounded-md shadow-lg overflow-hidden bg-(--col2) border border-(--col4) divide-y divide-(--col4);
+  @apply absolute z-50 mt-1 w-full rounded-md shadow-lg overflow-hidden
+         bg-(--col2) border border-(--col4)
+         origin-top
+         opacity-0 scale-95 -translate-y-1 pointer-events-none
+         transition-[opacity,transform] duration-150 ease-out;
+}
+
+.dropdown-menu.open {
+  @apply opacity-100 scale-100 translate-y-0 pointer-events-auto;
 }
 
 .dropdown-item {
-  @apply px-3 py-1.5 cursor-pointer transition-colors hover:bg-(--col3);
+  @apply px-3 py-1.5 cursor-pointer text-white transition-colors;
+
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
+.dropdown-item:hover,
 .dropdown-item.active {
-  @apply bg-(--col3) hover:bg-(--col4);
+  @apply bg-(--col3);
+}
+
+.dropdown-menu.open .dropdown-item {
+  animation: dropIn 220ms ease-out forwards;
+  animation-delay: calc(var(--i) * 40ms);
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

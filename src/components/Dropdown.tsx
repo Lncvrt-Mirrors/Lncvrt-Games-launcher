@@ -39,24 +39,23 @@ export default function Dropdown ({ value, options, onChange }: Props) {
           className={`dropdown-arrow ${open ? 'open' : ''}`}
         />
       </button>
-      {open && (
-        <div className='dropdown-menu'>
-          {options.map(option => (
-            <div
-              key={option.value}
-              className={`dropdown-item ${
-                option.value === value ? 'active' : ''
-              }`}
-              onClick={async () => {
-                await onChange(option.value)
-                setOpen(false)
-              }}
-            >
-              {option.label}
-            </div>
-          ))}
-        </div>
-      )}
+      <div className={`dropdown-menu ${open ? 'open' : ''}`}>
+        {options.map((option, i) => (
+          <div
+            key={option.value}
+            className={`dropdown-item ${
+              option.value === value ? 'active' : ''
+            }`}
+            style={{ ['--i']: i } as React.CSSProperties}
+            onClick={async () => {
+              await onChange(option.value)
+              setOpen(false)
+            }}
+          >
+            {option.label}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
