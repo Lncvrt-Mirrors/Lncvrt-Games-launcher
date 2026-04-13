@@ -427,8 +427,7 @@ fn launch_game(
     //if already running on macos, it'll auto take the user to that proccess
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     {
-        use tauri_plugin_dialog::DialogExt;
-        use tauri_plugin_dialog::MessageDialogKind;
+        use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
         if !use_wine && is_running_by_path(&exe_path) {
             app.dialog()
@@ -449,13 +448,25 @@ fn launch_game(
             let quoted_path = format!("\"{}\"", exe_path.to_string_lossy());
             let cmd = wine_command.replace("%path%", &quoted_path);
 
-            if let Err(_) = Command::new("bash")
-                .arg("-c")
-                .arg(cmd)
-                .current_dir(&game_folder)
-                .spawn()
+            if let Err(e) =
+                Command::new(&std::env::var("SHELL").unwrap_or_else(|_| "/bin/sh".to_string()))
+                    .arg("-c")
+                    .arg(cmd)
+                    .current_dir(&game_folder)
+                    .spawn()
             {
-                eprintln!("Failed to launch game with Wine");
+                use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+
+                eprintln!("Failed to launch game with Wine: {}", e);
+
+                app.dialog()
+                    .message(format!(
+                        "{} failed to launch with Wine\n\n{}",
+                        display_name, e
+                    ))
+                    .kind(MessageDialogKind::Error)
+                    .title("Game already running")
+                    .show(|_| {});
             }
 
             return;
