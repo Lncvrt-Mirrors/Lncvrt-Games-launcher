@@ -461,7 +461,12 @@ export default function RootLayout ({
 
       const versionId = downloadQueue[0]
       const downloadInfo = downloadProgress.find(d => d.version == versionId)
-      if (!downloadInfo) return
+      if (!downloadInfo) {
+        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
+        setDownloadQueue(prev => prev.slice(1))
+        setIsProcessingQueue(false)
+        return
+      }
       const info = serverVersionList?.versions.find(vf => vf.id == versionId)
 
       if (!info) {
@@ -614,22 +619,23 @@ export default function RootLayout ({
         const verInfo = serverVersionList.versions.find(item => item.id === key)
 
         if (
-          !verInfo ||
-          (verInfo.lastRevision > 0 && value / 1000 <= verInfo.lastRevision)
+          verInfo &&
+          verInfo.lastRevision > 0 &&
+          value / 1000 <= verInfo.lastRevision
         ) {
           if (
-            await exists('game/' + key + '/' + verInfo?.executable, {
+            await exists('game/' + key + '/' + verInfo.executable, {
               baseDir: BaseDirectory.AppLocalData
             })
           )
-            await remove('game/' + key + '/' + verInfo?.executable, {
+            await remove('game/' + key + '/' + verInfo.executable, {
               baseDir: BaseDirectory.AppLocalData,
               recursive: true
             })
         }
       }
     })()
-  }, [serverVersionList, downloadVersions, versionsList])
+  }, [serverVersionList, versionsList])
 
   useEffect(() => {
     if (

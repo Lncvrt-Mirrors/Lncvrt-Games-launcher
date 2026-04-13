@@ -23,7 +23,7 @@ export default function VersionChangelogPopup () {
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
               atob(versionInfo?.changelog ?? '')
-                .replaceAll('- ', '&bull; ')
+                .replace(/^- /gm, '&bull; ')
                 .replaceAll(/`([^`]+)`/g, '<code>$1</code>')
             )
           }}

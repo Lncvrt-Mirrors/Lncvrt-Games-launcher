@@ -203,7 +203,7 @@ export default function DownloadsPopup () {
                   </div>
                 ) : v.hash_checking ? (
                   <span className='text-blue-300 inline-block w-full text-center'>
-                    Verifying file integerty...
+                    Verifying file integrity...
                   </span>
                 ) : v.unzipping ? (
                   <div className='flex flex-col gap-1 w-full'>
