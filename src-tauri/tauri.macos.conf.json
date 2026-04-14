@@ -29,6 +29,7 @@
   },
   "bundle": {
     "active": true,
+    "category": "Game",
     "targets": ["dmg", "app"],
     "icon": ["icons/icon.icns"],
     "createUpdaterArtifacts": true,

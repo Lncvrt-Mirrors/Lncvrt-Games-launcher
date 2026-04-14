@@ -29,6 +29,7 @@
   },
   "bundle": {
     "active": true,
+    "category": "Game",
     "targets": ["msi"],
     "icon": ["icons/icon.ico"],
     "createUpdaterArtifacts": true

@@ -26,6 +26,7 @@
   },
   "bundle": {
     "active": true,
+    "category": "Game",
     "targets": ["deb", "rpm"],
     "icon": ["icons/icon.png"],
     "createUpdaterArtifacts": true
