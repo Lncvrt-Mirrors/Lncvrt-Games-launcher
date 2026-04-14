@@ -5,7 +5,7 @@
 }
 
 .dropdown-btn {
-  @apply w-full flex items-center justify-between px-3 py-1.5 rounded-md cursor-pointer
+  @apply w-full flex items-center justify-between px-2 py-1 rounded-md cursor-pointer
          bg-(--col2) hover:bg-(--col3)
          border border-(--col4) hover:border-(--col5)
          text-white;
@@ -32,7 +32,7 @@
 }
 
 .dropdown-item {
-  @apply px-3 py-1.5 cursor-pointer text-white transition-colors;
+  @apply px-2 py-1 cursor-pointer text-white transition-colors;
 
   opacity: 0;
   transform: translateY(-10px);
