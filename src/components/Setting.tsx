@@ -8,16 +8,18 @@ export function Setting ({
   value,
   onChange,
   className,
-  title
+  title,
+  disabled
 }: SettingProps) {
   return (
-    <div className={`flex items-center gap-2 mb-2 ${className}`} title={title}>
+    <div className={`flex items-center gap-2 mb-2 ${disabled ? 'opacity-50 pointer-events-none' : ''} ${className}`} title={title}>
       <label className='text-white text-lg'>{label}</label>
       <div className='setting-checkbox-wrapper'>
         <input
           type='checkbox'
           className='setting-checkbox'
           checked={value}
+          disabled={disabled}
           onChange={() => onChange(!value)}
         />
         {value && <FontAwesomeIcon icon={faCheck} className='fa-check-icon' />}

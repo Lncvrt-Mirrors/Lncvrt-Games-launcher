@@ -21,6 +21,7 @@
     "decorum:allow-show-snap-overlay",
     "fs:default",
     "dialog:default",
+    "dialog:allow-open",
     "notification:default",
     "clipboard-manager:default",
     "clipboard-manager:allow-write-text",

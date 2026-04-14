@@ -4,4 +4,5 @@ export type SettingProps = {
   onChange: (val: boolean) => void
   className?: string
   title?: string
+  disabled?: boolean
 }

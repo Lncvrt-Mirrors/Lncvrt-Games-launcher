@@ -89,11 +89,13 @@ export default function RootLayout ({
   const [linuxWineCommand, setLinuxWineCommand] =
     useState<string>('wine %path%')
   const [theme, setTheme] = useState<string>('dark')
+  const [customDataLocation, setCustomDataLocation] = useState<string>('')
 
   const [versionsList, setVersionsList] = useState<Record<string, number>>({})
   const [modsList, setModsList] = useState<
     Record<string, Record<string, number>>
   >({})
+  const [movingData, setMovingData] = useState(false)
 
   function getSpecialVersionsList (game?: number): GameVersion[] {
     if (!serverVersionList) return []
@@ -117,7 +119,7 @@ export default function RootLayout ({
   }
 
   const closePopup = useCallback(() => {
-    if (popupMode == 0 && selectedGame && pathname === '/') {
+    if (popupMode == 0 && selectedGame && pathname === '/main') {
       setSelectedGame(null)
       setSelectedVersionList([])
     } else if (viewingInfoFromDownloads) {
@@ -312,7 +314,8 @@ export default function RootLayout ({
           sidebarAlwaysShowGames: true,
           linuxUseWine: false,
           linuxWineCommand: 'wine %path%',
-          theme: 'dark'
+          theme: 'dark',
+          customDataLocation: ''
         }
       })
       const versionsLocal = await load('versions.json', {
@@ -623,15 +626,10 @@ export default function RootLayout ({
           verInfo.lastRevision > 0 &&
           value / 1000 <= verInfo.lastRevision
         ) {
-          if (
-            await exists('game/' + key + '/' + verInfo.executable, {
-              baseDir: BaseDirectory.AppLocalData
-            })
-          )
-            await remove('game/' + key + '/' + verInfo.executable, {
-              baseDir: BaseDirectory.AppLocalData,
-              recursive: true
-            })
+          await invoke('remove_stale_executable', {
+            version: key,
+            executable: verInfo.executable
+          })
         }
       }
     })()
@@ -687,6 +685,9 @@ export default function RootLayout ({
     watchSettings<boolean>('linuxUseWine', v => setLinuxUseWine(v ?? false))
     watchSettings<string>('linuxWineCommand', v =>
       setLinuxWineCommand(v ?? 'wine %path%')
+    )
+    watchSettings<string>('customDataLocation', v =>
+      setCustomDataLocation(v ?? '')
     )
 
     watchVersions<Record<string, number>>('list', v => setVersionsList(v ?? {}))
@@ -756,8 +757,11 @@ export default function RootLayout ({
                 linuxUseWine,
                 linuxWineCommand,
                 theme,
+                customDataLocation,
                 versionsList,
-                modsList
+                modsList,
+                movingData,
+                setMovingData
               }}
             >
               <div
@@ -823,6 +827,11 @@ export default function RootLayout ({
                         <VersionChangelogPopup />
                       ) : null}
                     </div>
+                  </div>
+                )}
+                {movingData && (
+                  <div className='fixed inset-0 z-999999 bg-(--col0) flex items-center justify-center'>
+                    <p className='text-5xl text-center'>Moving data...</p>
                   </div>
                 )}
               </div>

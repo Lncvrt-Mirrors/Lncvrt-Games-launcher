@@ -6,7 +6,7 @@ use openssl::sign::Verifier;
 use sha2::{Digest, Sha512};
 use std::fs;
 use std::path::Path;
-use std::sync::OnceLock;
+use std::sync::{OnceLock, RwLock};
 use std::time::Instant;
 use std::{
     fs::{File, create_dir_all},
@@ -32,6 +32,19 @@ use std::os::unix::fs::PermissionsExt;
 
 #[cfg(not(debug_assertions))]
 use tauri_plugin_updater::UpdaterExt;
+
+struct AppState {
+    custom_data_dir: RwLock<Option<PathBuf>>,
+}
+
+fn data_dir(app: &AppHandle) -> Result<PathBuf, String> {
+    let state = app.state::<AppState>();
+    let guard = state.custom_data_dir.read().unwrap();
+    match &*guard {
+        Some(p) => Ok(p.clone()),
+        None => app.path().app_local_data_dir().map_err(|e| e.to_string()),
+    }
+}
 
 static CANCEL_MAP: OnceLock<DashMap<String, bool>> = OnceLock::new();
 
@@ -120,7 +133,7 @@ async fn unzip_to_dir(app: AppHandle, zip_path: PathBuf, out_dir: PathBuf, name:
 
 #[tauri::command]
 fn folder_size(app: AppHandle, version: String) -> String {
-    let path = match app.path().app_local_data_dir() {
+    let path = match data_dir(&app) {
         Ok(p) => p.join("game").join(&version),
         Err(_) => return "-1".to_string(),
     };
@@ -160,20 +173,15 @@ async fn download(
     let _ = app.emit("download-start", format!("{}", name));
     let window = app.get_webview_window("main").expect("main window missing");
 
-    let downloads_path = match app.path().app_local_data_dir() {
-        Ok(p) => p.join("downloads"),
+    let base_dir = match data_dir(&app) {
+        Ok(p) => p,
         Err(_) => {
             let _ = &app.emit("download-stop", format!("{}", name));
             return "-1".to_string();
         }
     };
-    let game_path = match app.path().app_local_data_dir() {
-        Ok(p) => p.join("game"),
-        Err(_) => {
-            let _ = &app.emit("download-stop", format!("{}", name));
-            return "-1".to_string();
-        }
-    };
+    let downloads_path = base_dir.join("downloads");
+    let game_path = base_dir.join("game");
 
     let download_part_path = downloads_path.join(format!("{}.part", name));
     let download_zip_path = downloads_path.join(format!("{}.zip", name));
@@ -414,7 +422,7 @@ fn launch_game(
     use_wine: bool,
     wine_command: String,
 ) {
-    let game_folder = match app.path().app_local_data_dir() {
+    let game_folder = match data_dir(&app) {
         Ok(p) => p.join("game").join(&name),
         Err(_) => return,
     };
@@ -473,10 +481,7 @@ fn launch_game(
         }
     }
 
-    let bepinex_folder = match app.path().app_local_data_dir() {
-        Ok(p) => p.join("game").join(&name).join("BepInEx"),
-        Err(_) => return,
-    };
+    let bepinex_folder = game_folder.join("BepInEx");
 
     if platform() == "macos" && !bepinex_folder.exists() && executable.ends_with(".app") {
         if let Err(_) = Command::new("open")
@@ -528,6 +533,125 @@ fn verify_signature(body: String, signature: String, public_key: String) -> bool
 #[tauri::command]
 async fn cancel_download(name: String) {
     cancel_map().insert(name.clone(), true);
+}
+
+fn copy_dir_recursive(src: &Path, dst: &Path) -> std::io::Result<()> {
+    fs::create_dir_all(dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let src_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+        if src_path.is_dir() {
+            copy_dir_recursive(&src_path, &dst_path)?;
+        } else {
+            fs::copy(&src_path, &dst_path)?;
+        }
+    }
+    Ok(())
+}
+
+fn move_dir(src: &Path, dst: &Path) -> std::io::Result<()> {
+    if !src.exists() {
+        return Ok(());
+    }
+    if let Some(parent) = dst.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    if dst.exists() {
+        fs::remove_dir_all(dst)?;
+    }
+    match fs::rename(src, dst) {
+        Ok(()) => Ok(()),
+        Err(_) => {
+            copy_dir_recursive(src, dst)?;
+            fs::remove_dir_all(src)?;
+            Ok(())
+        }
+    }
+}
+
+#[tauri::command]
+async fn move_game_data(app: AppHandle, destination: String) -> Result<(), String> {
+    let default_dir = app.path().app_local_data_dir().map_err(|e| e.to_string())?;
+    let current_dir = data_dir(&app)?;
+
+    let new_dir = if destination.is_empty() {
+        default_dir.clone()
+    } else {
+        PathBuf::from(&destination)
+    };
+
+    if current_dir == new_dir {
+        return Ok(());
+    }
+
+    let src_game = current_dir.join("game");
+    let dst_game = new_dir.join("game");
+    let src_downloads = current_dir.join("downloads");
+    let dst_downloads = new_dir.join("downloads");
+
+    tauri::async_runtime::spawn_blocking(move || {
+        fs::create_dir_all(&new_dir).map_err(|e| e.to_string())?;
+        move_dir(&src_game, &dst_game).map_err(|e| e.to_string())?;
+        move_dir(&src_downloads, &dst_downloads).map_err(|e| e.to_string())?;
+        Ok::<(), String>(())
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+
+    let state = app.state::<AppState>();
+    let mut guard = state.custom_data_dir.write().unwrap();
+    if destination.is_empty() {
+        *guard = None;
+    } else {
+        *guard = Some(PathBuf::from(&destination));
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+fn restart_app(app: AppHandle) {
+    app.restart();
+}
+
+#[tauri::command]
+fn open_game_folder(app: AppHandle, version: String) -> Result<(), String> {
+    let dir = data_dir(&app)?;
+    let path = dir.join("game").join(&version);
+    if !path.exists() || !path.is_dir() {
+        return Err(format!("Game folder \"{}\" not found.", path.display()));
+    }
+    #[cfg(target_os = "macos")]
+    Command::new("open")
+        .arg(&path)
+        .spawn()
+        .map_err(|e| e.to_string())?;
+    #[cfg(target_os = "windows")]
+    Command::new("explorer")
+        .arg(&path)
+        .spawn()
+        .map_err(|e| e.to_string())?;
+    #[cfg(target_os = "linux")]
+    Command::new("xdg-open")
+        .arg(&path)
+        .spawn()
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn remove_stale_executable(app: AppHandle, version: String, executable: String) -> bool {
+    let dir = match data_dir(&app) {
+        Ok(d) => d,
+        Err(_) => return false,
+    };
+    let path = dir.join("game").join(&version).join(&executable);
+    if path.exists() {
+        fs::remove_file(&path).is_ok()
+    } else {
+        false
+    }
 }
 
 #[tauri::command]
@@ -597,9 +721,32 @@ pub fn run() {
             folder_size,
             verify_signature,
             cancel_download,
-            open_new_window
+            open_new_window,
+            move_game_data,
+            restart_app,
+            open_game_folder,
+            remove_stale_executable
         ])
         .setup(|app| {
+            let custom_dir = app
+                .path()
+                .app_config_dir()
+                .ok()
+                .map(|d| d.join("settings.json"))
+                .filter(|p| p.exists())
+                .and_then(|p| fs::read_to_string(p).ok())
+                .and_then(|c| serde_json::from_str::<serde_json::Value>(&c).ok())
+                .and_then(|v| {
+                    v.get("customDataLocation")
+                        .and_then(|s| s.as_str())
+                        .filter(|s| !s.is_empty())
+                        .map(PathBuf::from)
+                });
+
+            app.manage(AppState {
+                custom_data_dir: RwLock::new(custom_dir),
+            });
+
             let window = app.get_webview_window("main").unwrap();
 
             #[cfg(target_os = "windows")]

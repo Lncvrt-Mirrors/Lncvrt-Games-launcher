@@ -4,6 +4,8 @@ import { Setting } from '@/components/Setting'
 import { useGlobal } from '@/providers/GlobalProvider'
 import { copyToClipboard } from '@/lib/clipboard'
 import { platform } from '@tauri-apps/plugin-os'
+import { open } from '@tauri-apps/plugin-dialog'
+import { invoke } from '@tauri-apps/api/core'
 import Dropdown from '@/components/Dropdown'
 
 export default function Settings () {
@@ -14,7 +16,10 @@ export default function Settings () {
     sidebarAlwaysShowGames,
     linuxUseWine,
     linuxWineCommand,
-    theme
+    theme,
+    customDataLocation,
+    downloadProgress,
+    setMovingData
   } = useGlobal()
 
   return (
@@ -58,6 +63,45 @@ export default function Settings () {
           className='input-field my-1'
           hidden={!(platform() == 'linux' && linuxUseWine)}
         ></input>
+        <Setting
+          label='Use custom data location'
+          value={!!customDataLocation}
+          disabled={downloadProgress.length > 0}
+          onChange={async () => {
+            if (customDataLocation) {
+              try {
+                setMovingData(true)
+                await invoke('move_game_data', { destination: '' })
+                await settings?.set('customDataLocation', '')
+                await settings?.save()
+                await invoke('restart_app')
+              } catch {
+                setMovingData(false)
+              }
+            } else {
+              const selected = await open({
+                directory: true,
+                title: 'Select data location'
+              })
+              if (!selected || typeof selected !== 'string') return
+              try {
+                setMovingData(true)
+                await invoke('move_game_data', { destination: selected })
+                await settings?.set('customDataLocation', selected)
+                await settings?.save()
+                await invoke('restart_app')
+              } catch {
+                setMovingData(false)
+              }
+            }
+          }}
+          title='Move game data to a custom folder location. Disabled during downloads.'
+        />
+        {customDataLocation && (
+          <p className='text-sm opacity-50 ml-6 -mt-1 mb-2'>
+            {customDataLocation}
+          </p>
+        )}
         <div className='flex flex-row gap-2 items-center'>
           <p
             title='The theme you want the launcher to use.'

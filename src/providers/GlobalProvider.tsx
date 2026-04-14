@@ -57,8 +57,11 @@ type GlobalCtxType = {
   linuxUseWine: boolean
   linuxWineCommand: string
   theme: string
+  customDataLocation: string
   versionsList: Record<string, number>
   modsList: Record<string, Record<string, number>>
+  movingData: boolean
+  setMovingData: Dispatch<SetStateAction<boolean>>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)
