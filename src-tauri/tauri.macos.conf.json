@@ -30,6 +30,8 @@
   "bundle": {
     "active": true,
     "category": "Game",
+    "shortDescription": "A launcher for downloading, managing, and launching games with built-in mod support.",
+    "longDescription": "Lncvrt Games Launcher lets you download and manage multiple versions of games, install mods, and launch them directly. Linux users can run Windows exclusive games via Wine (or proton via a custom command).",
     "targets": ["dmg", "app"],
     "icon": ["icons/icon.icns"],
     "createUpdaterArtifacts": true,
