@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 .sidebar {
-  @apply fixed top-0 left-0 w-60 h-screen bg-(--col1) flex flex-col border-e border-(--col2) z-1;
+  @apply fixed top-0 left-0 w-60 h-screen bg-(--col1)/50 flex flex-col border-e border-(--col2)/50 z-1;
 }
 
 .sidebar-downloads {
-  @apply text-[#bdbdbd] fixed bottom-2 left-2 bg-(--col2) rounded-lg border border-(--col3) px-4 py-3 text-xl cursor-pointer transition-colors duration-[0.25s] opacity-75;
+  @apply text-[#bdbdbd] fixed bottom-2 left-2 bg-(--col2)/50 rounded-lg border border-(--col3)/50 px-4 py-3 text-xl cursor-pointer transition-colors duration-[0.25s] opacity-75;
 }
 
 .sidebar-downloads:hover {
   @apply text-white opacity-100;
-  @apply bg-(--col3) border-(--col4);
+  @apply bg-(--col3)/50 border-(--col4)/50;
 }
 
 .nav-links {
@@ -22,7 +22,7 @@
 }
 
 .link.active {
-  @apply bg-(--col2) border-(--col3);
+  @apply bg-(--col2)/50 border-(--col3)/50;
 }
 
 .link.active,
@@ -31,7 +31,7 @@
 }
 
 .link.active:hover {
-  @apply bg-(--col3) border-(--col4);
+  @apply bg-(--col3)/50 border-(--col4)/50;
 }
 
 .sidebar ::-webkit-scrollbar {

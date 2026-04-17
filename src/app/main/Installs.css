@@ -5,9 +5,9 @@
 }
 
 .downloads-scroll {
-  @apply bg-(--col1) border border-(--col3) rounded-lg overflow-y-auto w-full;
+  @apply bg-(--col1)/50 border border-(--col3)/50 rounded-lg overflow-y-auto w-full;
 }
 
 .downloads-entry {
-  @apply flex justify-between items-center m-2 p-2 rounded-lg text-gray-200 text-lg transition-colors bg-(--col2) hover:bg-(--col3) border border-(--col4) hover:border-(--col5) cursor-pointer;
+  @apply flex justify-between items-center m-2 p-2 rounded-lg text-gray-200 text-lg transition-colors bg-(--col2)/50 hover:bg-(--col3)/50 border border-(--col4)/50 hover:border-(--col5)/50 cursor-pointer;
 }

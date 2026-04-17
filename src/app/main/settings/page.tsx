@@ -23,7 +23,7 @@ export default function Settings () {
   return (
     <>
       <p className='text-3xl ml-4 mt-4'>Settings</p>
-      <div className='ml-4 mt-4 bg-(--col1) border border-(--col3) rounded-lg p-4 w-fit h-fit'>
+      <div className='ml-4 mt-4 bg-(--col1)/50 border border-(--col3)/50 rounded-lg p-4 w-fit h-fit'>
         <Setting
           label='Allow sending notifications'
           value={notificationsAllowed}

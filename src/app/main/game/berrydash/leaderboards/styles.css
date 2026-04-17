@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 .box {
-  @apply bg-(--col1) border border-(--col3) rounded-lg w-auto p-1;
+  @apply bg-(--col1)/50 border border-(--col3)/50 rounded-lg w-auto p-1;
 }
 
 .leaderboard-button {
-  @apply bg-(--col2) hover:bg-(--col4) border border-(--col4) hover:border-(--col6) rounded-lg px-4 py-2 inline-block transition-all duration-200 cursor-pointer;
+  @apply bg-(--col2)/50 hover:bg-(--col4)/50 border border-(--col4)/50 hover:border-(--col6)/50 rounded-lg px-4 py-2 inline-block transition-all duration-200 cursor-pointer;
 }
 
 .leaderboard-entry {
-  @apply rounded-lg text-gray-200 text-lg px-1 py-0.5 transition-colors bg-(--col2) hover:bg-(--col3) border border-(--col4) hover:border-(--col5) cursor-pointer;
+  @apply rounded-lg text-gray-200 text-lg px-1 py-0.5 transition-colors bg-(--col2)/50 hover:bg-(--col3)/50 border border-(--col4)/50 hover:border-(--col5)/50 cursor-pointer;
 }
