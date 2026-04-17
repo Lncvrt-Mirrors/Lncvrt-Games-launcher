@@ -21,6 +21,8 @@ use tauri_plugin_os::platform;
 use tauri_plugin_prevent_default::Flags;
 use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
+#[cfg(target_os = "macos")]
+use window_vibrancy::{NSVisualEffectMaterial, apply_vibrancy};
 use zip::ZipArchive;
 use zip::result::ZipError;
 
@@ -748,6 +750,10 @@ pub fn run() {
             });
 
             let window = app.get_webview_window("main").unwrap();
+
+            #[cfg(target_os = "macos")]
+            apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+                .expect("Unable to apply window blur");
 
             #[cfg(target_os = "windows")]
             {

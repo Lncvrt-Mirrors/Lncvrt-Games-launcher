@@ -56,7 +56,6 @@ type GlobalCtxType = {
   sidebarAlwaysShowGames: boolean
   linuxUseWine: boolean
   linuxWineCommand: string
-  theme: string
   customDataLocation: string
   versionsList: Record<string, number>
   modsList: Record<string, Record<string, number>>

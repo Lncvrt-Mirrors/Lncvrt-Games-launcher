@@ -88,7 +88,6 @@ export default function RootLayout ({
   const [linuxUseWine, setLinuxUseWine] = useState<boolean>(false)
   const [linuxWineCommand, setLinuxWineCommand] =
     useState<string>('wine %path%')
-  const [theme, setTheme] = useState<string>('dark')
   const [customDataLocation, setCustomDataLocation] = useState<string>('')
 
   const [versionsList, setVersionsList] = useState<Record<string, number>>({})
@@ -675,7 +674,6 @@ export default function RootLayout ({
       unlisteners.push(versions!.onKeyChange<T>(key, fn))
     }
 
-    watchSettings<string>('theme', v => setTheme(v ?? 'dark'))
     watchSettings<boolean>('notificationsAllowed', v =>
       setNotificationsAllowed(v ?? true)
     )
@@ -703,7 +701,7 @@ export default function RootLayout ({
   return (
     <>
       <html lang='en' className={roboto.className}>
-        <body className={theme + '-theme'}>
+        <body>
           {loading ? (
             <>
               <div
@@ -756,7 +754,6 @@ export default function RootLayout ({
                 sidebarAlwaysShowGames,
                 linuxUseWine,
                 linuxWineCommand,
-                theme,
                 customDataLocation,
                 versionsList,
                 modsList,

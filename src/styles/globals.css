@@ -5,10 +5,8 @@ html {
 }
 
 body {
-  @apply bg-(--col0) text-white select-none;
-}
+  @apply bg-transparent text-white select-none;
 
-.dark-theme {
   --col0: rgb(8, 8, 8);
   --col1: rgb(16, 16, 16);
   --col2: rgb(32, 32, 32);
@@ -19,45 +17,6 @@ body {
   --col7: rgb(112, 112, 112);
   --col8: rgb(128, 128, 128);
   --col9: rgb(144, 144, 144);
-}
-
-.red-theme {
-  --col0: rgb(32, 8, 8);
-  --col1: rgb(40, 16, 16);
-  --col2: rgb(56, 32, 32);
-  --col3: rgb(72, 48, 48);
-  --col4: rgb(88, 64, 64);
-  --col5: rgb(104, 80, 80);
-  --col6: rgb(120, 96, 96);
-  --col7: rgb(136, 112, 112);
-  --col8: rgb(152, 128, 128);
-  --col9: rgb(168, 144, 144);
-}
-
-.blue-theme {
-  --col0: rgb(8, 8, 32);
-  --col1: rgb(16, 16, 40);
-  --col2: rgb(32, 32, 56);
-  --col3: rgb(48, 48, 72);
-  --col4: rgb(64, 64, 88);
-  --col5: rgb(80, 80, 104);
-  --col6: rgb(96, 96, 120);
-  --col7: rgb(112, 112, 136);
-  --col8: rgb(128, 128, 152);
-  --col9: rgb(144, 144, 168);
-}
-
-.purple-theme {
-  --col0: rgb(20, 8, 32);
-  --col1: rgb(28, 16, 40);
-  --col2: rgb(44, 32, 56);
-  --col3: rgb(60, 48, 72);
-  --col4: rgb(76, 64, 88);
-  --col5: rgb(92, 80, 104);
-  --col6: rgb(108, 96, 120);
-  --col7: rgb(124, 112, 136);
-  --col8: rgb(140, 128, 152);
-  --col9: rgb(156, 144, 168);
 }
 
 .button {

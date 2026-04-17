@@ -6,7 +6,6 @@ import { copyToClipboard } from '@/lib/clipboard'
 import { platform } from '@tauri-apps/plugin-os'
 import { open } from '@tauri-apps/plugin-dialog'
 import { invoke } from '@tauri-apps/api/core'
-import Dropdown from '@/components/Dropdown'
 
 export default function Settings () {
   const {
@@ -16,7 +15,6 @@ export default function Settings () {
     sidebarAlwaysShowGames,
     linuxUseWine,
     linuxWineCommand,
-    theme,
     customDataLocation,
     downloadProgress,
     setMovingData
@@ -102,26 +100,6 @@ export default function Settings () {
             {customDataLocation}
           </p>
         )}
-        <div className='flex flex-row gap-2 items-center'>
-          <p
-            title='The theme you want the launcher to use.'
-            className='text-lg'
-          >
-            Theme:
-          </p>
-          <Dropdown
-            value={theme}
-            options={[
-              { label: 'Dark', value: 'dark' },
-              { label: 'Red', value: 'red' },
-              { label: 'Blue', value: 'blue' },
-              { label: 'Purple', value: 'purple' }
-            ]}
-            onChange={async val => {
-              await settings?.set('theme', val)
-            }}
-          />
-        </div>
       </div>
       <p
         className='fixed bottom-1.5 right-1.5 rounded-md cursor-pointer px-1 border z-100 transition-colors btntheme1'

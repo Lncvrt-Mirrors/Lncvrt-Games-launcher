@@ -37,6 +37,7 @@ tauri-plugin-http = "2.5.8"
 dashmap = "6.1.0"
 tauri-plugin-store = "2.4.2"
 hex = "0.4.3"
+window-vibrancy = "0.7.1"
 
 [target.'cfg(any(target_os = "windows", target_os = "linux"))'.dependencies]
 sysinfo = "0.38.4"
