@@ -1,6 +1,6 @@
 [package]
 name = "lncvrt-games-launcher"
-version = "1.9.1"
+version = "1.9.2"
 authors = ["Lncvrt"]
 edition = "2024"
 
@@ -21,7 +21,7 @@ reqwest = { version = "0.13.2", default-features = false, features = [
   "stream",
   "rustls",
 ] }
-tokio = "1.51.1"
+tokio = "1.52.1"
 futures-util = { version = "0.3.32", features = ["io"] }
 tauri-plugin-decorum = "1.1.1"
 tauri-plugin-fs = "2.5.0"
