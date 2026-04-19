@@ -1,8 +1,9 @@
-use base64::{Engine as _, engine::general_purpose};
+use base64::Engine;
 use dashmap::DashMap;
+use ed25519_dalek::pkcs8::DecodePublicKey;
+use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use futures_util::stream::StreamExt;
-use openssl::pkey::PKey;
-use openssl::sign::Verifier;
+use pem::parse;
 use sha2::{Digest, Sha512};
 use std::fs;
 use std::path::Path;
@@ -509,24 +510,31 @@ fn launch_game(
 
 #[tauri::command]
 fn verify_signature(body: String, signature: String, public_key: String) -> bool {
-    let Ok(pem) = general_purpose::STANDARD.decode(public_key) else {
-        return false;
-    };
-    let Ok(pubkey) = PKey::public_key_from_pem(&pem) else {
-        return false;
-    };
-    let Ok(sig) = general_purpose::STANDARD.decode(signature) else {
+    let Ok(pubkey_pem_bytes) = base64::engine::general_purpose::STANDARD.decode(public_key) else {
         return false;
     };
 
-    let mut verifier = match Verifier::new_without_digest(&pubkey) {
-        Ok(v) => v,
-        Err(_) => return false,
+    let Ok(sig_bytes) = base64::engine::general_purpose::STANDARD.decode(signature) else {
+        return false;
     };
 
-    verifier
-        .verify_oneshot(&sig, body.as_bytes())
-        .unwrap_or(false)
+    let Ok(pubkey_pem) = String::from_utf8(pubkey_pem_bytes) else {
+        return false;
+    };
+
+    let Ok(parsed) = parse(pubkey_pem) else {
+        return false;
+    };
+
+    let Ok(pubkey) = VerifyingKey::from_public_key_der(&parsed.contents()) else {
+        return false;
+    };
+
+    let Ok(sig) = Signature::from_slice(&sig_bytes) else {
+        return false;
+    };
+
+    pubkey.verify(body.as_bytes(), &sig).is_ok()
 }
 
 #[tauri::command]

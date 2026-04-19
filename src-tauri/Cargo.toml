@@ -31,12 +31,13 @@ tauri-plugin-notification = "2.3.3"
 sha2 = "0.11.0"
 tauri-plugin-clipboard-manager = "2.3.2"
 tauri-plugin-prevent-default = "5.0.0"
-openssl = { version = "0.10.78", features = ["vendored"] }
 base64 = "0.22.1"
 tauri-plugin-http = "2.5.8"
 dashmap = "6.1.0"
 tauri-plugin-store = "2.4.2"
 hex = "0.4.3"
+ed25519-dalek = { version = "2.2.0", features = ["pkcs8"] }
+pem = "3.0.6"
 
 [target.'cfg(any(target_os = "windows", target_os = "linux"))'.dependencies]
 sysinfo = "0.38.4"
