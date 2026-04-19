@@ -773,13 +773,15 @@ async fn update(
     app: tauri::AppHandle,
     window: tauri::WebviewWindow,
 ) -> tauri_plugin_updater::Result<()> {
-    let target = {
+    use tauri_plugin_os::arch;
+
+    let plat = {
         #[cfg(target_os = "linux")]
         {
             if std::path::Path::new("/etc/debian_version").exists() {
                 "linux-debian"
             } else if std::path::Path::new("/etc/redhat-release").exists() {
-                "linux-fedora"
+                "linux-redhat"
             } else {
                 let mut new_url = window.url().unwrap();
                 new_url.set_path("/update/outdated");
@@ -789,13 +791,13 @@ async fn update(
         }
         #[cfg(not(target_os = "linux"))]
         {
-            tauri_plugin_updater::target().unwrap_or("unknown".to_string())
+            platform()
         }
     };
 
     if let Some(update) = app
         .updater_builder()
-        .target(target)
+        .target(format!("{}-{}", plat, arch()))
         .build()?
         .check()
         .await?
