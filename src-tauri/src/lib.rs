@@ -32,9 +32,6 @@ use sysinfo::System;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
-#[cfg(not(debug_assertions))]
-use tauri_plugin_updater::UpdaterExt;
-
 struct AppState {
     custom_data_dir: RwLock<Option<PathBuf>>,
 }
@@ -685,7 +682,6 @@ fn open_new_window(
 pub fn run() {
     #[allow(unused_variables)]
     tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(
@@ -762,83 +758,9 @@ pub fn run() {
                     eprintln!("Failed to create overlay titlebar: {:?}", e);
                 }
             }
-            #[cfg(not(debug_assertions))]
-            {
-                let handle = app.handle().clone();
-                tauri::async_runtime::spawn(async move {
-                    update(handle, window.clone()).await.unwrap();
-                });
-            }
-            #[cfg(debug_assertions)]
-            {
-                let mut new_url = app.config().build.dev_url.clone().unwrap();
-                new_url.set_path("/main");
-                window.navigate(new_url).unwrap();
-            }
 
             Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-#[cfg(not(debug_assertions))]
-async fn update(
-    app: tauri::AppHandle,
-    window: tauri::WebviewWindow,
-) -> tauri_plugin_updater::Result<()> {
-    let target = {
-        #[cfg(target_os = "linux")]
-        {
-            if std::path::Path::new("/etc/debian_version").exists() {
-                "linux-debian"
-            } else if std::path::Path::new("/etc/redhat-release").exists() {
-                "linux-fedora"
-            } else {
-                let mut new_url = window.url().unwrap();
-                new_url.set_path("/update/outdated");
-                window.navigate(new_url).unwrap();
-                return Ok(());
-            }
-        }
-        #[cfg(not(target_os = "linux"))]
-        {
-            tauri_plugin_updater::target().unwrap_or("unknown".to_string())
-        }
-    };
-
-    if let Some(update) = app
-        .updater_builder()
-        .target(target)
-        .build()?
-        .check()
-        .await?
-    {
-        let mut new_url = window.url().unwrap();
-        new_url.set_path("/update/updating");
-        window.navigate(new_url).unwrap();
-
-        let mut downloaded = 0;
-
-        update
-            .download_and_install(
-                |chunk_length, content_length| {
-                    downloaded += chunk_length;
-                    println!("downloaded {downloaded} from {content_length:?}");
-                },
-                || {
-                    println!("download finished");
-                },
-            )
-            .await?;
-
-        println!("update installed");
-        app.restart();
-    }
-
-    let mut new_url = window.url().unwrap();
-    new_url.set_path("/main");
-    window.navigate(new_url).unwrap();
-
-    Ok(())
 }
