@@ -23,7 +23,6 @@ reqwest = { version = "0.13.2", default-features = false, features = [
 ] }
 tokio = "1.52.1"
 futures-util = { version = "0.3.32", features = ["io"] }
-tauri-plugin-decorum = "1.1.1"
 tauri-plugin-fs = "2.5.0"
 zip = "8.5.1"
 tauri-plugin-dialog = "2.7.0"

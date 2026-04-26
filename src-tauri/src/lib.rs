@@ -688,8 +688,8 @@ fn open_new_window(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    #[allow(unused_variables)]
-    tauri::Builder::default()
+    #[allow(unused)]
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
@@ -704,7 +704,6 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_decorum::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
@@ -763,7 +762,12 @@ pub fn run() {
             }
 
             Ok(())
-        })
+        });
+
+    #[cfg(target_os = "windows")]
+    builder.plugin(tauri_plugin_decorum::init());
+
+    builder
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
