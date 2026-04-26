@@ -24,7 +24,7 @@ reqwest = { version = "0.13.2", default-features = false, features = [
 tokio = "1.52.1"
 futures-util = { version = "0.3.32", features = ["io"] }
 tauri-plugin-fs = "2.5.0"
-zip = "8.5.1"
+zip = "8.6.0"
 tauri-plugin-dialog = "2.7.0"
 tauri-plugin-notification = "2.3.3"
 sha2 = "0.11.0"
@@ -45,6 +45,7 @@ sysinfo = "0.38.4"
 tauri-plugin-single-instance = "2.4.1"
 tauri-plugin-updater = "2.10.1"
 tauri-plugin-window-state = "2.4.1"
+tauri-plugin-process = "2.3.1"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 tauri-plugin-decorum = "1.1.1"

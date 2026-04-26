@@ -32,6 +32,8 @@ import { GameVersion } from '@/types/GameVersion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { invoke } from '@tauri-apps/api/core'
+import semver from 'semver'
+import { exit } from '@tauri-apps/plugin-process'
 
 import VersionsDownloadPopup from '@/popups/VersionsDownload'
 import GamesDownloadPopup from '@/popups/GamesDownload'
@@ -326,8 +328,16 @@ export default function RootLayout ({
           mods: {}
         }
       })
+      const cfgVer = (await settingsLocal.get<string>('version')) ?? client
+      const versVer = (await versionsLocal.get<string>('version')) ?? client
+      if (semver.gt(cfgVer, client) || semver.gt(versVer, client)) {
+        exit(1)
+        return
+      }
+
       settingsLocal.set('version', client)
       versionsLocal.set('version', client)
+
       if (await exists('config.json', legacyOptions)) {
         const config = await readTextFile('config.json', legacyOptions)
         const raw = JSON.parse(config)
