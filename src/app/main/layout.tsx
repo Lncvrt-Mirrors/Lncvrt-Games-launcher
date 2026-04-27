@@ -271,7 +271,14 @@ export default function RootLayout ({
       setVersion(client)
       try {
         const response = await fetch(
-          `https://games.lncvrt.xyz/api/launcher/versions?platform=${platform()}&arch=${arch()}`
+          'https://games.lncvrt.xyz/api/launcher/versions',
+          {
+            headers: {
+              Requester: 'LncvrtGamesLauncherClient',
+              ClientVersion: await app.getVersion(),
+              ClientPlatform: platform() + '-' + arch()
+            }
+          }
         )
         const signature = response.headers.get('x-signature') ?? ''
         const data = await response.json()
@@ -509,7 +516,14 @@ export default function RootLayout ({
               (downloadInfo.type == 1
                 ? info.modSupportDownload
                 : downloadInfo.modDownload)) +
-          (downloadInfo.type == 2 ? '&modId=' + downloadInfo.modId : '')
+          (downloadInfo.type == 2 ? '&modId=' + downloadInfo.modId : ''),
+        {
+          headers: {
+            Requester: 'LncvrtGamesLauncherClient',
+            ClientVersion: await app.getVersion(),
+            ClientPlatform: platform() + '-' + arch()
+          }
+        }
       )
       const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
       const data = await downloadInfoRequest.json()

@@ -6,10 +6,11 @@ import { BirdColor } from '@/types/BerryDash/BirdColor'
 import { GetIconForUser } from '@/lib/berrydashutil'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { platform } from '@tauri-apps/plugin-os'
+import { arch, platform } from '@tauri-apps/plugin-os'
 import { fetch } from '@tauri-apps/plugin-http'
 import { verifySignature } from '@/lib/util'
 import Dropdown from '@/components/Dropdown'
+import { app } from '@tauri-apps/api'
 
 interface BaseEntry {
   id: number
@@ -95,7 +96,14 @@ export default function BerryDashLeaderboards () {
     try {
       if (selected == 3 || selected == 4) {
         const response = await fetch(
-          'https://games.lncvrt.xyz/api/berrydash/account?username='
+          'https://games.lncvrt.xyz/api/berrydash/account?username=',
+          {
+            headers: {
+              Requester: 'LncvrtGamesLauncherClient',
+              ClientVersion: await app.getVersion(),
+              ClientPlatform: platform() + '-' + arch()
+            }
+          }
         )
         const signature = response.headers.get('x-signature') ?? ''
         const data = await response.json()
@@ -135,7 +143,14 @@ export default function BerryDashLeaderboards () {
               ? 'coin'
               : selected == 5
               ? 'legacy'
-              : 'total')
+              : 'total'),
+          {
+            headers: {
+              Requester: 'LncvrtGamesLauncherClient',
+              ClientVersion: await app.getVersion(),
+              ClientPlatform: platform() + '-' + arch()
+            }
+          }
         )
         const signature = response.headers.get('x-signature') ?? ''
         const data = await response.json()

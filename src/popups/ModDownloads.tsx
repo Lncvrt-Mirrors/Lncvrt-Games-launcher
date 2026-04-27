@@ -19,6 +19,7 @@ import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { fetch } from '@tauri-apps/plugin-http'
 import { arch, platform } from '@tauri-apps/plugin-os'
 import { useEffect, useState } from 'react'
+import { app } from '@tauri-apps/api'
 
 export default function ModDownloadsPopup () {
   const {
@@ -39,7 +40,14 @@ export default function ModDownloadsPopup () {
     if (!managingVersion) return
     ;(async () => {
       const response = await fetch(
-        `https://games.lncvrt.xyz/api/launcher/mods?platform=${platform()}&arch=${arch()}&version=${managingVersion}`
+        'https://games.lncvrt.xyz/api/launcher/mods?version=' + managingVersion,
+        {
+          headers: {
+            Requester: 'LncvrtGamesLauncherClient',
+            ClientVersion: await app.getVersion(),
+            ClientPlatform: platform() + '-' + arch()
+          }
+        }
       )
       const signature = response.headers.get('x-signature') ?? ''
       const data = await response.json()
@@ -64,7 +72,15 @@ export default function ModDownloadsPopup () {
         onClick={async () => {
           setMods(0)
           const response = await fetch(
-            `https://games.lncvrt.xyz/api/launcher/mods?platform=${platform()}&arch=${arch()}&version=${managingVersion}`
+            'https://games.lncvrt.xyz/api/launcher/mods?version=' +
+              managingVersion,
+            {
+              headers: {
+                Requester: 'LncvrtGamesLauncherClient',
+                ClientVersion: await app.getVersion(),
+                ClientPlatform: platform() + '-' + arch()
+              }
+            }
           )
           const signature = response.headers.get('x-signature') ?? ''
           const data = await response.json()
