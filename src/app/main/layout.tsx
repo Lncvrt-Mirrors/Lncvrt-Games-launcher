@@ -560,7 +560,10 @@ export default function RootLayout ({
         setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
         if (downloadInfo.type != 1) {
           if (downloadInfo.type == 2) {
-            const currentMods = await versions?.get<Record<string, Record<string, number>>>('mods') ?? {}
+            const currentMods =
+              (await versions?.get<Record<string, Record<string, number>>>(
+                'mods'
+              )) ?? {}
             versions?.set('mods', {
               ...currentMods,
               [downloadInfo.modGame! + '-' + downloadInfo.modId!]: {
@@ -568,7 +571,8 @@ export default function RootLayout ({
               }
             })
           } else {
-            const currentList = await versions?.get<Record<string, number>>('list') ?? {}
+            const currentList =
+              (await versions?.get<Record<string, number>>('list')) ?? {}
             versions?.set('list', {
               ...currentList,
               [versionId]: Date.now()
