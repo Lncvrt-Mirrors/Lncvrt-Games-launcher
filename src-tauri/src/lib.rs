@@ -690,6 +690,7 @@ fn open_new_window(
 pub fn run() {
     #[allow(unused)]
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_cli::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
@@ -750,16 +751,32 @@ pub fn run() {
             }
             #[cfg(not(debug_assertions))]
             {
-                let handle = app.handle().clone();
-                tauri::async_runtime::spawn(async move {
-                    update(handle, window.clone()).await.unwrap();
-                });
+                use tauri_plugin_cli::CliExt;
+
+                match app.cli().matches() {
+                    Ok(matches) => match matches.args.get("no-check-updates") {
+                        Some(arg) => {
+                            if arg.value == false {
+                                let handle = app.handle().clone();
+                                tauri::async_runtime::spawn(async move {
+                                    update(handle, window.clone()).await.unwrap();
+                                });
+                            } else {
+                                let mut new_url = window.url().unwrap();
+                                new_url.set_path("/main");
+                                let _ = window.navigate(new_url);
+                            }
+                        }
+                        None => {}
+                    },
+                    Err(_) => {}
+                }
             }
             #[cfg(debug_assertions)]
             {
-                let mut new_url = app.config().build.dev_url.clone().unwrap();
+                let mut new_url = window.url().unwrap();
                 new_url.set_path("/main");
-                window.navigate(new_url).unwrap();
+                let _ = window.navigate(new_url).unwrap();
             }
 
             Ok(())

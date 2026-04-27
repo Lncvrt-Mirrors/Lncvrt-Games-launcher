@@ -39,6 +39,16 @@
       "endpoints": [
         "https://games.lncvrt.xyz/api/launcher/update?target={{target}}&currentVersion={{current_version}}"
       ]
+    },
+    "cli": {
+      "description": "Lncvrt Games Launcher CLI",
+      "args": [
+        {
+          "short": "n",
+          "name": "no-check-updates",
+          "description": "Bypasses th eupdate checker"
+        }
+      ]
     }
   }
 }
