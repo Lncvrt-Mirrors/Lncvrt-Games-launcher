@@ -27,7 +27,8 @@ export default function ManageVersionPopup () {
     setPopupMode,
     setSelectedVersionList,
     downloadVersions,
-    versions
+    versions,
+    customDataLocation
   } = useGlobal()
   const [versionSize, setVersionSize] = useState<number>(0)
 
@@ -140,14 +141,28 @@ export default function ManageVersionPopup () {
             )
 
             if (
-              await exists('game/' + managingVersion, {
-                baseDir: BaseDirectory.AppLocalData
-              })
+              await exists(
+                (customDataLocation ? customDataLocation + '/' : null) +
+                  'game/' +
+                  managingVersion,
+                {
+                  baseDir: customDataLocation
+                    ? undefined
+                    : BaseDirectory.AppLocalData
+                }
+              )
             )
-              await remove('game/' + managingVersion, {
-                baseDir: BaseDirectory.AppLocalData,
-                recursive: true
-              })
+              await remove(
+                (customDataLocation ? customDataLocation + '/' : null) +
+                  'game/' +
+                  managingVersion,
+                {
+                  baseDir: customDataLocation
+                    ? undefined
+                    : BaseDirectory.AppLocalData,
+                  recursive: true
+                }
+              )
           }}
           title='Click to uninstall this game. This will NOT remove any progress or any save files.'
           hidden={viewingInfoFromDownloads}
@@ -172,14 +187,28 @@ export default function ManageVersionPopup () {
             )
 
             if (
-              await exists('game/' + managingVersion, {
-                baseDir: BaseDirectory.AppLocalData
-              })
+              await exists(
+                (customDataLocation ? customDataLocation + '/' : null) +
+                  'game/' +
+                  managingVersion,
+                {
+                  baseDir: customDataLocation
+                    ? undefined
+                    : BaseDirectory.AppLocalData
+                }
+              )
             )
-              await remove('game/' + managingVersion, {
-                baseDir: BaseDirectory.AppLocalData,
-                recursive: true
-              })
+              await remove(
+                (customDataLocation ? customDataLocation + '/' : null) +
+                  'game/' +
+                  managingVersion,
+                {
+                  baseDir: customDataLocation
+                    ? undefined
+                    : BaseDirectory.AppLocalData,
+                  recursive: true
+                }
+              )
 
             //reinstall
             setSelectedVersionList([managingVersion])

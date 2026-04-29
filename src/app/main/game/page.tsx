@@ -29,7 +29,8 @@ export default function Installs () {
     downloadProgress,
     linuxUseWine,
     linuxWineCommand,
-    versions
+    versions,
+    customDataLocation
   } = useGlobal()
 
   const params = useSearchParams()
@@ -271,14 +272,28 @@ export default function Installs () {
                         )
 
                         if (
-                          await exists('game/' + v, {
-                            baseDir: BaseDirectory.AppLocalData
-                          })
+                          await exists(
+                            customDataLocation
+                              ? customDataLocation + '/'
+                              : null + 'game/' + v,
+                            {
+                              baseDir: customDataLocation
+                                ? undefined
+                                : BaseDirectory.AppLocalData
+                            }
+                          )
                         )
-                          await remove('game/' + v, {
-                            baseDir: BaseDirectory.AppLocalData,
-                            recursive: true
-                          })
+                          await remove(
+                            customDataLocation
+                              ? customDataLocation + '/'
+                              : null + 'game/' + v,
+                            {
+                              baseDir: customDataLocation
+                                ? undefined
+                                : BaseDirectory.AppLocalData,
+                              recursive: true
+                            }
+                          )
 
                         //reinstall
                         setSelectedVersionList([v])
@@ -356,9 +371,16 @@ export default function Installs () {
                         e.stopPropagation()
 
                         if (
-                          !(await exists('game/' + v + '/BepInEx', {
-                            baseDir: BaseDirectory.AppLocalData
-                          }))
+                          !(await exists(
+                            customDataLocation
+                              ? customDataLocation + '/'
+                              : null + 'game/' + v + '/BepInEx',
+                            {
+                              baseDir: customDataLocation
+                                ? undefined
+                                : BaseDirectory.AppLocalData
+                            }
+                          ))
                         ) {
                           if (
                             (await ask(

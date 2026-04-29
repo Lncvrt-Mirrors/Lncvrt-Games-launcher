@@ -30,7 +30,8 @@ export default function ModDownloadsPopup () {
     setShowModInfo,
     downloadVersions,
     downloadProgress,
-    versions
+    versions,
+    customDataLocation
   } = useGlobal()
 
   const [mods, setMods] = useState<Mod[] | 0 | 1>(0)
@@ -208,14 +209,28 @@ export default function ModDownloadsPopup () {
                             '/BepInEx/plugins/' +
                             v.id
                           if (
-                            await exists(path, {
-                              baseDir: BaseDirectory.AppLocalData
-                            })
+                            await exists(
+                              (customDataLocation
+                                ? customDataLocation + '/'
+                                : null) + path,
+                              {
+                                baseDir: customDataLocation
+                                  ? undefined
+                                  : BaseDirectory.AppLocalData
+                              }
+                            )
                           )
-                            await remove(path, {
-                              baseDir: BaseDirectory.AppLocalData,
-                              recursive: true
-                            })
+                            await remove(
+                              (customDataLocation
+                                ? customDataLocation + '/'
+                                : null) + path,
+                              {
+                                baseDir: customDataLocation
+                                  ? undefined
+                                  : BaseDirectory.AppLocalData,
+                                recursive: true
+                              }
+                            )
                           versions?.set(
                             'mods',
                             Object.fromEntries(
@@ -295,14 +310,26 @@ export default function ModDownloadsPopup () {
                       '/BepInEx/plugins/' +
                       showModInfo.id
                     if (
-                      await exists(path, {
-                        baseDir: BaseDirectory.AppLocalData
-                      })
+                      await exists(
+                        (customDataLocation ? customDataLocation + '/' : null) +
+                          path,
+                        {
+                          baseDir: customDataLocation
+                            ? undefined
+                            : BaseDirectory.AppLocalData
+                        }
+                      )
                     )
-                      await remove(path, {
-                        baseDir: BaseDirectory.AppLocalData,
-                        recursive: true
-                      })
+                      await remove(
+                        (customDataLocation ? customDataLocation + '/' : null) +
+                          path,
+                        {
+                          baseDir: customDataLocation
+                            ? undefined
+                            : BaseDirectory.AppLocalData,
+                          recursive: true
+                        }
+                      )
                     versions?.set(
                       'mods',
                       Object.fromEntries(
