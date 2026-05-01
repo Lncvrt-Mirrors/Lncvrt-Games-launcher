@@ -101,12 +101,10 @@ export default function ManageVersionPopup () {
           <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
           <p>
             Size on disk:{' '}
-            {versionSize && versionSize > 0
-              ? prettyBytes(versionSize, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })
-              : 'N/A'}
+            {prettyBytes(versionSize, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
           </p>
         </div>
         <div

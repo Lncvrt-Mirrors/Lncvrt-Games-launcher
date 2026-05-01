@@ -19,7 +19,6 @@ export default function ManageGamePopup () {
   const {
     versionsList,
     serverVersionList,
-    viewingInfoFromDownloads,
     closePopup,
     versions,
     customDataLocation,
@@ -35,7 +34,7 @@ export default function ManageGamePopup () {
   const gameInfo = serverVersionList?.games.find(vf => vf.id == managingGame)
 
   useEffect(() => {
-    if (viewingInfoFromDownloads || !versionsInstalled) return
+    if (!versionsInstalled || versionsInstalled.length == 0) return
 
     let cancelled = false
 
@@ -60,7 +59,7 @@ export default function ManageGamePopup () {
     return () => {
       cancelled = true
     }
-  }, [versionsInstalled, viewingInfoFromDownloads])
+  }, [versionsInstalled])
 
   return (
     <>
@@ -105,17 +104,15 @@ export default function ManageGamePopup () {
         </div>
         <div
           className='entry-info-item btntheme2'
-          hidden={viewingInfoFromDownloads}
+          hidden={versionsInstalled?.length == 0}
         >
           <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
           <p>
             Size on disk:{' '}
-            {gameSize && gameSize > 0
-              ? prettyBytes(gameSize, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })
-              : 'N/A'}
+            {prettyBytes(gameSize, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
           </p>
         </div>
         <div
@@ -160,7 +157,7 @@ export default function ManageGamePopup () {
             }
           }}
           title='Click to uninstall this game. This will NOT remove any progress or any save files.'
-          hidden={viewingInfoFromDownloads}
+          hidden={versionsInstalled?.length == 0}
         >
           Uninstall
         </div>
