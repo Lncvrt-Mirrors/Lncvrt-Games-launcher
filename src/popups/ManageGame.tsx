@@ -3,6 +3,7 @@
 import {
   faCheck,
   faCode,
+  faDownload,
   faHardDrive,
   faShieldHalved,
   faWarning
@@ -82,6 +83,25 @@ export default function ManageGamePopup () {
         >
           <FontAwesomeIcon icon={faCode} color='lightgray' />
           <p>Developer: {gameInfo?.developer}</p>
+        </div>
+        <div className='entry-info-item btntheme2' hidden={!gameInfo?.official}>
+          <FontAwesomeIcon icon={faDownload} color='lightgray' />
+          <p>
+            {(() => {
+              if (!serverVersionList) return 'N/A'
+
+              const gameVersions = serverVersionList.versions.filter(
+                vf => vf.game === managingGame
+              )
+              const installed = gameVersions.filter(v =>
+                Object.keys(versionsList).includes(v.id)
+              ).length
+              return gameVersions.length
+                ? `${installed}/${gameVersions.length}`
+                : 'N/A'
+            })()}{' '}
+            versions installed
+          </p>
         </div>
         <div
           className='entry-info-item btntheme2'

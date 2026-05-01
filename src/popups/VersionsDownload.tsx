@@ -24,20 +24,27 @@ export default function VersionsDownloadPopup () {
       <p className='text-xl text-center'>Select versions to download</p>
       <div className='popup-content'>
         {getSpecialVersionsList(selectedGame).map((v, i) => (
-          <div key={i} className='popup-entry'>
-            <div className='flex items-center'>
-              <p
-                className={`text-2xl truncate ${
-                  selectedVersionList.includes(v.id)
-                    ? 'max-w-84.5'
-                    : 'max-w-91.5'
-                }`}
-              >
-                {v.displayName}
-              </p>
-            </div>
+          <div
+            key={i}
+            className='popup-entry grid items-center gap-3'
+            style={{ gridTemplateColumns: 'auto minmax(0, 1fr) auto' }}
+          >
             <button
-              className='button btntheme3 right-20.75 bottom-1.75'
+              className='button btntheme3'
+              onClick={() => {
+                setManagingVersion(v.id)
+                setViewingInfoFromDownloads(true)
+                setPopupMode(2)
+              }}
+              title='Click to view version info.'
+            >
+              <FontAwesomeIcon icon={faInfo} /> Info
+            </button>
+            <p className='text-2xl text-center truncate' title={v.displayName}>
+              {v.displayName}
+            </p>
+            <button
+              className='button btntheme3'
               onClick={() => {
                 setSelectedVersionList(prev =>
                   prev.includes(v.id)
@@ -60,17 +67,6 @@ export default function VersionsDownloadPopup () {
                   <FontAwesomeIcon icon={faAdd} /> Add
                 </>
               )}
-            </button>
-            <button
-              className='button btntheme3 right-1.5 bottom-1.75'
-              onClick={() => {
-                setManagingVersion(v.id)
-                setViewingInfoFromDownloads(true)
-                setPopupMode(2)
-              }}
-              title='Click to view version info'
-            >
-              <FontAwesomeIcon icon={faInfo} /> Info
             </button>
           </div>
         ))}

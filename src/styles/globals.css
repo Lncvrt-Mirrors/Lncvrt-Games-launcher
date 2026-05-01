@@ -130,10 +130,6 @@ body {
   @apply relative h-fit bg-(--col3) m-2 p-2 rounded-lg border border-(--col5);
 }
 
-.popup-entry button {
-  @apply absolute;
-}
-
 .popup-top-button {
   @apply flex justify-center items-center absolute text-2xl text-gray-200 hover:text-white cursor-pointer h-12 w-12 p-3 rounded-lg top-2 transition-colors border;
 }
