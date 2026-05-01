@@ -5,7 +5,7 @@
 }
 
 .sidebar-downloads {
-  @apply text-[#bdbdbd] fixed bottom-2 left-2 bg-(--col2) rounded-lg border border-(--col3) px-4 py-3 text-xl cursor-pointer transition-colors duration-[0.25s] opacity-75;
+  @apply text-[#bdbdbd] fixed bottom-2 left-2 bg-(--col2) rounded-lg border border-(--col3) px-4 py-3 text-xl cursor-pointer transition-colors opacity-75;
 }
 
 .sidebar-downloads:hover {
@@ -18,7 +18,7 @@
 }
 
 .link {
-  @apply text-[#bdbdbd] p-2 rounded-md no-underline cursor-pointer transition-colors duration-[0.25s] border border-transparent;
+  @apply text-[#bdbdbd] p-2 rounded-md no-underline cursor-pointer transition-colors border border-transparent;
 }
 
 .link.active {
