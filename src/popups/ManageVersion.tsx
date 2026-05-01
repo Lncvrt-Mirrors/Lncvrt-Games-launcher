@@ -48,165 +48,166 @@ export default function ManageVersionPopup () {
       <p className='text-xl text-center'>Viewing {versionInfo?.displayName}</p>
       <div className='popup-content h-full w-full flex justify-center items-center flex-col gap-2'>
         <div className='flex flex-row gap-2 justify-center'>
-          <div
-            className='entry-info-item btntheme2'
-            hidden={viewingInfoFromDownloads}
-          >
-            <p>
-              Installed{' '}
-              {new Intl.DateTimeFormat(undefined).format(
-                versionsList[managingVersion] ?? 0
+          {!viewingInfoFromDownloads && (
+            <div className='entry-info-item btntheme2'>
+              <p>
+                Installed{' '}
+                {new Intl.DateTimeFormat(undefined).format(
+                  versionsList[managingVersion] ?? 0
+                )}
+              </p>
+            </div>
+          )}
+          {versionInfo && (
+            <>
+              {versionInfo.releaseDate != 0 && (
+                <div className='entry-info-item btntheme2'>
+                  <p>
+                    Released{' '}
+                    {new Intl.DateTimeFormat(undefined).format(
+                      versionInfo?.releaseDate
+                        ? versionInfo.releaseDate * 1000
+                        : 0
+                    )}
+                  </p>
+                </div>
               )}
-            </p>
-          </div>
-          <div
-            className='entry-info-item btntheme2'
-            hidden={!versionInfo || versionInfo.releaseDate == 0}
-          >
-            <p>
-              Released{' '}
-              {new Intl.DateTimeFormat(undefined).format(
-                versionInfo?.releaseDate ? versionInfo.releaseDate * 1000 : 0
+              {versionInfo.changelog && (
+                <div
+                  className='entry-info-item btntheme2'
+                  onClick={() => setPopupMode(4)}
+                >
+                  <p>View Changelog</p>
+                  <FontAwesomeIcon
+                    icon={faArrowUpRightFromSquare}
+                    color='lightgray'
+                  />
+                </div>
               )}
-            </p>
-          </div>
-          <div
-            className='entry-info-item btntheme2'
-            onClick={() => setPopupMode(4)}
-            hidden={!versionInfo?.changelog}
-          >
-            <p>View Changelog</p>
-            <FontAwesomeIcon
-              icon={faArrowUpRightFromSquare}
-              color='lightgray'
-            />
-          </div>
+            </>
+          )}
         </div>
-        <div className='flex flex-row gap-2 justify-center'>
-          <div
-            className='entry-info-item btntheme2'
-            hidden={viewingInfoFromDownloads}
-          >
-            <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
-            <p>
-              Size on disk:{' '}
-              {prettyBytes(versionSize, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })}
-            </p>
-          </div>
-          <div
-            className='entry-info-item btntheme2'
-            onClick={async () => openFolder(managingVersion)}
-            title="Click to browse the game's files."
-            hidden={viewingInfoFromDownloads}
-          >
-            Open Folder
-            <FontAwesomeIcon
-              icon={faArrowUpRightFromSquare}
-              color='lightgray'
-            />
-          </div>
-          <div
-            className='entry-info-item btntheme2'
-            onClick={async () => {
-              closePopup()
+        {!viewingInfoFromDownloads && (
+          <div className='flex flex-row gap-2 justify-center'>
+            <div className='entry-info-item btntheme2'>
+              <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
+              <p>
+                Size on disk:{' '}
+                {prettyBytes(versionSize, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </p>
+            </div>
+            <div
+              className='entry-info-item btntheme2'
+              onClick={async () => openFolder(managingVersion)}
+              title="Click to browse the game's files."
+            >
+              Open Folder
+              <FontAwesomeIcon
+                icon={faArrowUpRightFromSquare}
+                color='lightgray'
+              />
+            </div>
+            <div
+              className='entry-info-item btntheme2'
+              onClick={async () => {
+                closePopup()
 
-              await versions?.set(
-                'list',
-                Object.fromEntries(
-                  Object.entries(versionsList).filter(
-                    ([k]) => k !== managingVersion
+                await versions?.set(
+                  'list',
+                  Object.fromEntries(
+                    Object.entries(versionsList).filter(
+                      ([k]) => k !== managingVersion
+                    )
                   )
                 )
-              )
 
-              if (
-                await exists(
-                  (customDataLocation ? customDataLocation + '/' : null) +
-                    'game/' +
-                    managingVersion,
-                  {
-                    baseDir: customDataLocation
-                      ? undefined
-                      : BaseDirectory.AppLocalData
-                  }
-                )
-              )
-                await remove(
-                  (customDataLocation ? customDataLocation + '/' : null) +
-                    'game/' +
-                    managingVersion,
-                  {
-                    baseDir: customDataLocation
-                      ? undefined
-                      : BaseDirectory.AppLocalData,
-                    recursive: true
-                  }
-                )
-            }}
-            title='Click to uninstall this game. This will NOT remove any progress or any save files.'
-            hidden={viewingInfoFromDownloads}
-          >
-            Uninstall
-          </div>
-          <div
-            className='entry-info-item btntheme2'
-            onClick={async () => {
-              //change popup to downloads
-              setManagingVersion(null)
-              setPopupMode(1)
-
-              //uninstall
-              await versions?.set(
-                'list',
-                Object.fromEntries(
-                  Object.entries(versionsList).filter(
-                    ([k]) => k !== managingVersion
+                if (
+                  await exists(
+                    (customDataLocation ? customDataLocation + '/' : null) +
+                      'game/' +
+                      managingVersion,
+                    {
+                      baseDir: customDataLocation
+                        ? undefined
+                        : BaseDirectory.AppLocalData
+                    }
                   )
                 )
-              )
+                  await remove(
+                    (customDataLocation ? customDataLocation + '/' : null) +
+                      'game/' +
+                      managingVersion,
+                    {
+                      baseDir: customDataLocation
+                        ? undefined
+                        : BaseDirectory.AppLocalData,
+                      recursive: true
+                    }
+                  )
+              }}
+              title='Click to uninstall this game. This will NOT remove any progress or any save files.'
+            >
+              Uninstall
+            </div>
+            <div
+              className='entry-info-item btntheme2'
+              onClick={async () => {
+                //change popup to downloads
+                setManagingVersion(null)
+                setPopupMode(1)
 
-              if (
-                await exists(
-                  (customDataLocation ? customDataLocation + '/' : null) +
-                    'game/' +
-                    managingVersion,
-                  {
-                    baseDir: customDataLocation
-                      ? undefined
-                      : BaseDirectory.AppLocalData
-                  }
-                )
-              )
-                await remove(
-                  (customDataLocation ? customDataLocation + '/' : null) +
-                    'game/' +
-                    managingVersion,
-                  {
-                    baseDir: customDataLocation
-                      ? undefined
-                      : BaseDirectory.AppLocalData,
-                    recursive: true
-                  }
+                //uninstall
+                await versions?.set(
+                  'list',
+                  Object.fromEntries(
+                    Object.entries(versionsList).filter(
+                      ([k]) => k !== managingVersion
+                    )
+                  )
                 )
 
-              //reinstall
-              setSelectedVersionList([managingVersion])
-              downloadVersions([
-                {
-                  id: managingVersion,
-                  type: 0
-                }
-              ])
-            }}
-            title="Click to reinstall this game. This will NOT remove any progress or any save files. This WILL uninstall any modifications to the game's executable files."
-            hidden={viewingInfoFromDownloads}
-          >
-            Reinstall
+                if (
+                  await exists(
+                    (customDataLocation ? customDataLocation + '/' : null) +
+                      'game/' +
+                      managingVersion,
+                    {
+                      baseDir: customDataLocation
+                        ? undefined
+                        : BaseDirectory.AppLocalData
+                    }
+                  )
+                )
+                  await remove(
+                    (customDataLocation ? customDataLocation + '/' : null) +
+                      'game/' +
+                      managingVersion,
+                    {
+                      baseDir: customDataLocation
+                        ? undefined
+                        : BaseDirectory.AppLocalData,
+                      recursive: true
+                    }
+                  )
+
+                //reinstall
+                setSelectedVersionList([managingVersion])
+                downloadVersions([
+                  {
+                    id: managingVersion,
+                    type: 0
+                  }
+                ])
+              }}
+              title="Click to reinstall this game. This will NOT remove any progress or any save files. This WILL uninstall any modifications to the game's executable files."
+            >
+              Reinstall
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   )
