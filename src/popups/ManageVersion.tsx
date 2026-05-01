@@ -131,7 +131,7 @@ export default function ManageVersionPopup () {
           onClick={async () => {
             closePopup()
 
-            versions?.set(
+            await versions?.set(
               'list',
               Object.fromEntries(
                 Object.entries(versionsList).filter(
@@ -177,7 +177,7 @@ export default function ManageVersionPopup () {
             setPopupMode(1)
 
             //uninstall
-            versions?.set(
+            await versions?.set(
               'list',
               Object.fromEntries(
                 Object.entries(versionsList).filter(

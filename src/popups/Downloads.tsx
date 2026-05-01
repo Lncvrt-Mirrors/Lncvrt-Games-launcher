@@ -70,14 +70,14 @@ export default function DownloadsPopup () {
                         )
                         if (v.type != 1) {
                           if (v.type == 2) {
-                            versions?.set('mods', {
+                            await versions?.set('mods', {
                               ...modsList,
                               [v.modGame! + '-' + v.modId!]: {
                                 [v.modVersion!]: Date.now()
                               }
                             })
                           } else {
-                            versions?.set('list', {
+                            await versions?.set('list', {
                               ...versionsList,
                               [v.version]: Date.now()
                             })

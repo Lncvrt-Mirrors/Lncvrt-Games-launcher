@@ -344,8 +344,8 @@ export default function RootLayout ({
         return
       }
 
-      settingsLocal.set('version', client)
-      versionsLocal.set('version', client)
+      await settingsLocal.set('version', client)
+      await versionsLocal.set('version', client)
 
       if (await exists('config.json', legacyOptions)) {
         const config = await readTextFile('config.json', legacyOptions)
@@ -361,22 +361,22 @@ export default function RootLayout ({
           else if (parsed != 0 && parsed != 1) raw.settings.theme = 0
         }
         if (raw.settings.allowNotifications)
-          settingsLocal?.set(
+          await settingsLocal?.set(
             'notificationsAllowed',
             Boolean(raw.settings.allowNotifications)
           )
         if (raw.settings.alwaysShowGamesInSidebar)
-          settingsLocal?.set(
+          await settingsLocal?.set(
             'sidebarAlwaysShowGames',
             Boolean(raw.settings.alwaysShowGamesInSidebar)
           )
         if (raw.settings.useWineOnUnixWhenNeeded)
-          settingsLocal?.set(
+          await settingsLocal?.set(
             'linuxUseWine',
             Boolean(raw.settings.useWineOnUnixWhenNeeded)
           )
         if (raw.settings.wineOnUnixCommand)
-          settingsLocal?.set(
+          await settingsLocal?.set(
             'linuxWineCommand',
             String(raw.settings.wineOnUnixCommand)
           )
@@ -393,7 +393,7 @@ export default function RootLayout ({
                 return 'dark'
             }
           })()
-          settingsLocal?.set('theme', tempTheme)
+          await settingsLocal?.set('theme', tempTheme)
         }
         await remove('config.json', legacyOptions)
       }
@@ -570,7 +570,7 @@ export default function RootLayout ({
               (await versions?.get<Record<string, Record<string, number>>>(
                 'mods'
               )) ?? {}
-            versions?.set('mods', {
+            await versions?.set('mods', {
               ...currentMods,
               [downloadInfo.modGame! + '-' + downloadInfo.modId!]: {
                 [downloadInfo.modVersion!]: Date.now()
@@ -579,7 +579,7 @@ export default function RootLayout ({
           } else {
             const currentList =
               (await versions?.get<Record<string, number>>('list')) ?? {}
-            versions?.set('list', {
+            await versions?.set('list', {
               ...currentList,
               [versionId]: Date.now()
             })

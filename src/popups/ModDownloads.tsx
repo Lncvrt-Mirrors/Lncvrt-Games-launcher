@@ -231,7 +231,7 @@ export default function ModDownloadsPopup () {
                                 recursive: true
                               }
                             )
-                          versions?.set(
+                          await versions?.set(
                             'mods',
                             Object.fromEntries(
                               Object.entries(modsList).filter(
@@ -330,7 +330,7 @@ export default function ModDownloadsPopup () {
                           recursive: true
                         }
                       )
-                    versions?.set(
+                    await versions?.set(
                       'mods',
                       Object.fromEntries(
                         Object.entries(modsList).filter(

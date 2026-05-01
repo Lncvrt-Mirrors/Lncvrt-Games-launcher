@@ -262,7 +262,7 @@ export default function Installs () {
                         setFadeOut(false)
 
                         //uninstall
-                        versions?.set(
+                        await versions?.set(
                           'list',
                           Object.fromEntries(
                             Object.entries(versionsList).filter(
