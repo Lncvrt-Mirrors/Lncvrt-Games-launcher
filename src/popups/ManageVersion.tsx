@@ -2,11 +2,7 @@
 
 import {
   faArrowUpRightFromSquare,
-  faCheck,
-  faCode,
-  faHardDrive,
-  faShieldHalved,
-  faWarning
+  faHardDrive
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useGlobal } from '@/providers/GlobalProvider'
@@ -46,9 +42,6 @@ export default function ManageVersionPopup () {
   const versionInfo = serverVersionList?.versions.find(
     vf => vf.id == managingVersion
   )
-  const gameInfo = serverVersionList?.games.find(
-    vf => vf.id == versionInfo?.game
-  )
 
   return (
     <>
@@ -75,24 +68,6 @@ export default function ManageVersionPopup () {
               versionInfo?.releaseDate ? versionInfo.releaseDate * 1000 : 0
             )}
           </p>
-        </div>
-        <div className='entry-info-item btntheme2' hidden={!gameInfo?.official}>
-          <FontAwesomeIcon icon={faCheck} color='#19c84b' />
-          <p>Official</p>
-        </div>
-        <div className='entry-info-item btntheme2' hidden={gameInfo?.official}>
-          <FontAwesomeIcon
-            icon={gameInfo?.verified ? faShieldHalved : faWarning}
-            color={gameInfo?.verified ? '#19c84b' : '#ffc800'}
-          />
-          <p>{gameInfo?.verified ? 'Verified' : 'Unverified'}</p>
-        </div>
-        <div
-          className='entry-info-item btntheme2'
-          hidden={gameInfo?.developer == null}
-        >
-          <FontAwesomeIcon icon={faCode} color='lightgray' />
-          <p>Developer: {gameInfo?.developer}</p>
         </div>
         <div
           className='entry-info-item btntheme2'
