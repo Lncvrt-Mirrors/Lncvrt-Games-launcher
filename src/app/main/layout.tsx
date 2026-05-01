@@ -828,7 +828,7 @@ export default function RootLayout ({
                           icon={
                             (popupMode == 0 &&
                               selectedGame &&
-                              pathname === '/') ||
+                              pathname === '/main') ||
                             viewingInfoFromDownloads ||
                             (popupMode == 3 && showModInfo) ||
                             popupMode == 4

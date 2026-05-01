@@ -17,13 +17,15 @@ export default function VersionsDownloadPopup () {
 
   const game = serverVersionList?.games.find(g => g.id === selectedGame)
 
-  if (!selectedGame || !game) return <></>
+  if (!selectedGame || !game) return null
+
+  const list = getSpecialVersionsList(selectedGame)
 
   return (
     <>
       <p className='text-xl text-center'>Select versions to download</p>
       <div className='popup-content'>
-        {getSpecialVersionsList(selectedGame).map((v, i) => (
+        {list.map((v, i) => (
           <div
             key={i}
             className='popup-entry grid items-center gap-3'
@@ -94,20 +96,18 @@ export default function VersionsDownloadPopup () {
         <button
           className='button btntheme1 w-fit mt-2 ml-2 -mb-4'
           onClick={() => {
-            const allIds = getSpecialVersionsList(selectedGame).map(v => v.id)
+            const allIds = list.map(v => v.id)
             setSelectedVersionList(prev =>
               prev.length === allIds.length ? [] : allIds
             )
           }}
           title={
-            selectedVersionList.length ===
-            getSpecialVersionsList(selectedGame).length
+            selectedVersionList.length === list.length
               ? 'Click to remove all selected versions for download.'
               : 'Click to add all selected versions for download.'
           }
         >
-          {selectedVersionList.length ===
-          getSpecialVersionsList(selectedGame).length
+          {selectedVersionList.length === list.length
             ? 'Deselect All'
             : 'Select All'}
         </button>

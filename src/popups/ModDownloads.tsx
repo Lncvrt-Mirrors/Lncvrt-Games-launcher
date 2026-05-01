@@ -60,7 +60,7 @@ export default function ModDownloadsPopup () {
     })()
   }, [managingVersion])
 
-  if (!managingVersion || !serverVersionList) return <></>
+  if (!managingVersion || !serverVersionList) return null
 
   const versionInfo = serverVersionList.versions.find(
     v => v.id == managingVersion

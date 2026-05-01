@@ -111,7 +111,7 @@ export default function Sidebar () {
                     : ''
                 } ml-auto w-50 ${
                   sidebarAlwaysShowGames ||
-                  pathname === '/' ||
+                  pathname === '/main' ||
                   pathname.startsWith('/main/game')
                     ? ''
                     : 'hidden'
@@ -164,7 +164,7 @@ export default function Sidebar () {
                         : ''
                     } ml-auto w-47.5 ${
                       sidebarAlwaysShowGames ||
-                      pathname === '/' ||
+                      pathname === '/main' ||
                       pathname.startsWith('/main/game')
                         ? ''
                         : 'hidden'

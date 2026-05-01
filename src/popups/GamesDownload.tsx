@@ -1,5 +1,8 @@
 import { useGlobal } from '@/providers/GlobalProvider'
-import { faDownload, faInfo } from '@fortawesome/free-solid-svg-icons'
+import {
+  faArrowUpRightFromSquare,
+  faInfo
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default function GamesDownloadPopup () {
@@ -33,9 +36,9 @@ export default function GamesDownloadPopup () {
               <button
                 className='button btntheme3'
                 onClick={() => setSelectedGame(v.id)}
-                title='Click to download more versions of the game.'
+                title='Click to view more versions of the game.'
               >
-                <FontAwesomeIcon icon={faDownload} /> Download
+                <FontAwesomeIcon icon={faArrowUpRightFromSquare} /> View
               </button>
             </div>
           ))}

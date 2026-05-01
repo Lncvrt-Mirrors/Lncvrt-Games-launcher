@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify'
 export default function VersionChangelogPopup () {
   const { serverVersionList, managingVersion } = useGlobal()
 
-  if (!managingVersion) return <></>
+  if (!managingVersion) return null
 
   const versionInfo = serverVersionList?.versions.find(
     vf => vf.id == managingVersion

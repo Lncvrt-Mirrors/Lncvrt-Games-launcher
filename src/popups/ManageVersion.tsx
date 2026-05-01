@@ -41,7 +41,7 @@ export default function ManageVersionPopup () {
     })
   }, [managingVersion, setVersionSize, viewingInfoFromDownloads])
 
-  if (!managingVersion) return <></>
+  if (!managingVersion) return null
 
   const versionInfo = serverVersionList?.versions.find(
     vf => vf.id == managingVersion
