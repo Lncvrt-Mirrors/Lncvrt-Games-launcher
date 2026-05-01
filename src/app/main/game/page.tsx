@@ -9,8 +9,7 @@ import { platform } from '@tauri-apps/plugin-os'
 import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ask } from '@tauri-apps/plugin-dialog'
-import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
-import { openFolder } from '@/lib/util'
+import { BaseDirectory, exists } from '@tauri-apps/plugin-fs'
 
 export default function Installs () {
   const {
@@ -28,9 +27,9 @@ export default function Installs () {
     downloadVersions,
     downloadProgress,
     linuxUseWine,
-    linuxWineCommand,
-    versions,
-    customDataLocation
+    customDataLocation,
+    needsRevisionUpdate,
+    launchGame
   } = useGlobal()
 
   const params = useSearchParams()
@@ -44,19 +43,7 @@ export default function Installs () {
     setSelectedVersionList([])
   }, [setSelectedVersionList, showPopup])
 
-  if (!id || !game) return <p>Invalid game</p>
-
-  const needsRevisionUpdate = (
-    lastRevision: number | undefined,
-    version: string
-  ) => {
-    if (!lastRevision) return false
-    return (
-      lastRevision > 0 &&
-      (versionsList == undefined ? 0 : versionsList[version]) / 1000 <=
-        lastRevision
-    )
-  }
+  if (!id || !game) return null
 
   const filteredVersions = Object.keys(versionsList).filter(v => {
     const info = serverVersionList?.versions.find(vf => vf.id == v)
@@ -237,89 +224,7 @@ export default function Installs () {
                   title={
                     'Click to launch game. Right-click to manage this version install'
                   }
-                  onClick={async () => {
-                    if (needsRevisionUpdate(versionInfo.lastRevision, v)) {
-                      const answer = await ask(
-                        'Before proceeding, if you do not want your installation directory wiped just yet, please backup the files to another directory. When you click "Yes", it will be wiped. Click "No" if you want to open the installation folder instead.',
-                        {
-                          title: 'Revision Update',
-                          kind: 'warning'
-                        }
-                      )
-                      if (answer) {
-                        const answer2 = await ask(
-                          'Are you sure you want to update? If you did not read the last popup, please go back and read it.',
-                          {
-                            title: 'Revision Update',
-                            kind: 'warning'
-                          }
-                        )
-                        if (!answer2) return
-
-                        //open downloads popup
-                        setPopupMode(1)
-                        setShowPopup(true)
-                        setFadeOut(false)
-
-                        //uninstall
-                        await versions?.set(
-                          'list',
-                          Object.fromEntries(
-                            Object.entries(versionsList).filter(
-                              ([k]) => k !== v
-                            )
-                          )
-                        )
-
-                        if (
-                          await exists(
-                            customDataLocation
-                              ? customDataLocation + '/'
-                              : null + 'game/' + v,
-                            {
-                              baseDir: customDataLocation
-                                ? undefined
-                                : BaseDirectory.AppLocalData
-                            }
-                          )
-                        )
-                          await remove(
-                            customDataLocation
-                              ? customDataLocation + '/'
-                              : null + 'game/' + v,
-                            {
-                              baseDir: customDataLocation
-                                ? undefined
-                                : BaseDirectory.AppLocalData,
-                              recursive: true
-                            }
-                          )
-
-                        //reinstall
-                        setSelectedVersionList([v])
-                        downloadVersions([
-                          {
-                            id: v,
-                            type: 0
-                          }
-                        ])
-                      } else {
-                        openFolder(v)
-                      }
-                      return
-                    }
-                    invoke('launch_game', {
-                      name: versionInfo.id,
-                      executable: versionInfo.executable,
-                      displayName: versionInfo.displayName,
-                      useWine: !!(
-                        platform() == 'linux' &&
-                        versionInfo.wine &&
-                        linuxUseWine
-                      ),
-                      wineCommand: linuxWineCommand
-                    })
-                  }}
+                  onClick={async () => await launchGame(versionInfo)}
                   onContextMenu={e => {
                     e.preventDefault()
                     setManagingVersion(v)

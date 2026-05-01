@@ -64,6 +64,11 @@ type GlobalCtxType = {
   setMovingData: Dispatch<SetStateAction<boolean>>
   managingGame: number | null
   setManagingGame: Dispatch<SetStateAction<number | null>>
+  needsRevisionUpdate: (
+    lastRevision: number | undefined,
+    version: string
+  ) => boolean
+  launchGame: (versionInfo: GameVersion) => Promise<void>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)

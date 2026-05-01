@@ -23,7 +23,7 @@ import {
   remove
 } from '@tauri-apps/plugin-fs'
 import { fetch } from '@tauri-apps/plugin-http'
-import { verifySignature } from '@/lib/util'
+import { openFolder, verifySignature } from '@/lib/util'
 import { getCurrentWindow, UserAttentionType } from '@tauri-apps/api/window'
 import { Mod } from '@/types/Mod'
 import { load, Store } from '@tauri-apps/plugin-store'
@@ -34,6 +34,7 @@ import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { invoke } from '@tauri-apps/api/core'
 import semver from 'semver'
 import { exit } from '@tauri-apps/plugin-process'
+import { ask } from '@tauri-apps/plugin-dialog'
 
 import VersionsDownloadPopup from '@/popups/VersionsDownload'
 import GamesDownloadPopup from '@/popups/GamesDownload'
@@ -56,6 +57,7 @@ export default function RootLayout ({
   const [loadingText, setLoadingText] = useState('Loading...')
   const [version, setVersion] = useState<string | null>(null)
   const [platformName, setPlatformName] = useState<string | null>(null)
+  const [movingData, setMovingData] = useState(false)
 
   const [serverVersionList, setServerVersionList] =
     useState<null | ServerVersionsResponse>(null)
@@ -99,7 +101,234 @@ export default function RootLayout ({
   const [modsList, setModsList] = useState<
     Record<string, Record<string, number>>
   >({})
-  const [movingData, setMovingData] = useState(false)
+
+  const downloadVersions = useCallback(
+    async (
+      list: Array<{
+        id: string
+        type: 0 | 1 | 2
+        modDownload?: number
+        gameId?: number
+        modId?: number
+        modVersion?: string
+      }>
+    ): Promise<void> => {
+      if (list.length === 0) return
+      setSelectedVersionList([])
+
+      const newVersions = list.filter(
+        item =>
+          !downloadQueue.includes(item.id) &&
+          !downloadProgress.some(d => d.version === item.id)
+      )
+
+      if (newVersions.length === 0) return
+
+      const newDownloads = newVersions.map(
+        item =>
+          new DownloadProgress(
+            item.id,
+            0,
+            0,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            0,
+            0,
+            0,
+            false,
+            0,
+            0,
+            null,
+            null,
+            null,
+            item.type,
+            item.modDownload ?? null,
+            item.gameId ?? null,
+            item.modId ?? null,
+            item.modVersion ?? null
+          )
+      )
+
+      setDownloadProgress(prev => [...prev, ...newDownloads])
+      setDownloadQueue(prev => [...prev, ...newVersions.map(v => v.id)])
+    },
+    [downloadQueue, downloadProgress]
+  )
+
+  useEffect(() => {
+    if (isProcessingQueue || downloadQueue.length === 0) return
+
+    const processNextDownload = async () => {
+      setIsProcessingQueue(true)
+
+      const versionId = downloadQueue[0]
+
+      const downloadInfo = downloadProgress.find(d => d.version == versionId)
+      if (!downloadInfo) {
+        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
+        setDownloadQueue(prev => prev.slice(1))
+        setIsProcessingQueue(false)
+        return
+      }
+
+      const info = serverVersionList?.versions.find(vf => vf.id == versionId)
+      if (!info) {
+        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
+        setDownloadQueue(prev => prev.slice(1))
+        setIsProcessingQueue(false)
+        return
+      }
+
+      const gameInfo = serverVersionList?.games.find(vf => vf.id == info.game)
+      if (!gameInfo) {
+        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
+        setDownloadQueue(prev => prev.slice(1))
+        setIsProcessingQueue(false)
+        return
+      }
+
+      setDownloadProgress(prev =>
+        prev.map(d => (d.version === versionId ? { ...d, queued: false } : d))
+      )
+
+      const downloadInfoRequest = await fetch(
+        'https://games.lncvrt.xyz/api/launcher/download' +
+          (downloadInfo.type == 0
+            ? '?versionId=' + info.id + '&downloadId=' + info.download
+            : '?downloadId=' +
+              (downloadInfo.type == 1
+                ? info.modSupportDownload
+                : downloadInfo.modDownload)) +
+          (downloadInfo.type == 2 ? '&modId=' + downloadInfo.modId : ''),
+        {
+          headers: {
+            Requester: 'LncvrtGamesLauncherClient',
+            ClientVersion: await app.getVersion(),
+            ClientPlatform: platform() + '-' + arch()
+          }
+        }
+      )
+      const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
+      const data = await downloadInfoRequest.json()
+      if (
+        !(await verifySignature(JSON.stringify(data), signature)) ||
+        !data.success
+      ) {
+        setDownloadProgress(prev =>
+          prev.map(d =>
+            d.version === versionId
+              ? { ...d, queued: false, failed: true, progress: 0 }
+              : d
+          )
+        )
+        if (await settings?.get<boolean>('notificationsAllowed'))
+          await notifyUser(
+            'Download Failed',
+            `The download for version ${info.displayName} has failed.`
+          )
+        await getCurrentWindow().requestUserAttention(
+          UserAttentionType.Critical
+        )
+        return
+      }
+
+      setDownloadProgress(prev =>
+        prev.map(d =>
+          d.version === versionId
+            ? {
+                ...d,
+                url: data.data.url,
+                executable: downloadInfo.type == 0 ? info.executable : null,
+                hash: data.data.hash
+              }
+            : d
+        )
+      )
+
+      const res = await invoke<string>('download', {
+        url: data.data.url,
+        name: info.id,
+        hash: data.data.hash,
+        downloadType: downloadInfo.type,
+        modId: String(downloadInfo.modId ?? '')
+      })
+
+      if (res === '1') {
+        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
+        if (downloadInfo.type != 1) {
+          if (downloadInfo.type == 2) {
+            const currentMods =
+              (await versions?.get<Record<string, Record<string, number>>>(
+                'mods'
+              )) ?? {}
+            await versions?.set('mods', {
+              ...currentMods,
+              [downloadInfo.modGame! + '-' + downloadInfo.modId!]: {
+                [downloadInfo.modVersion!]: Date.now()
+              }
+            })
+          } else {
+            const currentList =
+              (await versions?.get<Record<string, number>>('list')) ?? {}
+            await versions?.set('list', {
+              ...currentList,
+              [versionId]: Date.now()
+            })
+          }
+        }
+      } else if (res == '0') {
+        setDownloadProgress(prev => {
+          const i = prev.findIndex(d => d.version === info.id)
+          if (i === -1) return prev
+          if (prev[i].canceled) {
+            return prev.filter((_, idx) => idx !== i)
+          }
+          const copy = [...prev]
+          copy[i] = {
+            ...copy[i],
+            downloading: false,
+            paused: true,
+            failed: false
+          }
+          return copy
+        })
+      } else if (res == '-1') {
+        setDownloadProgress(prev =>
+          prev.map(d =>
+            d.version === versionId
+              ? { ...d, queued: false, failed: true, progress: 0 }
+              : d
+          )
+        )
+        if (await settings?.get<boolean>('notificationsAllowed'))
+          await notifyUser(
+            'Download Failed',
+            `The download for version ${info.displayName} has failed.`
+          )
+        await getCurrentWindow().requestUserAttention(
+          UserAttentionType.Critical
+        )
+      }
+
+      setDownloadQueue(prev => prev.slice(1))
+      setIsProcessingQueue(false)
+    }
+
+    processNextDownload()
+  }, [
+    downloadQueue,
+    isProcessingQueue,
+    downloadProgress,
+    serverVersionList,
+    settings,
+    versions,
+    versionsList,
+    modsList
+  ])
 
   function getSpecialVersionsList (game?: number): GameVersion[] {
     if (!serverVersionList) return []
@@ -138,6 +367,96 @@ export default function RootLayout ({
       setTimeout(() => setShowPopup(false), 200)
     }
   }, [popupMode, selectedGame, pathname, viewingInfoFromDownloads, showModInfo])
+
+  const needsRevisionUpdate = (
+    lastRevision: number | undefined,
+    version: string
+  ) => {
+    if (!lastRevision) return false
+    return (
+      lastRevision > 0 &&
+      (versionsList == undefined ? 0 : versionsList[version]) / 1000 <=
+        lastRevision
+    )
+  }
+
+  const launchGame = async (versionInfo: GameVersion) => {
+    if (needsRevisionUpdate(versionInfo.lastRevision, versionInfo.id)) {
+      const answer = await ask(
+        'Before proceeding, if you do not want your installation directory wiped just yet, please backup the files to another directory. When you click "Yes", it will be wiped. Click "No" if you want to open the installation folder instead.',
+        {
+          title: 'Revision Update',
+          kind: 'warning'
+        }
+      )
+      if (answer) {
+        const answer2 = await ask(
+          'Are you sure you want to update? If you did not read the last popup, please go back and read it.',
+          {
+            title: 'Revision Update',
+            kind: 'warning'
+          }
+        )
+        if (!answer2) return
+
+        //open downloads popup
+        setPopupMode(1)
+        setShowPopup(true)
+        setFadeOut(false)
+
+        //uninstall
+        await versions?.set(
+          'list',
+          Object.fromEntries(
+            Object.entries(versionsList).filter(([k]) => k !== versionInfo.id)
+          )
+        )
+
+        if (
+          await exists(
+            customDataLocation
+              ? customDataLocation + '/'
+              : null + 'game/' + versionInfo.id,
+            {
+              baseDir: customDataLocation
+                ? undefined
+                : BaseDirectory.AppLocalData
+            }
+          )
+        )
+          await remove(
+            customDataLocation
+              ? customDataLocation + '/'
+              : null + 'game/' + versionInfo.id,
+            {
+              baseDir: customDataLocation
+                ? undefined
+                : BaseDirectory.AppLocalData,
+              recursive: true
+            }
+          )
+
+        //reinstall
+        setSelectedVersionList([versionInfo.id])
+        downloadVersions([
+          {
+            id: versionInfo.id,
+            type: 0
+          }
+        ])
+      } else {
+        openFolder(versionInfo.id)
+      }
+      return
+    }
+    invoke('launch_game', {
+      name: versionInfo.id,
+      executable: versionInfo.executable,
+      displayName: versionInfo.displayName,
+      useWine: !!(platform() == 'linux' && versionInfo.wine && linuxUseWine),
+      wineCommand: linuxWineCommand
+    })
+  }
 
   useEffect(() => {
     const unlisteners: (() => void)[] = []
@@ -407,234 +726,6 @@ export default function RootLayout ({
     })()
   }, [])
 
-  const downloadVersions = useCallback(
-    async (
-      list: Array<{
-        id: string
-        type: 0 | 1 | 2
-        modDownload?: number
-        gameId?: number
-        modId?: number
-        modVersion?: string
-      }>
-    ): Promise<void> => {
-      if (list.length === 0) return
-      setSelectedVersionList([])
-
-      const newVersions = list.filter(
-        item =>
-          !downloadQueue.includes(item.id) &&
-          !downloadProgress.some(d => d.version === item.id)
-      )
-
-      if (newVersions.length === 0) return
-
-      const newDownloads = newVersions.map(
-        item =>
-          new DownloadProgress(
-            item.id,
-            0,
-            0,
-            false,
-            false,
-            false,
-            false,
-            true,
-            false,
-            0,
-            0,
-            0,
-            false,
-            0,
-            0,
-            null,
-            null,
-            null,
-            item.type,
-            item.modDownload ?? null,
-            item.gameId ?? null,
-            item.modId ?? null,
-            item.modVersion ?? null
-          )
-      )
-
-      setDownloadProgress(prev => [...prev, ...newDownloads])
-      setDownloadQueue(prev => [...prev, ...newVersions.map(v => v.id)])
-    },
-    [downloadQueue, downloadProgress]
-  )
-
-  useEffect(() => {
-    if (isProcessingQueue || downloadQueue.length === 0) return
-
-    const processNextDownload = async () => {
-      setIsProcessingQueue(true)
-
-      const versionId = downloadQueue[0]
-
-      const downloadInfo = downloadProgress.find(d => d.version == versionId)
-      if (!downloadInfo) {
-        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
-        setDownloadQueue(prev => prev.slice(1))
-        setIsProcessingQueue(false)
-        return
-      }
-
-      const info = serverVersionList?.versions.find(vf => vf.id == versionId)
-      if (!info) {
-        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
-        setDownloadQueue(prev => prev.slice(1))
-        setIsProcessingQueue(false)
-        return
-      }
-
-      const gameInfo = serverVersionList?.games.find(vf => vf.id == info.game)
-      if (!gameInfo) {
-        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
-        setDownloadQueue(prev => prev.slice(1))
-        setIsProcessingQueue(false)
-        return
-      }
-
-      setDownloadProgress(prev =>
-        prev.map(d => (d.version === versionId ? { ...d, queued: false } : d))
-      )
-
-      const downloadInfoRequest = await fetch(
-        'https://games.lncvrt.xyz/api/launcher/download' +
-          (downloadInfo.type == 0
-            ? '?versionId=' + info.id + '&downloadId=' + info.download
-            : '?downloadId=' +
-              (downloadInfo.type == 1
-                ? info.modSupportDownload
-                : downloadInfo.modDownload)) +
-          (downloadInfo.type == 2 ? '&modId=' + downloadInfo.modId : ''),
-        {
-          headers: {
-            Requester: 'LncvrtGamesLauncherClient',
-            ClientVersion: await app.getVersion(),
-            ClientPlatform: platform() + '-' + arch()
-          }
-        }
-      )
-      const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
-      const data = await downloadInfoRequest.json()
-      if (
-        !(await verifySignature(JSON.stringify(data), signature)) ||
-        !data.success
-      ) {
-        setDownloadProgress(prev =>
-          prev.map(d =>
-            d.version === versionId
-              ? { ...d, queued: false, failed: true, progress: 0 }
-              : d
-          )
-        )
-        if (await settings?.get<boolean>('notificationsAllowed'))
-          await notifyUser(
-            'Download Failed',
-            `The download for version ${info.displayName} has failed.`
-          )
-        await getCurrentWindow().requestUserAttention(
-          UserAttentionType.Critical
-        )
-        return
-      }
-
-      setDownloadProgress(prev =>
-        prev.map(d =>
-          d.version === versionId
-            ? {
-                ...d,
-                url: data.data.url,
-                executable: downloadInfo.type == 0 ? info.executable : null,
-                hash: data.data.hash
-              }
-            : d
-        )
-      )
-
-      const res = await invoke<string>('download', {
-        url: data.data.url,
-        name: info.id,
-        hash: data.data.hash,
-        downloadType: downloadInfo.type,
-        modId: String(downloadInfo.modId ?? '')
-      })
-
-      if (res === '1') {
-        setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
-        if (downloadInfo.type != 1) {
-          if (downloadInfo.type == 2) {
-            const currentMods =
-              (await versions?.get<Record<string, Record<string, number>>>(
-                'mods'
-              )) ?? {}
-            await versions?.set('mods', {
-              ...currentMods,
-              [downloadInfo.modGame! + '-' + downloadInfo.modId!]: {
-                [downloadInfo.modVersion!]: Date.now()
-              }
-            })
-          } else {
-            const currentList =
-              (await versions?.get<Record<string, number>>('list')) ?? {}
-            await versions?.set('list', {
-              ...currentList,
-              [versionId]: Date.now()
-            })
-          }
-        }
-      } else if (res == '0') {
-        setDownloadProgress(prev => {
-          const i = prev.findIndex(d => d.version === info.id)
-          if (i === -1) return prev
-          if (prev[i].canceled) {
-            return prev.filter((_, idx) => idx !== i)
-          }
-          const copy = [...prev]
-          copy[i] = {
-            ...copy[i],
-            downloading: false,
-            paused: true,
-            failed: false
-          }
-          return copy
-        })
-      } else if (res == '-1') {
-        setDownloadProgress(prev =>
-          prev.map(d =>
-            d.version === versionId
-              ? { ...d, queued: false, failed: true, progress: 0 }
-              : d
-          )
-        )
-        if (await settings?.get<boolean>('notificationsAllowed'))
-          await notifyUser(
-            'Download Failed',
-            `The download for version ${info.displayName} has failed.`
-          )
-        await getCurrentWindow().requestUserAttention(
-          UserAttentionType.Critical
-        )
-      }
-
-      setDownloadQueue(prev => prev.slice(1))
-      setIsProcessingQueue(false)
-    }
-
-    processNextDownload()
-  }, [
-    downloadQueue,
-    isProcessingQueue,
-    downloadProgress,
-    serverVersionList,
-    settings,
-    versions,
-    versionsList,
-    modsList
-  ])
-
   useEffect(() => {
     if (revisionCheck.current) return
     if (!serverVersionList) return
@@ -785,7 +876,9 @@ export default function RootLayout ({
                 movingData,
                 setMovingData,
                 managingGame,
-                setManagingGame
+                setManagingGame,
+                needsRevisionUpdate,
+                launchGame
               }}
             >
               <div
