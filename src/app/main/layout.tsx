@@ -41,6 +41,7 @@ import DownloadsPopup from '@/popups/Downloads'
 import ManageVersionPopup from '@/popups/ManageVersion'
 import ModDownloadsPopup from '@/popups/ModDownloads'
 import VersionChangelogPopup from '@/popups/VersionChangelog'
+import ManageGamePopup from '@/popups/ManageGame'
 
 const roboto = Roboto({
   subsets: ['latin']
@@ -70,6 +71,7 @@ export default function RootLayout ({
   const [downloadQueue, setDownloadQueue] = useState<string[]>([])
   const [isProcessingQueue, setIsProcessingQueue] = useState<boolean>(false)
   const [managingVersion, setManagingVersion] = useState<string | null>(null)
+  const [managingGame, setManagingGame] = useState<number | null>(null)
   const [viewingInfoFromDownloads, setViewingInfoFromDownloads] =
     useState<boolean>(false)
   const [selectedGame, setSelectedGame] = useState<number | null>(null)
@@ -791,7 +793,9 @@ export default function RootLayout ({
                 versionsList,
                 modsList,
                 movingData,
-                setMovingData
+                setMovingData,
+                managingGame,
+                setManagingGame
               }}
             >
               <div
@@ -855,6 +859,8 @@ export default function RootLayout ({
                         <ModDownloadsPopup />
                       ) : popupMode === 4 ? (
                         <VersionChangelogPopup />
+                      ) : popupMode === 5 ? (
+                        <ManageGamePopup />
                       ) : null}
                     </div>
                   </div>

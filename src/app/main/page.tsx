@@ -22,7 +22,8 @@ export default function Installs () {
     setFadeOut,
     setSelectedVersionList,
     setSelectedGame,
-    setCategory
+    setCategory,
+    setManagingGame
   } = useGlobal()
 
   const router = useRouter()
@@ -77,6 +78,13 @@ export default function Installs () {
                 onClick={() => {
                   setCategory(-1)
                   router.push('/main/game?id=' + i.id)
+                }}
+                onContextMenu={e => {
+                  e.preventDefault()
+                  setManagingGame(i.id)
+                  setPopupMode(5)
+                  setShowPopup(true)
+                  setFadeOut(false)
                 }}
               >
                 <div className='h-18 w-screen relative'>

@@ -62,6 +62,8 @@ type GlobalCtxType = {
   modsList: Record<string, Record<string, number>>
   movingData: boolean
   setMovingData: Dispatch<SetStateAction<boolean>>
+  managingGame: number | null
+  setManagingGame: Dispatch<SetStateAction<number | null>>
 }
 
 const GlobalCtx = createContext<GlobalCtxType | null>(null)
