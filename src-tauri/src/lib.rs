@@ -186,6 +186,23 @@ async fn download(
     let download_part_path = downloads_path.join(format!("{}.part", name));
     let download_zip_path = downloads_path.join(format!("{}.zip", name));
 
+    if tokio::fs::try_exists(game_path.join(&name))
+        .await
+        .is_ok_and(|v| v)
+        && !tokio::fs::try_exists(&download_part_path)
+            .await
+            .is_ok_and(|v| v)
+        && !tokio::fs::try_exists(&download_zip_path)
+            .await
+            .is_ok_and(|v| v)
+    {
+        let _ = window.set_progress_bar(ProgressBarState {
+            status: Some(ProgressBarStatus::None),
+            progress: Some(0),
+        });
+        return "1".to_string();
+    }
+
     let _ = tokio::fs::create_dir_all(&downloads_path).await;
 
     let resume_from: u64 = match tokio::fs::metadata(&download_part_path).await {

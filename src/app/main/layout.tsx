@@ -471,6 +471,7 @@ export default function RootLayout ({
       setIsProcessingQueue(true)
 
       const versionId = downloadQueue[0]
+
       const downloadInfo = downloadProgress.find(d => d.version == versionId)
       if (!downloadInfo) {
         setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
@@ -478,8 +479,8 @@ export default function RootLayout ({
         setIsProcessingQueue(false)
         return
       }
-      const info = serverVersionList?.versions.find(vf => vf.id == versionId)
 
+      const info = serverVersionList?.versions.find(vf => vf.id == versionId)
       if (!info) {
         setDownloadProgress(prev => prev.filter(d => d.version !== versionId))
         setDownloadQueue(prev => prev.slice(1))
