@@ -353,18 +353,7 @@ export default function RootLayout ({
         if (
           raw.settings &&
           raw.settings.theme &&
-          (raw.version == '1.0.0' ||
-            raw.version == '1.1.0' ||
-            raw.version == '1.1.1' ||
-            raw.version == '1.2.0' ||
-            raw.version == '1.3.0' ||
-            raw.version == '1.3.1' ||
-            raw.version == '1.4.0' ||
-            raw.version == '1.5.0' ||
-            raw.version == '1.5.1' ||
-            raw.version == '1.5.2' ||
-            raw.version == '1.5.3' ||
-            raw.version == '1.5.4')
+          semver.satisfies(raw.version, '>=1.0.0 <=1.5.4')
         ) {
           const parsed = Number(raw.settings.theme)
           if (parsed == 3) raw.settings.theme = 2
