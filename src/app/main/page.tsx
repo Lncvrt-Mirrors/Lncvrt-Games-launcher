@@ -23,7 +23,8 @@ export default function Installs () {
     setSelectedVersionList,
     setSelectedGame,
     setCategory,
-    setManagingGame
+    setManagingGame,
+    developerMode
   } = useGlobal()
 
   const router = useRouter()
@@ -88,6 +89,9 @@ export default function Installs () {
                 }}
               >
                 <div className='h-18 w-screen relative'>
+                  {developerMode && (
+                    <p className='absolute bottom-0 right-0 text-sm'>{i.id}</p>
+                  )}
                   <p className='text-2xl'>{i.name}</p>
 
                   <div className='flex gap-2 absolute left-0 bottom-0'>

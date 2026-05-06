@@ -58,6 +58,7 @@ type GlobalCtxType = {
   linuxWineCommand: string
   theme: string
   customDataLocation: string
+  developerMode: boolean
   versionsList: Record<string, number>
   modsList: Record<string, Record<string, number>>
   movingData: boolean

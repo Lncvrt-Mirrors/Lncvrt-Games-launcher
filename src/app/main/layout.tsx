@@ -96,6 +96,7 @@ export default function RootLayout ({
     useState<string>('wine %path%')
   const [theme, setTheme] = useState<string>('dark')
   const [customDataLocation, setCustomDataLocation] = useState<string>('')
+  const [developerMode, setDeveloperMode] = useState<boolean>(false)
 
   const [versionsList, setVersionsList] = useState<Record<string, number>>({})
   const [modsList, setModsList] = useState<
@@ -645,7 +646,8 @@ export default function RootLayout ({
           linuxUseWine: false,
           linuxWineCommand: 'wine %path%',
           theme: 'dark',
-          customDataLocation: ''
+          customDataLocation: '',
+          developerMode: false
         }
       })
       const versionsLocal = await load('versions.json', {
@@ -802,6 +804,7 @@ export default function RootLayout ({
     watchSettings<string>('customDataLocation', v =>
       setCustomDataLocation(v ?? '')
     )
+    watchSettings<boolean>('developerMode', v => setDeveloperMode(v ?? false))
 
     watchVersions<Record<string, number>>('list', v => setVersionsList(v ?? {}))
     watchVersions<Record<string, Record<string, number>>>('mods', v =>
@@ -871,6 +874,7 @@ export default function RootLayout ({
                 linuxWineCommand,
                 theme,
                 customDataLocation,
+                developerMode,
                 versionsList,
                 modsList,
                 movingData,

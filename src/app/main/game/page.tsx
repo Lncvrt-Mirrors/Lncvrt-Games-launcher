@@ -29,7 +29,8 @@ export default function Installs () {
     linuxUseWine,
     customDataLocation,
     needsRevisionUpdate,
-    launchGame
+    launchGame,
+    developerMode
   } = useGlobal()
 
   const params = useSearchParams()
@@ -155,6 +156,11 @@ export default function Installs () {
                     onClick={() => setCategory(Number(key))}
                   >
                     <div className='h-18 w-screen relative'>
+                      {developerMode && (
+                        <p className='absolute bottom-0 right-0 text-sm'>
+                          {key}
+                        </p>
+                      )}
                       <p className='text-2xl'>{value}</p>
 
                       <div
@@ -232,6 +238,11 @@ export default function Installs () {
                   }}
                 >
                   <div className='h-18 w-screen relative'>
+                    {developerMode && (
+                      <p className='absolute bottom-0 right-0 text-sm'>
+                        {versionInfo.id}
+                      </p>
+                    )}
                     <p className='text-2xl'>{versionInfo.displayName}</p>
 
                     <div className='flex gap-2 absolute left-0 bottom-0'>

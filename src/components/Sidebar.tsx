@@ -19,7 +19,8 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { Lexend } from 'next/font/google'
-import React from 'react'
+import React, { useState } from 'react'
+import { message } from '@tauri-apps/plugin-dialog'
 
 const lexend = Lexend({
   subsets: ['latin']
@@ -37,12 +38,16 @@ export default function Sidebar () {
     setCategory,
     sidebarAlwaysShowGames,
     linuxUseWine,
-    setManagingGame
+    setManagingGame,
+    settings,
+    developerMode
   } = useGlobal()
 
   const pathname = usePathname()
   const params = useSearchParams()
   const router = useRouter()
+
+  const [devModeClicks, setDevModeClicks] = useState<number>(0)
 
   return (
     <aside className='sidebar'>
@@ -90,6 +95,29 @@ export default function Sidebar () {
               ? 'active'
               : ''
           }`}
+          onContextMenu={async e => {
+            e.preventDefault()
+
+            if (developerMode) {
+              await settings?.set('developerMode', false)
+              await message(
+                'Developer mode disabled! You can enable it again by right clicking the games button 3 times again.',
+                { title: 'Developer mode off', kind: 'info' }
+              )
+              return
+            }
+
+            if (devModeClicks == 2) {
+              await settings?.set('developerMode', true)
+              setDevModeClicks(0)
+              await message(
+                'Developer mode sucessfully enabled! You can disable it by right clicking the games button again.',
+                { title: 'Developer mode on', kind: 'info' }
+              )
+            } else {
+              setDevModeClicks(devModeClicks + 1)
+            }
+          }}
         >
           <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Games
         </Link>

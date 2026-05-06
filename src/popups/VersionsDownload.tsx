@@ -12,7 +12,8 @@ export default function VersionsDownloadPopup () {
     setPopupMode,
     selectedGame,
     setViewingInfoFromDownloads,
-    downloadVersions
+    downloadVersions,
+    developerMode
   } = useGlobal()
 
   const game = serverVersionList?.games.find(g => g.id === selectedGame)
@@ -47,6 +48,7 @@ export default function VersionsDownloadPopup () {
                 className='text-2xl text-center truncate'
                 title={v.displayName}
               >
+                {developerMode ? <span className='text-sm'>{v.id} </span> : ''}
                 {v.displayName}
               </p>
               <button

@@ -13,7 +13,8 @@ export default function GamesDownloadPopup () {
     setPopupMode,
     setShowPopup,
     setFadeOut,
-    setViewingInfoFromDownloads
+    setViewingInfoFromDownloads,
+    developerMode
   } = useGlobal()
 
   return (
@@ -46,7 +47,10 @@ export default function GamesDownloadPopup () {
               >
                 <FontAwesomeIcon icon={faInfo} /> Info
               </button>
-              <p className='text-2xl text-center truncate'>{g.name}</p>
+              <p className='text-2xl text-center truncate'>
+                {developerMode ? <span className='text-sm'>{g.id} </span> : ''}
+                {g.name}
+              </p>
               <button
                 className='button btntheme3'
                 onClick={() => setSelectedGame(g.id)}
