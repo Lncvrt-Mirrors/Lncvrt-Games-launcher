@@ -36,7 +36,8 @@ export default function Sidebar () {
     category,
     setCategory,
     sidebarAlwaysShowGames,
-    linuxUseWine
+    linuxUseWine,
+    setManagingGame
   } = useGlobal()
 
   const pathname = usePathname()
@@ -119,6 +120,13 @@ export default function Sidebar () {
                 onClick={() => {
                   setCategory(-1)
                   router.push('/main/game?id=' + i.id)
+                }}
+                onContextMenu={e => {
+                  e.preventDefault()
+                  setManagingGame(i.id)
+                  setPopupMode(5)
+                  setShowPopup(true)
+                  setFadeOut(false)
                 }}
               >
                 <div className='flex items-center'>
