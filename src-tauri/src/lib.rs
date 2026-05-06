@@ -758,6 +758,13 @@ pub fn run() {
             });
 
             let window = app.get_webview_window("main").unwrap();
+            let app_handle = app.handle().clone();
+
+            window.on_window_event(move |event| {
+                if let tauri::WindowEvent::CloseRequested { .. } = event {
+                    app_handle.exit(0);
+                }
+            });
 
             #[cfg(target_os = "windows")]
             {
