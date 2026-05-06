@@ -73,8 +73,8 @@ export default function Installs () {
             filteredGames.map(i => (
               <div
                 key={i.id}
-                className={'downloads-entry'}
-                title={'Click to view game installs'}
+                className='downloads-entry'
+                title='Click to view game installs.'
                 onClick={() => {
                   setCategory(-1)
                   router.push('/main/game?id=' + i.id)

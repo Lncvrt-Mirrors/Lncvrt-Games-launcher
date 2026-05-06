@@ -150,8 +150,8 @@ export default function Installs () {
                 return (
                   <div
                     key={key}
-                    className={'downloads-entry'}
-                    title={'Click to view category'}
+                    className='downloads-entry'
+                    title='Click to view category.'
                     onClick={() => setCategory(Number(key))}
                   >
                     <div className='h-18 w-screen relative'>
@@ -220,10 +220,8 @@ export default function Installs () {
               return (
                 <div
                   key={v}
-                  className={'downloads-entry'}
-                  title={
-                    'Click to launch game. Right-click to manage this version install'
-                  }
+                  className='downloads-entry'
+                  title='Click to launch game. Right-click to manage this version install.'
                   onClick={async () => await launchGame(versionInfo)}
                   onContextMenu={e => {
                     e.preventDefault()

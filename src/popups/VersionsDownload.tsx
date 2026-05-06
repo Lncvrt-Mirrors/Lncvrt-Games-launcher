@@ -98,7 +98,7 @@ export default function VersionsDownloadPopup () {
           disabled={selectedVersionList.length == 0}
           title={`Download ${selectedVersionList.length} version${
             selectedVersionList.length == 1 ? '' : 's'
-          } of ${game.name}`}
+          } of ${game.name}.`}
         >
           Download {selectedVersionList.length} version
           {selectedVersionList.length == 1 ? '' : 's'}
