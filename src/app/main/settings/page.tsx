@@ -7,6 +7,7 @@ import { platform } from '@tauri-apps/plugin-os'
 import { open } from '@tauri-apps/plugin-dialog'
 import { invoke } from '@tauri-apps/api/core'
 import Dropdown from '@/components/Dropdown'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 
 export default function Settings () {
   const {
@@ -117,6 +118,24 @@ export default function Settings () {
             ]}
             onChange={async val => {
               await settings?.set('theme', val)
+
+              const window = await WebviewWindow.getByLabel(
+                'berrydashleaderboards'
+              )
+              if (window) {
+                await window.close()
+
+                new WebviewWindow('berrydashleaderboards', {
+                  title: 'Berry Dash Leaderboards',
+                  url:
+                    'https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=1&theme=' +
+                    val,
+                  width: 800,
+                  height: 600,
+                  resizable: false,
+                  maximizable: false
+                })
+              }
             }}
           />
         </div>
