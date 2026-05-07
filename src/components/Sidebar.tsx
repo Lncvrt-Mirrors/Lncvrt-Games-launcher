@@ -132,10 +132,8 @@ export default function Sidebar () {
               <div
                 draggable={false}
                 className={`link ${
-                  (pathname === '/main/game' &&
-                    Number(params.get('id') || 0) == i.id) ||
-                  (i.id == 1 &&
-                    pathname === '/main/game/berrydash/leaderboards')
+                  pathname === '/main/game' &&
+                  Number(params.get('id') || 0) == i.id
                     ? 'active'
                     : ''
                 } ml-auto w-50 ${
@@ -191,10 +189,8 @@ export default function Sidebar () {
                     key={`${i.id}-${key}`}
                     draggable={false}
                     className={`link ${
-                      ((pathname === '/main/game' &&
-                        Number(params.get('id') || 0) == i.id) ||
-                        (i.id == 1 &&
-                          pathname === '/main/game/berrydash/leaderboards')) &&
+                      pathname === '/main/game' &&
+                      Number(params.get('id') || 0) == i.id &&
                       category == Number(key)
                         ? 'active'
                         : ''

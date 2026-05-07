@@ -4,7 +4,7 @@ import '../Installs.css'
 import { useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { useGlobal } from '@/providers/GlobalProvider'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
 import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -30,11 +30,11 @@ export default function Installs () {
     customDataLocation,
     needsRevisionUpdate,
     launchGame,
-    developerMode
+    developerMode,
+    theme
   } = useGlobal()
 
   const params = useSearchParams()
-  const router = useRouter()
 
   const id = Number(params.get('id') || 0)
   const game = serverVersionList?.games.find(g => g.id === id)
@@ -73,9 +73,17 @@ export default function Installs () {
         <div className='flex gap-2'>
           <button
             className='button btntheme1'
-            onClick={() => {
-              router.push('/main/game/berrydash/leaderboards')
-            }}
+            onClick={() =>
+              invoke('open_new_window', {
+                title: 'Berry Dash Leaderboards',
+                name: 'berrydashleaderboards',
+                url:
+                  'https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=1&theme=' +
+                  theme,
+                width: 800,
+                height: 600
+              })
+            }
             title='View the leaderboards for this game.'
             hidden={game.id != 1}
           >
