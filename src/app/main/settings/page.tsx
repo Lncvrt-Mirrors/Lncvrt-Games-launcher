@@ -73,7 +73,6 @@ export default function Settings () {
                 setMovingData(true)
                 await invoke('move_game_data', { destination: '' })
                 await settings?.set('customDataLocation', '')
-                await settings?.save()
                 await invoke('restart_app')
               } catch {
                 setMovingData(false)
@@ -88,7 +87,6 @@ export default function Settings () {
                 setMovingData(true)
                 await invoke('move_game_data', { destination: selected })
                 await settings?.set('customDataLocation', selected)
-                await settings?.save()
                 await invoke('restart_app')
               } catch {
                 setMovingData(false)
