@@ -95,7 +95,7 @@ export default function Settings () {
               }
             }
           }}
-          title='Move game data to a custom folder location. Disabled during downloads.'
+          title='Move game data to a custom storage location, like a different disk.'
         />
         {customDataLocation && (
           <p className='text-sm opacity-50 ml-6 -mt-1 mb-2'>
