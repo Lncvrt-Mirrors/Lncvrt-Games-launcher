@@ -678,31 +678,6 @@ fn remove_stale_executable(app: AppHandle, version: String, executable: String) 
     }
 }
 
-#[tauri::command]
-fn open_new_window(
-    app: tauri::AppHandle,
-    title: String,
-    name: String,
-    url: String,
-    width: f64,
-    height: f64,
-) {
-    if let Some(window) = app.get_webview_window(&name) {
-        let _ = window.show();
-        return;
-    };
-
-    tauri::WebviewWindowBuilder::new(
-        &app,
-        name,
-        tauri::WebviewUrl::External(url.parse().unwrap()),
-    )
-    .inner_size(width, height)
-    .title(title)
-    .build()
-    .unwrap();
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[allow(unused)]
@@ -731,7 +706,6 @@ pub fn run() {
             folder_size,
             verify_signature,
             cancel_download,
-            open_new_window,
             move_game_data,
             restart_app,
             open_game_folder,

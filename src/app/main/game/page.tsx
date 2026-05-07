@@ -2,7 +2,6 @@
 
 import '../Installs.css'
 import { useEffect } from 'react'
-import { invoke } from '@tauri-apps/api/core'
 import { useGlobal } from '@/providers/GlobalProvider'
 import { useSearchParams } from 'next/navigation'
 import { platform } from '@tauri-apps/plugin-os'
@@ -10,6 +9,7 @@ import { faWarning } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ask } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists } from '@tauri-apps/plugin-fs'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 
 export default function Installs () {
   const {
@@ -74,14 +74,15 @@ export default function Installs () {
           <button
             className='button btntheme1'
             onClick={() =>
-              invoke('open_new_window', {
+              new WebviewWindow('berrydashleaderboards', {
                 title: 'Berry Dash Leaderboards',
-                name: 'berrydashleaderboards',
                 url:
                   'https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=1&theme=' +
                   theme,
                 width: 800,
-                height: 600
+                height: 600,
+                resizable: false,
+                maximizable: false
               })
             }
             title='View the leaderboards for this game.'
@@ -92,12 +93,13 @@ export default function Installs () {
           <button
             className='button btntheme1'
             onClick={() =>
-              invoke('open_new_window', {
+              new WebviewWindow('xpsdashboard', {
                 title: 'XPS Dashboard',
-                name: 'xpsdashboard',
                 url: 'https://xps.lncvrt.xyz/dashboard/',
                 width: 1280,
-                height: 720
+                height: 720,
+                minWidth: 1280,
+                minHeight: 720
               })
             }
             title='Open the GDPS Dashboard!'
