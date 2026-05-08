@@ -66,7 +66,7 @@ function AccountLoggedOut () {
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
-            className='input-field my-1'
+            className='input-field btntheme1'
           />
           <input
             id='password'
@@ -76,7 +76,7 @@ function AccountLoggedOut () {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            className='input-field my-1'
+            className='input-field btntheme1'
           />
           <button type='submit' className='button btntheme1'>
             Login
@@ -180,7 +180,7 @@ function AccountChangeUsername ({
             value={newUsername}
             onChange={e => setNewUsername(e.target.value)}
             required
-            className='input-field my-1'
+            className='input-field btntheme1'
           />
           <button type='submit' className='button btntheme1'>
             Change Username
@@ -264,7 +264,7 @@ function AccountChangePassword ({
             value={newPassword}
             onChange={e => setNewPassword(e.target.value)}
             required
-            className='input-field my-1'
+            className='input-field btntheme1'
           />
           <input
             id='retype-new-password'
@@ -275,7 +275,7 @@ function AccountChangePassword ({
             value={retypeNewPassword}
             onChange={e => setRetypeNewPassword(e.target.value)}
             required
-            className='input-field my-1'
+            className='input-field btntheme1'
           />
           <button type='submit' className='button btntheme1'>
             Change Password

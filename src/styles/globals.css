@@ -60,7 +60,8 @@ body {
   --col9: rgb(156, 144, 168);
 }
 
-.button {
+.button,
+.input-field {
   @apply rounded-md cursor-pointer text-[16px] py-1 px-2 transition-colors border;
 }
 
@@ -78,6 +79,18 @@ body {
 .downloads-entry:hover .entry-info-item,
 .downloads-entry:hover .button {
   @apply bg-(--col4) border-(--col6) hover:bg-(--col6) hover:border-(--col8) disabled:text-gray-300 disabled:bg-(--col2) disabled:border-(--col7) disabled:hover:text-gray-100 disabled:hover:bg-(--col4) disabled:hover:border-(--col8);
+}
+
+.input-field.btntheme1 {
+  @apply focus:bg-(--col4) focus:border-(--col6);
+}
+
+.input-field.btntheme2 {
+  @apply focus:bg-(--col5) focus:border-(--col7);
+}
+
+.input-field.btntheme3 {
+  @apply focus:bg-(--col6) focus:border-(--col8);
 }
 
 ::-webkit-scrollbar {
@@ -136,10 +149,6 @@ body {
 
 *:focus {
   @apply outline-none;
-}
-
-.input-field {
-  @apply border-2 border-(--col4) rounded-md bg-(--col2) py-1 px-2 focus:bg-(--col3) focus:border-(--col6) transition-colors w-full;
 }
 
 .entry-info-item {
