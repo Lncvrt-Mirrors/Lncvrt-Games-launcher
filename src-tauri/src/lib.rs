@@ -19,6 +19,7 @@ use std::{
 use tauri::window::{ProgressBarState, ProgressBarStatus};
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_os::platform;
+use tauri_plugin_window_state::StateFlags;
 use tokio::io::AsyncReadExt;
 use tokio::{io::AsyncWriteExt, time::timeout};
 use zip::ZipArchive;
@@ -688,7 +689,13 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_prevent_default::init())
-        .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(
+                    StateFlags::all() & !StateFlags::VISIBLE & !StateFlags::DECORATIONS,
+                )
+                .build(),
+        )
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
