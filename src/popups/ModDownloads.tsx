@@ -68,33 +68,34 @@ export default function ModDownloadsPopup () {
 
   return (
     <>
-      <button
-        className='popup-top-button btntheme1 right-2'
-        onClick={async () => {
-          setMods(0)
-          const response = await fetch(
-            'https://games.lncvrt.xyz/api/launcher/mods?version=' +
-              managingVersion,
-            {
-              headers: {
-                Requester: 'LncvrtGamesLauncherClient',
-                ClientVersion: await app.getVersion(),
-                ClientPlatform: platform() + '-' + arch()
+      {typeof mods != 'number' && showModInfo == null && (
+        <button
+          className='popup-top-button btntheme1 right-2'
+          onClick={async () => {
+            setMods(0)
+            const response = await fetch(
+              'https://games.lncvrt.xyz/api/launcher/mods?version=' +
+                managingVersion,
+              {
+                headers: {
+                  Requester: 'LncvrtGamesLauncherClient',
+                  ClientVersion: await app.getVersion(),
+                  ClientPlatform: platform() + '-' + arch()
+                }
               }
+            )
+            const signature = response.headers.get('x-signature') ?? ''
+            const data = await response.json()
+            if (await verifySignature(JSON.stringify(data), signature)) {
+              setMods(data as Mod[])
+            } else {
+              setMods(1)
             }
-          )
-          const signature = response.headers.get('x-signature') ?? ''
-          const data = await response.json()
-          if (await verifySignature(JSON.stringify(data), signature)) {
-            setMods(data as Mod[])
-          } else {
-            setMods(1)
-          }
-        }}
-        hidden={typeof mods == 'number' || showModInfo != null}
-      >
-        <FontAwesomeIcon icon={faRefresh} />
-      </button>
+          }}
+        >
+          <FontAwesomeIcon icon={faRefresh} />
+        </button>
+      )}
       <p className='text-xl text-center'>
         {!showModInfo
           ? versionInfo?.displayName + ' Mod Manager'
@@ -180,13 +181,12 @@ export default function ModDownloadsPopup () {
                         >
                           v{tab == 0 ? localVersion : v.latestVersion}
                         </span>
-                        <span
-                          className='text-green-300'
-                          hidden={tab != 0 || v.latestVersion == localVersion}
-                        >
-                          {' '}
-                          (available: v{v.latestVersion})
-                        </span>
+                        {tab == 0 && v.latestVersion != localVersion && (
+                          <span className='text-green-300'>
+                            {' '}
+                            (available: v{v.latestVersion})
+                          </span>
+                        )}
                       </p>
                       <p className='text-yellow-200'>
                         Made by {v.creators[0]}
@@ -196,66 +196,69 @@ export default function ModDownloadsPopup () {
                       </p>
                     </div>
                     <div className='flex flex-row items-center h-full gap-2 px-3 ml-auto'>
-                      <p className='text-green-400' hidden={tab == 0}>
-                        <FontAwesomeIcon icon={faDownload} />{' '}
-                        {v.downloads.toLocaleString()}
-                      </p>
-                      <button
-                        className='button btntheme3'
-                        onClick={async () => {
-                          const path =
-                            'game/' +
-                            versionInfo?.id +
-                            '/BepInEx/plugins/' +
-                            v.id
-                          if (
-                            await exists(
-                              (customDataLocation
-                                ? customDataLocation + '/'
-                                : null) + path,
-                              {
-                                baseDir: customDataLocation
-                                  ? undefined
-                                  : BaseDirectory.AppLocalData
-                              }
-                            )
-                          )
-                            await remove(
-                              (customDataLocation
-                                ? customDataLocation + '/'
-                                : null) + path,
-                              {
-                                baseDir: customDataLocation
-                                  ? undefined
-                                  : BaseDirectory.AppLocalData,
-                                recursive: true
-                              }
-                            )
-                          await versions?.set(
-                            'mods',
-                            Object.fromEntries(
-                              Object.entries(modsList).filter(
-                                ([k]) => k !== versionInfo?.game + '-' + v.id
+                      {tab != 0 && (
+                        <p className='text-green-400'>
+                          <FontAwesomeIcon icon={faDownload} />{' '}
+                          {v.downloads.toLocaleString()}
+                        </p>
+                      )}
+                      {tab == 0 && v.latestVersion != localVersion && (
+                        <button
+                          className='button btntheme3'
+                          onClick={async () => {
+                            const path =
+                              'game/' +
+                              versionInfo?.id +
+                              '/BepInEx/plugins/' +
+                              v.id
+                            if (
+                              await exists(
+                                (customDataLocation
+                                  ? customDataLocation + '/'
+                                  : null) + path,
+                                {
+                                  baseDir: customDataLocation
+                                    ? undefined
+                                    : BaseDirectory.AppLocalData
+                                }
                               )
                             )
-                          )
+                              await remove(
+                                (customDataLocation
+                                  ? customDataLocation + '/'
+                                  : null) + path,
+                                {
+                                  baseDir: customDataLocation
+                                    ? undefined
+                                    : BaseDirectory.AppLocalData,
+                                  recursive: true
+                                }
+                              )
+                            await versions?.set(
+                              'mods',
+                              Object.fromEntries(
+                                Object.entries(modsList).filter(
+                                  ([k]) => k !== versionInfo?.game + '-' + v.id
+                                )
+                              )
+                            )
 
-                          downloadVersions([
-                            {
-                              id: managingVersion,
-                              type: 2,
-                              modDownload: v.latestDownload,
-                              gameId: versionInfo?.game,
-                              modId: v.id,
-                              modVersion: v.latestVersion
-                            }
-                          ])
-                        }}
-                        hidden={tab != 0 || v.latestVersion == localVersion}
-                        disabled={downloadProgress.length != 0}
-                      >
-                        Update
-                      </button>
+                            downloadVersions([
+                              {
+                                id: managingVersion,
+                                type: 2,
+                                modDownload: v.latestDownload,
+                                gameId: versionInfo?.game,
+                                modId: v.id,
+                                modVersion: v.latestVersion
+                              }
+                            ])
+                          }}
+                          disabled={downloadProgress.length != 0}
+                        >
+                          Update
+                        </button>
+                      )}
                       <button
                         className='button btntheme3'
                         onClick={() => setShowModInfo(v)}
@@ -388,20 +391,21 @@ export default function ModDownloadsPopup () {
                 />{' '}
                 View changelog
               </button>
-              <button
-                className='button btntheme2 w-fit'
-                hidden={showModInfo.creators.length < 2}
-                onClick={async () => {
-                  if (!versionInfo) return
-                  await message(showModInfo.creators.join(', '), {
-                    title: 'Creators for ' + showModInfo.name,
-                    kind: 'info'
-                  })
-                }}
-              >
-                <FontAwesomeIcon icon={faPeopleGroup} color='lightgray' /> View
-                all creators
-              </button>
+              {showModInfo.creators.length > 2 && (
+                <button
+                  className='button btntheme2 w-fit'
+                  onClick={async () => {
+                    if (!versionInfo) return
+                    await message(showModInfo.creators.join(', '), {
+                      title: 'Creators for ' + showModInfo.name,
+                      kind: 'info'
+                    })
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPeopleGroup} color='lightgray' />{' '}
+                  View all creators
+                </button>
+              )}
             </div>
           </div>
         )}

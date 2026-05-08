@@ -71,52 +71,55 @@ export default function Installs () {
           {game.name} Installs
         </p>
         <div className='flex gap-2'>
-          <button
-            className='button btntheme1'
-            onClick={() =>
-              new WebviewWindow('berrydashleaderboards', {
-                title: 'Berry Dash Leaderboards',
-                url:
-                  'https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=1&theme=' +
-                  theme,
-                width: 800,
-                height: 600,
-                resizable: false,
-                maximizable: false
-              })
-            }
-            title='View the leaderboards for this game.'
-            hidden={game.id != 1}
-          >
-            Leaderboards
-          </button>
-          <button
-            className='button btntheme1'
-            onClick={() =>
-              new WebviewWindow('xpsdashboard', {
-                title: 'XPS Dashboard',
-                url: 'https://xps.lncvrt.xyz/dashboard/',
-                width: 1280,
-                height: 720,
-                minWidth: 1280,
-                minHeight: 720
-              })
-            }
-            title='Open the GDPS Dashboard!'
-            hidden={game.id != 9 || category != -1}
-          >
-            Dashboard
-          </button>
-          <button
-            className='button btntheme1'
-            onClick={() => {
-              setCategory(-1)
-            }}
-            title='Click to go up a level.'
-            hidden={category == -1}
-          >
-            Back
-          </button>
+          {game.id == 1 && (
+            <button
+              className='button btntheme1'
+              onClick={() =>
+                new WebviewWindow('berrydashleaderboards', {
+                  title: 'Berry Dash Leaderboards',
+                  url:
+                    'https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=1&theme=' +
+                    theme,
+                  width: 800,
+                  height: 600,
+                  resizable: false,
+                  maximizable: false
+                })
+              }
+              title='View the leaderboards for this game.'
+            >
+              Leaderboards
+            </button>
+          )}
+          {game.id == 9 && category == -1 && (
+            <button
+              className='button btntheme1'
+              onClick={() =>
+                new WebviewWindow('xpsdashboard', {
+                  title: 'XPS Dashboard',
+                  url: 'https://xps.lncvrt.xyz/dashboard/',
+                  width: 1280,
+                  height: 720,
+                  minWidth: 1280,
+                  minHeight: 720
+                })
+              }
+              title='Open the GDPS Dashboard!'
+            >
+              Dashboard
+            </button>
+          )}
+          {category != -1 && (
+            <button
+              className='button btntheme1'
+              onClick={() => {
+                setCategory(-1)
+              }}
+              title='Click to go up a level.'
+            >
+              Back
+            </button>
+          )}
           <button
             className='button btntheme1'
             onClick={() => {
@@ -267,72 +270,70 @@ export default function Installs () {
                           )}
                         </p>
                       </div>
-                      <div
-                        className='entry-info-item'
-                        title='This version is using wine. It cannot be guarenteed to work fully and might not work at all.'
-                        hidden={
-                          !(platform() == 'linux' && versionInfo.wine) ||
-                          needsRevisionUpdate(versionInfo.lastRevision, v)
-                        }
-                      >
-                        <FontAwesomeIcon icon={faWarning} color='#ffc800' />
-                        <p>Uses wine</p>
-                      </div>
-                      <div
-                        className='entry-info-item'
-                        hidden={
-                          !needsRevisionUpdate(versionInfo.lastRevision, v)
-                        }
-                      >
-                        <FontAwesomeIcon icon={faWarning} color='#ffc800' />
-                        <p>Needs revision update!</p>
-                      </div>
+                      {platform() == 'linux' &&
+                        versionInfo.wine &&
+                        needsRevisionUpdate(versionInfo.lastRevision, v) && (
+                          <div
+                            className='entry-info-item'
+                            title='This version is using wine. It cannot be guarenteed to work fully and might not work at all.'
+                          >
+                            <FontAwesomeIcon icon={faWarning} color='#ffc800' />
+                            <p>Uses wine</p>
+                          </div>
+                        )}
+                      {needsRevisionUpdate(versionInfo.lastRevision, v) && (
+                        <div className='entry-info-item'>
+                          <FontAwesomeIcon icon={faWarning} color='#ffc800' />
+                          <p>Needs revision update!</p>
+                        </div>
+                      )}
                     </div>
-                    <button
-                      className='absolute right-0 bottom-0 button'
-                      title='Click to manage mods for this game!'
-                      onClick={async e => {
-                        e.stopPropagation()
+                    {versionInfo.modSupportDownload && (
+                      <button
+                        className='absolute right-0 bottom-0 button'
+                        title='Click to manage mods for this game!'
+                        onClick={async e => {
+                          e.stopPropagation()
 
-                        if (
-                          !(await exists(
-                            customDataLocation
-                              ? customDataLocation + '/'
-                              : null + 'game/' + v + '/BepInEx',
-                            {
-                              baseDir: customDataLocation
-                                ? undefined
-                                : BaseDirectory.AppLocalData
-                            }
-                          ))
-                        ) {
                           if (
-                            (await ask(
-                              "You don't have BepInEx (the mod loader for Unity Games), would you like to install it now? It is about 1MB in size. If you choose yes, it will download the recommended BepInEx version for " +
-                                versionInfo.displayName +
-                                '.',
-                              { title: 'BepInEx not found!', kind: 'error' }
-                            )) &&
-                            !downloadProgress.find(d => d.version == v)
-                          ) {
-                            downloadVersions([
+                            !(await exists(
+                              customDataLocation
+                                ? customDataLocation + '/'
+                                : null + 'game/' + v + '/BepInEx',
                               {
-                                id: v,
-                                type: 1
+                                baseDir: customDataLocation
+                                  ? undefined
+                                  : BaseDirectory.AppLocalData
                               }
-                            ])
+                            ))
+                          ) {
+                            if (
+                              (await ask(
+                                "You don't have BepInEx (the mod loader for Unity Games), would you like to install it now? It is about 1MB in size. If you choose yes, it will download the recommended BepInEx version for " +
+                                  versionInfo.displayName +
+                                  '.',
+                                { title: 'BepInEx not found!', kind: 'error' }
+                              )) &&
+                              !downloadProgress.find(d => d.version == v)
+                            ) {
+                              downloadVersions([
+                                {
+                                  id: v,
+                                  type: 1
+                                }
+                              ])
+                            }
+                            return
                           }
-                          return
-                        }
-                        setManagingVersion(v)
-                        setPopupMode(3)
-                        setShowPopup(true)
-                        setFadeOut(false)
-                      }}
-                      hidden={!versionInfo.modSupportDownload}
-                    >
-                      Mod Manager
-                    </button>
+                          setManagingVersion(v)
+                          setPopupMode(3)
+                          setShowPopup(true)
+                          setFadeOut(false)
+                        }}
+                      >
+                        Mod Manager
+                      </button>
+                    )}
                   </div>
                 </div>
               )

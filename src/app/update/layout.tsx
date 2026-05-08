@@ -24,10 +24,9 @@ export default function RootLayout ({
     <>
       <html lang='en' className={roboto.className}>
         <body className='dark-theme'>
-          <div
-            className='relative z-2 w-screen border-b border-b-(--col3) h-8.25 bg-(--col1)'
-            hidden={platformName != 'windows'}
-          />
+          {platformName == 'windows' && (
+            <div className='relative z-2 w-screen border-b border-b-(--col3) h-8.25 bg-(--col1)' />
+          )}
           <div
             className={`w-screen ${
               platformName == 'windows' ? 'h-[calc(100vh-64px)]' : 'h-screen'

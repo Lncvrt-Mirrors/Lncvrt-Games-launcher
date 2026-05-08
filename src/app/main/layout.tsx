@@ -822,10 +822,9 @@ export default function RootLayout ({
         <body className={theme + '-theme'}>
           {loading ? (
             <>
-              <div
-                className='relative z-2 w-screen border-b border-b-(--col3) h-8.25 bg-(--col1)'
-                hidden={platformName != 'windows'}
-              />
+              {platformName == 'windows' && (
+                <div className='relative z-2 w-screen border-b border-b-(--col3) h-8.25 bg-(--col1)' />
+              )}
               <div
                 className={`w-screen ${
                   platformName == 'windows'
@@ -892,10 +891,9 @@ export default function RootLayout ({
                 }}
               >
                 <Sidebar />
-                <div
-                  className='relative z-2 ml-59.75 w-[calc(100vw-239px)] border-b border-b-(--col3) h-8.25 bg-(--col1)'
-                  hidden={platformName != 'windows'}
-                />
+                {platformName == 'windows' && (
+                  <div className='relative z-2 ml-59.75 w-[calc(100vw-239px)] border-b border-b-(--col3) h-8.25 bg-(--col1)' />
+                )}
                 <div className='relative z-0'>
                   <main className='ml-60'>{children}</main>
                 </div>

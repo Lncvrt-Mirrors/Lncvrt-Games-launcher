@@ -54,16 +54,19 @@ export default function Settings () {
           }}
           className={platform() == 'linux' ? '' : 'hidden'}
         />
-        <p hidden={!(platform() == 'linux' && linuxUseWine)}>Wine Command:</p>
-        <input
-          type='text'
-          value={linuxWineCommand}
-          onChange={async e =>
-            await settings?.set('linuxWineCommand', e.target.value)
-          }
-          className='input-field my-1'
-          hidden={!(platform() == 'linux' && linuxUseWine)}
-        ></input>
+        {platform() == 'linux' && linuxUseWine && (
+          <>
+            <p>Wine Command:</p>
+            <input
+              type='text'
+              value={linuxWineCommand}
+              onChange={async e =>
+                await settings?.set('linuxWineCommand', e.target.value)
+              }
+              className='input-field my-1'
+            ></input>
+          </>
+        )}
         <Setting
           label='Use custom data location'
           value={!!customDataLocation}

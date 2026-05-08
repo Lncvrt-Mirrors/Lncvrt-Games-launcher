@@ -114,29 +114,30 @@ export default function Installs () {
                         versions installed
                       </p>
                     </div>
-                    <div
-                      className='entry-info-item'
-                      hidden={!i.official}
-                      title='This game is official.'
-                    >
-                      <FontAwesomeIcon icon={faCheck} color='#19c84b' />
-                      <p>Official</p>
-                    </div>
-                    <div
-                      className='entry-info-item'
-                      hidden={i.official}
-                      title={
-                        i.verified
-                          ? 'This game is verified to be safe'
-                          : 'This game is not verified to be save. Proceed with caution.'
-                      }
-                    >
-                      <FontAwesomeIcon
-                        icon={i.verified ? faShieldHalved : faWarning}
-                        color={i.verified ? '#19c84b' : '#ffc800'}
-                      />
-                      <p>{i.verified ? 'Verified' : 'Unverified'}</p>
-                    </div>
+                    {i.official ? (
+                      <div
+                        className='entry-info-item'
+                        title='This game is official.'
+                      >
+                        <FontAwesomeIcon icon={faCheck} color='#19c84b' />
+                        <p>Official</p>
+                      </div>
+                    ) : (
+                      <div
+                        className='entry-info-item'
+                        title={
+                          i.verified
+                            ? 'This game is verified to be safe'
+                            : 'This game is not verified to be save. Proceed with caution.'
+                        }
+                      >
+                        <FontAwesomeIcon
+                          icon={i.verified ? faShieldHalved : faWarning}
+                          color={i.verified ? '#19c84b' : '#ffc800'}
+                        />
+                        <p>{i.verified ? 'Verified' : 'Unverified'}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -38,142 +38,153 @@ export default function DownloadsPopup () {
               className='popup-entry flex flex-col justify-between relative'
             >
               <div className='absolute right-2 top-2 flex flex-row gap-2'>
-                <div
-                  className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
-                  hidden={!v.downloading && !v.paused}
-                  onClick={async () => {
-                    if (v.downloading) {
-                      await invoke('cancel_download', { name: v.version })
-                    } else {
-                      setDownloadProgress(prev => {
-                        const i = prev.findIndex(d => d.version === v.version)
-                        if (i === -1) return prev
-                        const copy = [...prev]
-                        copy[i] = {
-                          ...copy[i],
-                          paused: false,
-                          downloading: true
-                        }
-                        return copy
-                      })
-                      const res = await invoke<string>('download', {
-                        url: v.url,
-                        name: v.version,
-                        hash: v.hash,
-                        downloadType: v.type,
-                        modId: String(v.modId ?? '')
-                      })
+                {(v.downloading || v.paused) && (
+                  <>
+                    <div
+                      className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
+                      onClick={async () => {
+                        if (v.downloading) {
+                          await invoke('cancel_download', { name: v.version })
+                        } else {
+                          setDownloadProgress(prev => {
+                            const i = prev.findIndex(
+                              d => d.version === v.version
+                            )
+                            if (i === -1) return prev
+                            const copy = [...prev]
+                            copy[i] = {
+                              ...copy[i],
+                              paused: false,
+                              downloading: true
+                            }
+                            return copy
+                          })
+                          const res = await invoke<string>('download', {
+                            url: v.url,
+                            name: v.version,
+                            hash: v.hash,
+                            downloadType: v.type,
+                            modId: String(v.modId ?? '')
+                          })
 
-                      if (res === '1') {
-                        setDownloadProgress(prev =>
-                          prev.filter(d => d.version !== v.version)
-                        )
-                        if (v.type != 1) {
-                          if (v.type == 2) {
-                            await versions?.set('mods', {
-                              ...modsList,
-                              [v.modGame! + '-' + v.modId!]: {
-                                [v.modVersion!]: Date.now()
+                          if (res === '1') {
+                            setDownloadProgress(prev =>
+                              prev.filter(d => d.version !== v.version)
+                            )
+                            if (v.type != 1) {
+                              if (v.type == 2) {
+                                await versions?.set('mods', {
+                                  ...modsList,
+                                  [v.modGame! + '-' + v.modId!]: {
+                                    [v.modVersion!]: Date.now()
+                                  }
+                                })
+                              } else {
+                                await versions?.set('list', {
+                                  ...versionsList,
+                                  [v.version]: Date.now()
+                                })
                               }
+                            }
+                          } else if (res == '0') {
+                            setDownloadProgress(prev => {
+                              const i = prev.findIndex(
+                                d => d.version === v.version
+                              )
+                              if (i === -1) return prev
+                              if (prev[i].canceled) {
+                                return prev.filter((_, idx) => idx !== i)
+                              }
+                              const copy = [...prev]
+                              copy[i] = {
+                                ...copy[i],
+                                downloading: false,
+                                paused: true,
+                                failed: false
+                              }
+                              return copy
                             })
-                          } else {
-                            await versions?.set('list', {
-                              ...versionsList,
-                              [v.version]: Date.now()
-                            })
+                          } else if (res == '-1') {
+                            setDownloadProgress(prev =>
+                              prev.map(d =>
+                                d.version === v.version
+                                  ? {
+                                      ...d,
+                                      queued: false,
+                                      failed: true,
+                                      progress: 0
+                                    }
+                                  : d
+                              )
+                            )
+                            if (notificationsAllowed)
+                              await notifyUser(
+                                'Download Failed',
+                                `The download for version ${
+                                  serverVersionList?.versions.find(
+                                    vf => vf.id == v.version
+                                  )?.displayName
+                                } has failed.`
+                              )
+                            await getCurrentWindow().requestUserAttention(
+                              UserAttentionType.Critical
+                            )
                           }
                         }
-                      } else if (res == '0') {
-                        setDownloadProgress(prev => {
-                          const i = prev.findIndex(d => d.version === v.version)
-                          if (i === -1) return prev
-                          if (prev[i].canceled) {
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        icon={v.downloading ? faPause : faPlay}
+                        className='w-6 h-6'
+                      />
+                    </div>
+                    <div
+                      className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
+                      onClick={async () => {
+                        if (!v.paused) {
+                          await invoke('cancel_download', { name: v.version })
+                          setDownloadProgress(prev => {
+                            const i = prev.findIndex(
+                              d => d.version === v.version
+                            )
+                            if (i === -1) return prev
+                            const copy = [...prev]
+                            copy[i] = {
+                              ...copy[i],
+                              canceled: true
+                            }
+                            return copy
+                          })
+                        } else {
+                          setDownloadProgress(prev => {
+                            const i = prev.findIndex(
+                              d => d.version === v.version
+                            )
+                            if (i === -1) return prev
                             return prev.filter((_, idx) => idx !== i)
-                          }
-                          const copy = [...prev]
-                          copy[i] = {
-                            ...copy[i],
-                            downloading: false,
-                            paused: true,
-                            failed: false
-                          }
-                          return copy
-                        })
-                      } else if (res == '-1') {
-                        setDownloadProgress(prev =>
-                          prev.map(d =>
-                            d.version === v.version
-                              ? {
-                                  ...d,
-                                  queued: false,
-                                  failed: true,
-                                  progress: 0
-                                }
-                              : d
-                          )
-                        )
-                        if (notificationsAllowed)
-                          await notifyUser(
-                            'Download Failed',
-                            `The download for version ${
-                              serverVersionList?.versions.find(
-                                vf => vf.id == v.version
-                              )?.displayName
-                            } has failed.`
-                          )
-                        await getCurrentWindow().requestUserAttention(
-                          UserAttentionType.Critical
-                        )
-                      }
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={v.downloading ? faPause : faPlay}
-                    className='w-6 h-6'
-                  />
-                </div>
-                <div
-                  className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
-                  hidden={!v.downloading && !v.paused}
-                  onClick={async () => {
-                    if (!v.paused) {
-                      await invoke('cancel_download', { name: v.version })
-                      setDownloadProgress(prev => {
-                        const i = prev.findIndex(d => d.version === v.version)
-                        if (i === -1) return prev
-                        const copy = [...prev]
-                        copy[i] = {
-                          ...copy[i],
-                          canceled: true
+                          })
                         }
-                        return copy
-                      })
-                    } else {
-                      setDownloadProgress(prev => {
-                        const i = prev.findIndex(d => d.version === v.version)
-                        if (i === -1) return prev
-                        return prev.filter((_, idx) => idx !== i)
-                      })
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon icon={faCancel} className='w-6 h-6' />
-                </div>
-                <div
-                  className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
-                  hidden={!v.failed && !v.queued}
-                  onClick={() => {
-                    setDownloadQueue(prev =>
-                      prev.filter(id => id !== v.version)
-                    )
-                    setDownloadProgress(prev =>
-                      prev.filter(d => d.version !== v.version)
-                    )
-                  }}
-                >
-                  <FontAwesomeIcon icon={faTrash} className='w-6 h-6' />
-                </div>
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faCancel} className='w-6 h-6' />
+                    </div>
+                  </>
+                )}
+                {(v.failed || v.queued) && (
+                  <div
+                    className='cursor-pointer bg-(--col5) hover:bg-(--col7) border border-(--col7) hover:border-(--col9) transition-colors w-8 h-8 flex items-center justify-center rounded-full'
+                    onClick={() => {
+                      setDownloadQueue(prev =>
+                        prev.filter(id => id !== v.version)
+                      )
+                      setDownloadProgress(prev =>
+                        prev.filter(d => d.version !== v.version)
+                      )
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faTrash} className='w-6 h-6' />
+                  </div>
+                )}
               </div>
               <p className='text-2xl text-center'>
                 {v.type == 1

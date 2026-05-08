@@ -51,19 +51,20 @@ export default function Sidebar () {
 
   return (
     <aside className='sidebar'>
-      <div
-        className='macos-drag'
-        hidden={platform() != 'macos'}
-        onMouseDown={e => {
-          if (e.buttons === 1) {
-            if (e.detail === 2) {
-              getCurrentWindow().toggleMaximize()
-            } else {
-              getCurrentWindow().startDragging()
+      {platform() == 'macos' && (
+        <div
+          className='macos-drag'
+          onMouseDown={e => {
+            if (e.buttons === 1) {
+              if (e.detail === 2) {
+                getCurrentWindow().toggleMaximize()
+              } else {
+                getCurrentWindow().startDragging()
+              }
             }
-          }
-        }}
-      ></div>
+          }}
+        />
+      )}
       <div
         className={
           'flex items-center h-10 w-60 ' +
@@ -228,19 +229,20 @@ export default function Sidebar () {
           <FontAwesomeIcon icon={faDiscord} className='mr-1' /> Community
         </button>
       </nav>
-      <div
-        className='sidebar-downloads'
-        hidden={downloadProgress.length == 0}
-        onClick={() => {
-          setPopupMode(1)
-          setShowPopup(true)
-          setFadeOut(false)
-        }}
-      >
-        <p>
-          <FontAwesomeIcon icon={faDownload} /> Downloads
-        </p>
-      </div>
+      {downloadProgress.length != 0 && (
+        <div
+          className='sidebar-downloads'
+          onClick={() => {
+            setPopupMode(1)
+            setShowPopup(true)
+            setFadeOut(false)
+          }}
+        >
+          <p>
+            <FontAwesomeIcon icon={faDownload} /> Downloads
+          </p>
+        </div>
+      )}
     </aside>
   )
 }

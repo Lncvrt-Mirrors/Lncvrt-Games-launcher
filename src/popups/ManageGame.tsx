@@ -65,25 +65,27 @@ export default function ManageGamePopup () {
     <>
       <p className='text-xl text-center'>Viewing {gameInfo?.name}</p>
       <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
-        <div className='entry-info-item btntheme2' hidden={!gameInfo?.official}>
-          <FontAwesomeIcon icon={faCheck} color='#19c84b' />
-          <p>Official</p>
-        </div>
-        <div className='entry-info-item btntheme2' hidden={gameInfo?.official}>
-          <FontAwesomeIcon
-            icon={gameInfo?.verified ? faShieldHalved : faWarning}
-            color={gameInfo?.verified ? '#19c84b' : '#ffc800'}
-          />
-          <p>{gameInfo?.verified ? 'Verified' : 'Unverified'}</p>
-        </div>
-        <div
-          className='entry-info-item btntheme2'
-          hidden={gameInfo?.developer == null}
-        >
-          <FontAwesomeIcon icon={faCode} color='lightgray' />
-          <p>Developer: {gameInfo?.developer}</p>
-        </div>
-        <div className='entry-info-item btntheme2' hidden={!gameInfo?.official}>
+        {gameInfo?.official ? (
+          <div className='entry-info-item btntheme2'>
+            <FontAwesomeIcon icon={faCheck} color='#19c84b' />
+            <p>Official</p>
+          </div>
+        ) : (
+          <div className='entry-info-item btntheme2'>
+            <FontAwesomeIcon
+              icon={gameInfo?.verified ? faShieldHalved : faWarning}
+              color={gameInfo?.verified ? '#19c84b' : '#ffc800'}
+            />
+            <p>{gameInfo?.verified ? 'Verified' : 'Unverified'}</p>
+          </div>
+        )}
+        {gameInfo?.developer != null && (
+          <div className='entry-info-item btntheme2'>
+            <FontAwesomeIcon icon={faCode} color='lightgray' />
+            <p>Developer: {gameInfo?.developer}</p>
+          </div>
+        )}
+        <div className='entry-info-item btntheme2'>
           <FontAwesomeIcon icon={faDownload} color='lightgray' />
           <p>
             {(() => {
@@ -102,65 +104,65 @@ export default function ManageGamePopup () {
             versions installed
           </p>
         </div>
-        <div
-          className='entry-info-item btntheme2'
-          hidden={versionsInstalled?.length == 0}
-        >
-          <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
-          <p>
-            Size on disk:{' '}
-            {prettyBytes(gameSize, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })}
-          </p>
-        </div>
-        <div
-          className='entry-info-item btntheme2'
-          onClick={async () => {
-            closePopup()
-            if (!versionsInstalled) return
+        {versionsInstalled?.length != 0 && (
+          <>
+            <div className='entry-info-item btntheme2'>
+              <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
+              <p>
+                Size on disk:{' '}
+                {prettyBytes(gameSize, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </p>
+            </div>
+            <div
+              className='entry-info-item btntheme2'
+              onClick={async () => {
+                closePopup()
+                if (!versionsInstalled) return
 
-            const updatedList = { ...versionsList }
+                const updatedList = { ...versionsList }
 
-            for (const version of versionsInstalled)
-              delete updatedList[version.id]
+                for (const version of versionsInstalled)
+                  delete updatedList[version.id]
 
-            await versions?.set('list', updatedList)
+                await versions?.set('list', updatedList)
 
-            for (const version of versionsInstalled) {
-              const managingVersion = version.id
+                for (const version of versionsInstalled) {
+                  const managingVersion = version.id
 
-              if (
-                await exists(
-                  (customDataLocation ? customDataLocation + '/' : null) +
-                    'game/' +
-                    managingVersion,
-                  {
-                    baseDir: customDataLocation
-                      ? undefined
-                      : BaseDirectory.AppLocalData
-                  }
-                )
-              )
-                await remove(
-                  (customDataLocation ? customDataLocation + '/' : null) +
-                    'game/' +
-                    managingVersion,
-                  {
-                    baseDir: customDataLocation
-                      ? undefined
-                      : BaseDirectory.AppLocalData,
-                    recursive: true
-                  }
-                )
-            }
-          }}
-          title='Click to uninstall this game. This will NOT remove any progress or any save files.'
-          hidden={versionsInstalled?.length == 0}
-        >
-          Uninstall
-        </div>
+                  if (
+                    await exists(
+                      (customDataLocation ? customDataLocation + '/' : null) +
+                        'game/' +
+                        managingVersion,
+                      {
+                        baseDir: customDataLocation
+                          ? undefined
+                          : BaseDirectory.AppLocalData
+                      }
+                    )
+                  )
+                    await remove(
+                      (customDataLocation ? customDataLocation + '/' : null) +
+                        'game/' +
+                        managingVersion,
+                      {
+                        baseDir: customDataLocation
+                          ? undefined
+                          : BaseDirectory.AppLocalData,
+                        recursive: true
+                      }
+                    )
+                }
+              }}
+              title='Click to uninstall this game. This will NOT remove any progress or any save files.'
+            >
+              Uninstall
+            </div>
+          </>
+        )}
       </div>
     </>
   )
