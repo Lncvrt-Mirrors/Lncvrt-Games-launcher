@@ -9,7 +9,9 @@ import {
   faDownload,
   faGamepad,
   faHexagonNodes,
-  faLayerGroup
+  faLayerGroup,
+  faUser,
+  faUserShield
 } from '@fortawesome/free-solid-svg-icons'
 import { faDiscord } from '@fortawesome/free-brands-svg-icons'
 import { platform } from '@tauri-apps/plugin-os'
@@ -40,7 +42,9 @@ export default function Sidebar () {
     linuxUseWine,
     setManagingGame,
     settings,
-    developerMode
+    developerMode,
+    accountName,
+    accountAdmin
   } = useGlobal()
 
   const pathname = usePathname()
@@ -221,6 +225,17 @@ export default function Sidebar () {
           className={`link ${pathname === '/main/settings' ? 'active' : ''}`}
         >
           <FontAwesomeIcon icon={faCog} className='mr-1' /> Settings
+        </Link>
+        <Link
+          draggable={false}
+          href='/main/account'
+          className={`link ${pathname === '/main/account' ? 'active' : ''}`}
+        >
+          <FontAwesomeIcon
+            icon={accountAdmin ? faUserShield : faUser}
+            className='mr-1'
+          />{' '}
+          {accountName ?? 'Account'}
         </Link>
         <button
           onClick={() => openUrl('https://games.lncvrt.xyz/discord')}

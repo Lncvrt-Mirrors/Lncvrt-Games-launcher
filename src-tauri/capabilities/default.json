@@ -43,7 +43,10 @@
       "allow": [
         { "url": "https://games.lncvrt.xyz/api/launcher/versions" },
         { "url": "https://games.lncvrt.xyz/api/launcher/download" },
-        { "url": "https://games.lncvrt.xyz/api/launcher/mods" }
+        { "url": "https://games.lncvrt.xyz/api/launcher/mods" },
+        { "url": "https://games.lncvrt.xyz/api/account/login" },
+        { "url": "https://games.lncvrt.xyz/api/account/change-username" },
+        { "url": "https://games.lncvrt.xyz/api/account/change-password" }
       ]
     }
   ]

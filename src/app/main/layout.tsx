@@ -86,6 +86,7 @@ export default function RootLayout ({
 
   const [settings, setSettings] = useState<Store | null>(null)
   const [versions, setVersions] = useState<Store | null>(null)
+  const [account, setAccount] = useState<Store | null>(null)
 
   const [notificationsAllowed, setNotificationsAllowed] =
     useState<boolean>(false)
@@ -102,6 +103,11 @@ export default function RootLayout ({
   const [modsList, setModsList] = useState<
     Record<string, Record<string, number>>
   >({})
+
+  const [accountSession, setAccountSession] = useState<string | null>(null)
+  const [accountId, setAccountId] = useState<string | null>(null)
+  const [accountName, setAccountName] = useState<string | null>(null)
+  const [accountAdmin, setAccountAdmin] = useState<boolean>(false)
 
   const downloadVersions = useCallback(
     async (
@@ -658,6 +664,16 @@ export default function RootLayout ({
           mods: {}
         }
       })
+      const accountLocal = await load('account.json', {
+        autoSave: true,
+        defaults: {
+          version: client,
+          session: null,
+          id: null,
+          name: null,
+          admin: false
+        }
+      })
       const cfgVer = (await settingsLocal.get<string>('version')) ?? client
       const versVer = (await versionsLocal.get<string>('version')) ?? client
       if (semver.gt(cfgVer, client) || semver.gt(versVer, client)) {
@@ -667,6 +683,7 @@ export default function RootLayout ({
 
       await settingsLocal.set('version', client)
       await versionsLocal.set('version', client)
+      await accountLocal.set('version', client)
 
       if (await exists('config.json', legacyOptions)) {
         const config = await readTextFile('config.json', legacyOptions)
@@ -720,6 +737,7 @@ export default function RootLayout ({
       }
       setSettings(settingsLocal)
       setVersions(versionsLocal)
+      setAccount(accountLocal)
       setLoading(false)
 
       if (!(await isPermissionGranted())) {
@@ -790,6 +808,11 @@ export default function RootLayout ({
       unlisteners.push(versions!.onKeyChange<T>(key, fn))
     }
 
+    function watchAccount<T> (key: string, fn: (v: T | undefined) => void) {
+      account!.get<T>(key).then(fn)
+      unlisteners.push(account!.onKeyChange<T>(key, fn))
+    }
+
     watchSettings<string>('theme', v => setTheme(v ?? 'dark'))
     watchSettings<boolean>('notificationsAllowed', v =>
       setNotificationsAllowed(v ?? true)
@@ -811,10 +834,15 @@ export default function RootLayout ({
       setModsList(v ?? {})
     )
 
+    watchAccount<string | null>('session', v => setAccountSession(v ?? null))
+    watchAccount<string | null>('id', v => setAccountId(v ?? null))
+    watchAccount<string | null>('name', v => setAccountName(v ?? null))
+    watchAccount<boolean>('admin', v => setAccountAdmin(v ?? false))
+
     return () => {
       unlisteners.forEach(u => u.then(fn => fn()))
     }
-  }, [settings, versions])
+  }, [settings, versions, account])
 
   return (
     <>
@@ -867,6 +895,7 @@ export default function RootLayout ({
                 getSpecialVersionsList,
                 settings,
                 versions,
+                account,
                 notificationsAllowed,
                 sidebarAlwaysShowGames,
                 linuxUseWine,
@@ -876,6 +905,10 @@ export default function RootLayout ({
                 developerMode,
                 versionsList,
                 modsList,
+                accountSession,
+                accountId,
+                accountName,
+                accountAdmin,
                 movingData,
                 setMovingData,
                 managingGame,

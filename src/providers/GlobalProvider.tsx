@@ -52,6 +52,7 @@ type GlobalCtxType = {
   getSpecialVersionsList: (game?: number) => GameVersion[]
   settings: Store | null
   versions: Store | null
+  account: Store | null
   notificationsAllowed: boolean
   sidebarAlwaysShowGames: boolean
   linuxUseWine: boolean
@@ -61,6 +62,10 @@ type GlobalCtxType = {
   developerMode: boolean
   versionsList: Record<string, number>
   modsList: Record<string, Record<string, number>>
+  accountSession: string | null
+  accountId: string | null
+  accountName: string | null
+  accountAdmin: boolean
   movingData: boolean
   setMovingData: Dispatch<SetStateAction<boolean>>
   managingGame: number | null
