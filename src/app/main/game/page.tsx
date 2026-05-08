@@ -272,7 +272,7 @@ export default function Installs () {
                       </div>
                       {platform() == 'linux' &&
                         versionInfo.wine &&
-                        needsRevisionUpdate(versionInfo.lastRevision, v) && (
+                        !needsRevisionUpdate(versionInfo.lastRevision, v) && (
                           <div
                             className='entry-info-item'
                             title='This version is using wine. It cannot be guarenteed to work fully and might not work at all.'
