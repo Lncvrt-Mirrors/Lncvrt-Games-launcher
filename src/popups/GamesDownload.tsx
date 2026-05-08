@@ -47,7 +47,7 @@ export default function GamesDownloadPopup () {
               >
                 <FontAwesomeIcon icon={faInfo} /> Info
               </button>
-              <p className='text-2xl text-center truncate'>
+              <p className='text-2xl text-center truncate' title={g.name}>
                 {developerMode ? <span className='text-sm'>{g.id} </span> : ''}
                 {g.name}
               </p>
