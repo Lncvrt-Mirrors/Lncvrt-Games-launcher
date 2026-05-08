@@ -159,6 +159,7 @@ export default function Sidebar () {
                   setShowPopup(true)
                   setFadeOut(false)
                 }}
+                title='Click to view game installs.'
               >
                 <div className='flex items-center'>
                   <FontAwesomeIcon
@@ -210,6 +211,7 @@ export default function Sidebar () {
                       setCategory(Number(key))
                       router.push('/main/game?id=' + i.id)
                     }}
+                    title="Click to view this game's category."
                   >
                     <div className='flex items-center'>
                       <FontAwesomeIcon icon={faGamepad} className='mr-1' />
