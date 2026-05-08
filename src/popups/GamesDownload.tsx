@@ -54,7 +54,7 @@ export default function GamesDownloadPopup () {
               <button
                 className='button btntheme3'
                 onClick={() => setSelectedGame(g.id)}
-                title='Click to view more versions of the game.'
+                title='Click to view versions of the game.'
               >
                 <FontAwesomeIcon icon={faArrowUpRightFromSquare} /> View
               </button>
