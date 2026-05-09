@@ -18,7 +18,6 @@ export default function Settings () {
     account,
     version,
     versionsList,
-    notificationsAllowed,
     sidebarAlwaysShowGames,
     linuxUseWine,
     linuxWineCommand,
@@ -33,14 +32,6 @@ export default function Settings () {
       <p className='text-3xl ml-4 mt-4'>Settings</p>
       <div className='flex flex-row p-4 gap-4'>
         <div className='bg-(--col1) border border-(--col3) rounded-lg p-4 w-fit h-fit'>
-          <Setting
-            label='Allow sending notifications'
-            value={notificationsAllowed}
-            onChange={async () => {
-              await settings?.set('notificationsAllowed', !notificationsAllowed)
-            }}
-            title='This setting does as you expect, allow the launcher to send notifications for when stuff like downloading is done.'
-          />
           <Setting
             label='Always show games in sidebar'
             value={sidebarAlwaysShowGames}
@@ -290,9 +281,7 @@ export default function Settings () {
       </div>
       <p
         className='fixed bottom-1.5 right-1.5 rounded-md cursor-pointer px-1 border z-100 transition-colors btntheme1'
-        onClick={async () =>
-          await copyToClipboard(`v${version}`, notificationsAllowed)
-        }
+        onClick={async () => await copyToClipboard(`v${version}`)}
         title='The current launcher version.'
       >
         v{version}

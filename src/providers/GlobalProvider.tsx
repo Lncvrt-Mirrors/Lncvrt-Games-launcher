@@ -53,7 +53,6 @@ type GlobalCtxType = {
   settings: Store | null
   versions: Store | null
   account: Store | null
-  notificationsAllowed: boolean
   sidebarAlwaysShowGames: boolean
   linuxUseWine: boolean
   linuxWineCommand: string

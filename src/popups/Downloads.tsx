@@ -19,7 +19,6 @@ export default function DownloadsPopup () {
     setDownloadProgress,
     downloadQueue,
     setDownloadQueue,
-    notificationsAllowed,
     versionsList,
     modsList,
     versions,
@@ -117,15 +116,14 @@ export default function DownloadsPopup () {
                                   : d
                               )
                             )
-                            if (notificationsAllowed)
-                              await notifyUser(
-                                'Download Failed',
-                                `The download for version ${
-                                  serverVersionList?.versions.find(
-                                    vf => vf.id == v.version
-                                  )?.displayName
-                                } has failed.`
-                              )
+                            await notifyUser(
+                              'Download Failed',
+                              `The download for version ${
+                                serverVersionList?.versions.find(
+                                  vf => vf.id == v.version
+                                )?.displayName
+                              } has failed.`
+                            )
                             await getCurrentWindow().requestUserAttention(
                               UserAttentionType.Critical
                             )

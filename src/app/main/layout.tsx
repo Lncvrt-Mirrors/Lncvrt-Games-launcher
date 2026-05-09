@@ -88,8 +88,6 @@ export default function RootLayout ({
   const [versions, setVersions] = useState<Store | null>(null)
   const [account, setAccount] = useState<Store | null>(null)
 
-  const [notificationsAllowed, setNotificationsAllowed] =
-    useState<boolean>(false)
   const [sidebarAlwaysShowGames, setSidebarAlwaysShowGames] =
     useState<boolean>(false)
   const [linuxUseWine, setLinuxUseWine] = useState<boolean>(false)
@@ -232,11 +230,10 @@ export default function RootLayout ({
               : d
           )
         )
-        if (await settings?.get<boolean>('notificationsAllowed'))
-          await notifyUser(
-            'Download Failed',
-            `The download for version ${info.displayName} has failed.`
-          )
+        await notifyUser(
+          'Download Failed',
+          `The download for version ${info.displayName} has failed.`
+        )
         await getCurrentWindow().requestUserAttention(
           UserAttentionType.Critical
         )
@@ -311,11 +308,10 @@ export default function RootLayout ({
               : d
           )
         )
-        if (await settings?.get<boolean>('notificationsAllowed'))
-          await notifyUser(
-            'Download Failed',
-            `The download for version ${info.displayName} has failed.`
-          )
+        await notifyUser(
+          'Download Failed',
+          `The download for version ${info.displayName} has failed.`
+        )
         await getCurrentWindow().requestUserAttention(
           UserAttentionType.Critical
         )
@@ -647,7 +643,6 @@ export default function RootLayout ({
         autoSave: true,
         defaults: {
           version: client,
-          notificationsAllowed: true,
           sidebarAlwaysShowGames: true,
           linuxUseWine: false,
           linuxWineCommand: 'wine %path%',
@@ -776,23 +771,14 @@ export default function RootLayout ({
       popupMode === 1
     ) {
       setTimeout(async () => {
-        if (notificationsAllowed) {
-          await notifyUser('Downloads Complete', 'All downloads finished!')
-        }
+        await notifyUser('Downloads Complete', 'All downloads finished!')
         await getCurrentWindow().requestUserAttention(
           UserAttentionType.Informational
         )
         closePopup()
       }, 0)
     }
-  }, [
-    downloadProgress,
-    downloadQueue,
-    showPopup,
-    popupMode,
-    closePopup,
-    notificationsAllowed
-  ])
+  }, [downloadProgress, downloadQueue, showPopup, popupMode, closePopup])
 
   useEffect(() => {
     if (!settings || !versions) return
@@ -814,9 +800,6 @@ export default function RootLayout ({
     }
 
     watchSettings<string>('theme', v => setTheme(v ?? 'dark'))
-    watchSettings<boolean>('notificationsAllowed', v =>
-      setNotificationsAllowed(v ?? true)
-    )
     watchSettings<boolean>('sidebarAlwaysShowGames', v =>
       setSidebarAlwaysShowGames(v ?? true)
     )
@@ -896,7 +879,6 @@ export default function RootLayout ({
                 settings,
                 versions,
                 account,
-                notificationsAllowed,
                 sidebarAlwaysShowGames,
                 linuxUseWine,
                 linuxWineCommand,
