@@ -686,7 +686,11 @@ pub fn run() {
         .plugin(tauri_plugin_cli::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(
+            tauri_plugin_store::Builder::new()
+                .default_serialize_fn(|cache| Ok(serde_json::to_vec(cache)?))
+                .build(),
+        )
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_prevent_default::init())
         .plugin(
