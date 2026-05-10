@@ -31,7 +31,7 @@ use sysinfo::System;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
-#[cfg(not(debug_assertions))]
+#[cfg(not(dev))]
 use tauri_plugin_updater::UpdaterExt;
 
 struct AppState {
@@ -758,7 +758,7 @@ pub fn run() {
                     eprintln!("Failed to create overlay titlebar: {:?}", e);
                 }
             }
-            #[cfg(not(debug_assertions))]
+            #[cfg(not(dev))]
             {
                 use tauri_plugin_cli::CliExt;
 
@@ -781,7 +781,7 @@ pub fn run() {
                     Err(_) => {}
                 }
             }
-            #[cfg(debug_assertions)]
+            #[cfg(dev)]
             {
                 let mut new_url = window.url().unwrap();
                 new_url.set_path("/main");
@@ -799,7 +799,7 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-#[cfg(not(debug_assertions))]
+#[cfg(not(dev))]
 async fn update(
     app: tauri::AppHandle,
     window: tauri::WebviewWindow,
