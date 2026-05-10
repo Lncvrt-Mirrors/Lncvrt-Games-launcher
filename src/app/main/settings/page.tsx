@@ -10,6 +10,8 @@ import Dropdown from '@/components/Dropdown'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { relaunch } from '@tauri-apps/plugin-process'
 import { BaseDirectory, exists, readDir, remove } from '@tauri-apps/plugin-fs'
+import { openPath } from '@tauri-apps/plugin-opener'
+import { appLocalDataDir } from '@tauri-apps/api/path'
 
 export default function Settings () {
   const {
@@ -276,6 +278,22 @@ export default function Settings () {
           >
             Delete invalid/unavailable games
           </button>
+          <button
+            className='button btntheme1'
+            title="Restarts the launcher. I don't think I needed to add this description."
+            onClick={async () => await openPath(await appLocalDataDir())}
+          >
+            Open app data folder
+          </button>
+          {customDataLocation && (
+            <button
+              className='button btntheme1'
+              title="Restarts the launcher. I don't think I needed to add this description."
+              onClick={async () => await openPath(customDataLocation)}
+            >
+              Open custom app data folder
+            </button>
+          )}
           <p className='text-center'>Hover buttons for descriptions</p>
         </div>
       </div>
