@@ -743,11 +743,15 @@ export default function RootLayout ({
         return
       }
 
-      setLoading(false)
-
       if (!(await isPermissionGranted())) {
         await requestPermission()
       }
+
+      setLoading(false)
+
+      const window = getCurrentWindow()
+      await window.show()
+      await window.setFocus()
     })()
   }, [])
 
@@ -841,22 +845,7 @@ export default function RootLayout ({
     <>
       <html lang='en' className={roboto.className}>
         <body className={theme + '-theme'}>
-          {loading ? (
-            <>
-              {platformName == 'windows' && (
-                <div className='relative z-2 w-screen border-b border-b-(--col3) h-8.25 bg-(--col1)' />
-              )}
-              <div
-                className={`w-screen ${
-                  platformName == 'windows'
-                    ? 'h-[calc(100vh-64px)]'
-                    : 'h-screen'
-                } flex items-center justify-center`}
-              >
-                <p className='text-7xl text-center'>Loading...</p>
-              </div>
-            </>
-          ) : (
+          {!loading && (
             <GlobalProvider
               value={{
                 serverVersionList,

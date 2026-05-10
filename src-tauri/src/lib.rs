@@ -836,6 +836,8 @@ async fn update(
         let mut new_url = window.url().unwrap();
         new_url.set_path("/update/updating");
         window.navigate(new_url).unwrap();
+        let _ = window.show();
+        let _ = window.set_focus();
 
         let mut downloaded = 0;
 
