@@ -2,13 +2,15 @@
 
 import { verifySignature } from '@/lib/util'
 import { useGlobal } from '@/providers/GlobalProvider'
+import { app } from '@tauri-apps/api'
 import { message } from '@tauri-apps/plugin-dialog'
 import { fetch } from '@tauri-apps/plugin-http'
 import { openUrl } from '@tauri-apps/plugin-opener'
+import { arch, platform } from '@tauri-apps/plugin-os'
 import { Dispatch, SetStateAction, useState } from 'react'
 
 function AccountLoggedOut () {
-  const { account } = useGlobal()
+  const { account, setServerVersionList } = useGlobal()
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
 
@@ -44,12 +46,27 @@ function AccountLoggedOut () {
               return
             }
             if (data.success) {
-              if (data.data.session)
-                await account?.set('session', data.data.session)
-              if (data.data.username)
-                await account?.set('name', data.data.username)
-              if (data.data.id) await account?.set('id', data.data.id)
-              if (data.data.admin) await account?.set('admin', data.data.admin)
+              const response2 = await fetch(
+                'https://games.lncvrt.xyz/api/launcher/versions',
+                {
+                  headers: {
+                    Requester: 'LncvrtGamesLauncherClient',
+                    ClientVersion: await app.getVersion(),
+                    ClientPlatform: platform() + '-' + arch(),
+                    Authorization: data.data.session
+                  }
+                }
+              )
+              const signature2 = response2.headers.get('x-signature') ?? ''
+              const data2 = await response2.json()
+              if (await verifySignature(JSON.stringify(data2), signature2)) {
+                setServerVersionList(data2)
+              }
+
+              await account?.set('session', data.data.session)
+              await account?.set('name', data.data.username)
+              await account?.set('id', data.data.id)
+              await account?.set('admin', data.data.admin)
             } else {
               await message(data.message || 'n/a', {
                 title: 'Failed to login',
@@ -161,7 +178,7 @@ function AccountChangeUsername ({
               return
             }
             if (data.success) {
-              if (data.data) await account?.set('session', data.data)
+              await account?.set('session', data.data)
               await account?.set('name', newUsername)
               setChangingUsername(false)
             } else {
@@ -203,7 +220,7 @@ function AccountChangePassword ({
 }: {
   setChangingPassword: Dispatch<SetStateAction<boolean>>
 }) {
-  const { account, accountSession } = useGlobal()
+  const { account, accountSession, setServerVersionList } = useGlobal()
 
   const [newPassword, setNewPassword] = useState<string>('')
   const [retypeNewPassword, setRetypeNewPassword] = useState<string>('')
@@ -218,7 +235,10 @@ function AccountChangePassword ({
             e.preventDefault()
 
             if (newPassword !== retypeNewPassword) {
-              alert('Passwords must match')
+              message('Passwords must match', {
+                title: "Passwords don't match!",
+                kind: 'error'
+              })
               return
             }
 
@@ -245,7 +265,24 @@ function AccountChangePassword ({
               return
             }
             if (data.success) {
-              if (data.data) await account?.set('session', data.data)
+              const response2 = await fetch(
+                'https://games.lncvrt.xyz/api/launcher/versions',
+                {
+                  headers: {
+                    Requester: 'LncvrtGamesLauncherClient',
+                    ClientVersion: await app.getVersion(),
+                    ClientPlatform: platform() + '-' + arch(),
+                    Authorization: data.data
+                  }
+                }
+              )
+              const signature2 = response2.headers.get('x-signature') ?? ''
+              const data2 = await response2.json()
+              if (await verifySignature(JSON.stringify(data2), signature2)) {
+                setServerVersionList(data2)
+              }
+
+              await account?.set('session', data.data)
               setChangingPassword(false)
             } else {
               await message(data.message || 'n/a', {
@@ -294,7 +331,7 @@ function AccountChangePassword ({
 }
 
 function AccountLoggedIn () {
-  const { account, accountName } = useGlobal()
+  const { account, accountName, setServerVersionList } = useGlobal()
   const [changingUsername, setChangingUsername] = useState<boolean>(false)
   const [changingPassword, setChangingPassword] = useState<boolean>(false)
 
@@ -323,7 +360,26 @@ function AccountLoggedIn () {
             Change password
           </button>
           <button
-            onClick={async () => await account?.clear()}
+            onClick={async () => {
+              const response = await fetch(
+                'https://games.lncvrt.xyz/api/launcher/versions',
+                {
+                  headers: {
+                    Requester: 'LncvrtGamesLauncherClient',
+                    ClientVersion: await app.getVersion(),
+                    ClientPlatform: platform() + '-' + arch(),
+                    Authorization: ''
+                  }
+                }
+              )
+              const signature = response.headers.get('x-signature') ?? ''
+              const data = await response.json()
+              if (await verifySignature(JSON.stringify(data), signature)) {
+                setServerVersionList(data)
+              }
+
+              await account?.clear()
+            }}
             className='button btntheme1'
           >
             Logout

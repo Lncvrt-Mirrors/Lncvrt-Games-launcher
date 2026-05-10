@@ -593,29 +593,6 @@ export default function RootLayout ({
       setPlatformName(platform())
       const client = await app.getVersion()
       setVersion(client)
-      try {
-        const response = await fetch(
-          'https://games.lncvrt.xyz/api/launcher/versions',
-          {
-            headers: {
-              Requester: 'LncvrtGamesLauncherClient',
-              ClientVersion: await app.getVersion(),
-              ClientPlatform: platform() + '-' + arch()
-            }
-          }
-        )
-        const signature = response.headers.get('x-signature') ?? ''
-        const data = await response.json()
-        if (await verifySignature(JSON.stringify(data), signature)) {
-          setServerVersionList(data)
-        } else {
-          setLoadingText('Failed to download versions list.')
-          return
-        }
-      } catch {
-        setLoadingText('Failed to download versions list.')
-        return
-      }
       const legacyOptions = {
         baseDir: BaseDirectory.AppLocalData
       }
@@ -733,6 +710,32 @@ export default function RootLayout ({
       setSettings(settingsLocal)
       setVersions(versionsLocal)
       setAccount(accountLocal)
+
+      try {
+        const response = await fetch(
+          'https://games.lncvrt.xyz/api/launcher/versions',
+          {
+            headers: {
+              Requester: 'LncvrtGamesLauncherClient',
+              ClientVersion: await app.getVersion(),
+              ClientPlatform: platform() + '-' + arch(),
+              Authorization: (await accountLocal.get('session')) ?? ''
+            }
+          }
+        )
+        const signature = response.headers.get('x-signature') ?? ''
+        const data = await response.json()
+        if (await verifySignature(JSON.stringify(data), signature)) {
+          setServerVersionList(data)
+        } else {
+          setLoadingText('Failed to download versions list.')
+          return
+        }
+      } catch {
+        setLoadingText('Failed to download versions list.')
+        return
+      }
+
       setLoading(false)
 
       if (!(await isPermissionGranted())) {
@@ -850,6 +853,7 @@ export default function RootLayout ({
             <GlobalProvider
               value={{
                 serverVersionList,
+                setServerVersionList,
                 selectedVersionList,
                 setSelectedVersionList,
                 downloadProgress,

@@ -15,6 +15,7 @@ import { GameVersion } from '@/types/GameVersion'
 
 type GlobalCtxType = {
   serverVersionList: ServerVersionsResponse | null
+  setServerVersionList: Dispatch<SetStateAction<ServerVersionsResponse | null>>
   selectedVersionList: string[]
   setSelectedVersionList: (value: SetStateAction<string[]>) => void
   downloadProgress: DownloadProgress[]
