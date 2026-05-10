@@ -14,7 +14,23 @@
 }
 
 .nav-links {
-  @apply flex flex-col px-4 space-y-1;
+  @apply flex flex-col px-4 space-y-1 pt-3;
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12px,
+    black calc(100% - 24px),
+    transparent 100%
+  );
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12px,
+    black calc(100% - 24px),
+    transparent 100%
+  );
 }
 
 .link {

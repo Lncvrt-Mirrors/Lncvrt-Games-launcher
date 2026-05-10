@@ -91,7 +91,7 @@ export default function Sidebar () {
           Lncvrt Games Launcher
         </p>
       </div>
-      <nav className='nav-links overflow-auto pt-2'>
+      <nav className='nav-links overflow-auto'>
         <Link
           draggable={false}
           href='/main'
