@@ -34,7 +34,7 @@ import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { invoke } from '@tauri-apps/api/core'
 import semver from 'semver'
 import { exit } from '@tauri-apps/plugin-process'
-import { ask } from '@tauri-apps/plugin-dialog'
+import { ask, message } from '@tauri-apps/plugin-dialog'
 
 import VersionsDownloadPopup from '@/popups/VersionsDownload'
 import GamesDownloadPopup from '@/popups/GamesDownload'
@@ -54,7 +54,6 @@ export default function RootLayout ({
   children: React.ReactNode
 }) {
   const [loading, setLoading] = useState(true)
-  const [loadingText, setLoadingText] = useState('Loading...')
   const [version, setVersion] = useState<string | null>(null)
   const [platformName, setPlatformName] = useState<string | null>(null)
   const [movingData, setMovingData] = useState(false)
@@ -441,18 +440,18 @@ export default function RootLayout ({
 
         //reinstall
         setSelectedVersionList([versionInfo.id])
-        downloadVersions([
+        await downloadVersions([
           {
             id: versionInfo.id,
             type: 0
           }
         ])
       } else {
-        openFolder(versionInfo.id)
+        await openFolder(versionInfo.id)
       }
       return
     }
-    invoke('launch_game', {
+    await invoke('launch_game', {
       name: versionInfo.id,
       executable: versionInfo.executable,
       displayName: versionInfo.displayName,
@@ -728,11 +727,19 @@ export default function RootLayout ({
         if (await verifySignature(JSON.stringify(data), signature)) {
           setServerVersionList(data)
         } else {
-          setLoadingText('Failed to download versions list.')
+          await message(
+            'Failed to get version manifest, please try again later.',
+            { title: 'Error fetching launcher manifest', kind: 'error' }
+          )
+          await exit(1)
           return
         }
       } catch {
-        setLoadingText('Failed to download versions list.')
+        await message(
+          'Failed to get version manifest, please try again later.',
+          { title: 'Error fetching launcher manifest', kind: 'error' }
+        )
+        await exit(1)
         return
       }
 
@@ -846,7 +853,7 @@ export default function RootLayout ({
                     : 'h-screen'
                 } flex items-center justify-center`}
               >
-                <p className='text-7xl text-center'>{loadingText}</p>
+                <p className='text-7xl text-center'>Loading...</p>
               </div>
             </>
           ) : (

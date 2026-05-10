@@ -316,7 +316,7 @@ export default function Installs () {
                               )) &&
                               !downloadProgress.find(d => d.version == v)
                             ) {
-                              downloadVersions([
+                              await downloadVersions([
                                 {
                                   id: v,
                                   type: 1

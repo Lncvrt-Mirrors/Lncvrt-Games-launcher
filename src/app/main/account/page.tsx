@@ -235,7 +235,7 @@ function AccountChangePassword ({
             e.preventDefault()
 
             if (newPassword !== retypeNewPassword) {
-              message('Passwords must match', {
+              await message('Passwords must match', {
                 title: "Passwords don't match!",
                 kind: 'error'
               })

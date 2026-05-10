@@ -58,12 +58,12 @@ export default function Sidebar () {
       {platform() == 'macos' && (
         <div
           className='macos-drag'
-          onMouseDown={e => {
+          onMouseDown={async e => {
             if (e.buttons === 1) {
               if (e.detail === 2) {
-                getCurrentWindow().toggleMaximize()
+                await getCurrentWindow().toggleMaximize()
               } else {
-                getCurrentWindow().startDragging()
+                await getCurrentWindow().startDragging()
               }
             }
           }}
@@ -75,13 +75,13 @@ export default function Sidebar () {
           (platform() == 'windows' ? 'pl-1 pt-1' : 'pl-2 pt-2') +
           (platform() == 'macos' ? ' mt-6' : '')
         }
-        onMouseDown={e => {
+        onMouseDown={async e => {
           if (platform() != 'macos') return
           if (e.buttons === 1) {
             if (e.detail === 2) {
-              getCurrentWindow().toggleMaximize()
+              await getCurrentWindow().toggleMaximize()
             } else {
-              getCurrentWindow().startDragging()
+              await getCurrentWindow().startDragging()
             }
           }
         }}

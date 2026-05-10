@@ -195,7 +195,7 @@ export default function ManageVersionPopup () {
 
                 //reinstall
                 setSelectedVersionList([managingVersion])
-                downloadVersions([
+                await downloadVersions([
                   {
                     id: managingVersion,
                     type: 0

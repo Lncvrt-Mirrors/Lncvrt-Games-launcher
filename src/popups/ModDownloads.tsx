@@ -243,7 +243,7 @@ export default function ModDownloadsPopup () {
                               )
                             )
 
-                            downloadVersions([
+                            await downloadVersions([
                               {
                                 id: managingVersion,
                                 type: 2,
@@ -350,8 +350,8 @@ export default function ModDownloadsPopup () {
               ) : (
                 <button
                   className='button btntheme2 w-fit'
-                  onClick={() => {
-                    downloadVersions([
+                  onClick={async () =>
+                    await downloadVersions([
                       {
                         id: managingVersion,
                         type: 2,
@@ -361,7 +361,7 @@ export default function ModDownloadsPopup () {
                         modVersion: showModInfo.latestVersion
                       }
                     ])
-                  }}
+                  }
                   disabled={downloadProgress.length != 0}
                 >
                   <FontAwesomeIcon

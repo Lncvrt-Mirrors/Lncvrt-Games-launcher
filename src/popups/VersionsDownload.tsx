@@ -88,8 +88,8 @@ export default function VersionsDownloadPopup () {
       <div className='flex justify-center'>
         <button
           className='button btntheme1 w-fit mt-2 -mb-4'
-          onClick={() => {
-            downloadVersions(
+          onClick={async () => {
+            await downloadVersions(
               selectedVersionList.map(versionId => ({
                 id: versionId,
                 type: 0

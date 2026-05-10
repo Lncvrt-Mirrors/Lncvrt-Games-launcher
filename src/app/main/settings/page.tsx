@@ -269,7 +269,7 @@ export default function Settings () {
                 }
               }
 
-              message(
+              await message(
                 'Removed the following game items: ' +
                   (removed.length == 0 ? '(none)' : removed.join(', ')),
                 { title: 'Sucessfully cleaned games folder', kind: 'info' }
