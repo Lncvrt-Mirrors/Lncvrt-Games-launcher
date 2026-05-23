@@ -28,26 +28,26 @@
     "@tauri-apps/plugin-store": "2.4.3",
     "@tauri-apps/plugin-updater": "2.10.1",
     "@tauri-apps/plugin-window-state": "2.4.1",
-    "dompurify": "3.4.2",
+    "dompurify": "3.4.5",
     "next": "16.2.6",
     "pretty-bytes": "7.1.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "semver": "7.7.4"
+    "semver": "7.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.5",
-    "@tailwindcss/postcss": "4.2.4",
-    "@tauri-apps/cli": "2.11.1",
+    "@tailwindcss/postcss": "4.3.0",
+    "@tauri-apps/cli": "2.11.2",
     "@types/crypto-js": "4.2.2",
-    "@types/node": "25.6.2",
-    "@types/react": "19.2.14",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
     "@types/semver": "7.7.1",
     "crypto-js": "4.2.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
-    "tailwindcss": "4.2.4",
+    "tailwindcss": "4.3.0",
     "typescript": "6.0.3"
   }
 }
