@@ -59,17 +59,7 @@ export default function Installs () {
   return (
     <div className='mx-4 mt-4'>
       <div className='flex justify-between items-center mb-4'>
-        <p
-          className={`text-3xl truncate ${
-            category != -1
-              ? 'w-[calc(100vw-495px)]'
-              : game.id == 1 || game.id == 9
-              ? 'w-[calc(100vw-560px)]'
-              : 'w-[calc(100vw-440px)]'
-          }`}
-        >
-          {game.name} Installs
-        </p>
+        <p className='text-3xl truncate min-w-0 flex-1'>{game.name} Installs</p>
         <div className='flex gap-2'>
           {game.id == 1 && (
             <button
