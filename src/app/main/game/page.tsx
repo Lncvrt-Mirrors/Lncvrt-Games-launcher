@@ -99,6 +99,24 @@ export default function Installs () {
               Dashboard
             </button>
           )}
+          {game.id == 11 && category == -1 && (
+            <button
+              className='button btntheme1'
+              onClick={() =>
+                new WebviewWindow('georayschatroom', {
+                  title: 'Geometry Rays Chatroom',
+                  url: 'https://georays.puppet57.xyz/php-code/data/chat.txt',
+                  width: 800,
+                  height: 600,
+                  resizable: false,
+                  maximizable: false
+                })
+              }
+              title='View the chatroom for this game.'
+            >
+              Chatroom
+            </button>
+          )}
           {category != -1 && (
             <button
               className='button btntheme1'
