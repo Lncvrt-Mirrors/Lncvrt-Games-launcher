@@ -73,7 +73,7 @@ export default function Sidebar () {
         className={
           'flex items-center h-10 w-60 ' +
           (platform() == 'windows' ? 'pl-1 pt-1' : 'pl-2 pt-2') +
-          (platform() == 'macos' ? ' mt-6' : '')
+          (platform() == 'macos' ? ' mt-5' : '')
         }
         onMouseDown={async e => {
           if (platform() != 'macos') return
