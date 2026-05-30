@@ -64,7 +64,14 @@ export default function Installs () {
           {game.id == 1 && (
             <button
               className='button btntheme1'
-              onClick={() =>
+              onClick={async () => {
+                const window = await WebviewWindow.getByLabel(
+                  'berrydashleaderboards'
+                )
+                if (window) {
+                  await window.setFocus()
+                  return
+                }
                 new WebviewWindow('berrydashleaderboards', {
                   title: 'Berry Dash Leaderboards',
                   url:
@@ -75,7 +82,7 @@ export default function Installs () {
                   resizable: false,
                   maximizable: false
                 })
-              }
+              }}
               title='View the leaderboards for this game.'
             >
               Leaderboards
@@ -84,7 +91,12 @@ export default function Installs () {
           {game.id == 9 && category == -1 && (
             <button
               className='button btntheme1'
-              onClick={() =>
+              onClick={async () => {
+                const window = await WebviewWindow.getByLabel('xpsdashboard')
+                if (window) {
+                  await window.setFocus()
+                  return
+                }
                 new WebviewWindow('xpsdashboard', {
                   title: 'XPS Dashboard',
                   url: 'https://xps.lncvrt.xyz/dashboard/',
@@ -93,7 +105,7 @@ export default function Installs () {
                   minWidth: 1280,
                   minHeight: 720
                 })
-              }
+              }}
               title='Open the GDPS Dashboard!'
             >
               Dashboard
@@ -102,7 +114,12 @@ export default function Installs () {
           {game.id == 11 && category == -1 && (
             <button
               className='button btntheme1'
-              onClick={() =>
+              onClick={async () => {
+                const window = await WebviewWindow.getByLabel('georayschatroom')
+                if (window) {
+                  await window.setFocus()
+                  return
+                }
                 new WebviewWindow('georayschatroom', {
                   title: 'Geometry Rays Chatroom',
                   url: 'https://georays.puppet57.xyz/php-code/data/chat.txt',
@@ -111,7 +128,7 @@ export default function Installs () {
                   resizable: false,
                   maximizable: false
                 })
-              }
+              }}
               title='View the chatroom for this game.'
             >
               Chatroom
