@@ -32,8 +32,15 @@ export default function VersionChangelogPopup () {
       <div className='popup-content h-full w-full p-2 select-text'>
         {raw ? (
           <>
-            <p>Decoded: {atob(versionInfo?.changelog ?? '')}</p>
-            <p>Not decoded: {versionInfo?.changelog}</p>
+            <p>Raw: {versionInfo?.changelog}</p>
+            <p
+              className='whitespace-pre-line'
+              dangerouslySetInnerHTML={{
+                __html:
+                  'Decoded: \n' +
+                  DOMPurify.sanitize(atob(versionInfo?.changelog ?? ''))
+              }}
+            ></p>
           </>
         ) : (
           <p
