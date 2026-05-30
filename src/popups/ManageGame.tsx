@@ -64,105 +64,109 @@ export default function ManageGamePopup () {
   return (
     <>
       <p className='text-xl text-center'>Viewing {gameInfo?.name}</p>
-      <div className='popup-content flex flex-col items-center justify-center gap-2 h-full'>
-        {gameInfo?.official ? (
-          <div className='entry-info-item btntheme2'>
-            <FontAwesomeIcon icon={faCheck} color='#19c84b' />
-            <p>Official</p>
-          </div>
-        ) : (
-          <div className='entry-info-item btntheme2'>
-            <FontAwesomeIcon
-              icon={gameInfo?.verified ? faShieldHalved : faWarning}
-              color={gameInfo?.verified ? '#19c84b' : '#ffc800'}
-            />
-            <p>{gameInfo?.verified ? 'Verified' : 'Unverified'}</p>
-          </div>
-        )}
-        {gameInfo?.developer != null && (
-          <div className='entry-info-item btntheme2'>
-            <FontAwesomeIcon icon={faCode} color='lightgray' />
-            <p>Developer: {gameInfo?.developer}</p>
-          </div>
-        )}
-        <div className='entry-info-item btntheme2'>
-          <FontAwesomeIcon icon={faDownload} color='lightgray' />
-          <p>
-            {(() => {
-              if (!serverVersionList) return 'N/A'
-
-              const gameVersions = serverVersionList.versions.filter(
-                vf => vf.game === managingGame
-              )
-              const installed = gameVersions.filter(v =>
-                Object.keys(versionsList).includes(v.id)
-              ).length
-              return gameVersions.length
-                ? `${installed}/${gameVersions.length}`
-                : 'N/A'
-            })()}{' '}
-            versions installed
-          </p>
-        </div>
-        {versionsInstalled?.length != 0 && (
-          <>
+      <div className='popup-content h-full w-full flex justify-center items-center flex-col gap-2'>
+        <div className='flex flex-row gap-2 justify-center'>
+          {gameInfo?.official ? (
             <div className='entry-info-item btntheme2'>
-              <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
-              <p>
-                Size on disk:{' '}
-                {prettyBytes(gameSize, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })}
-              </p>
+              <FontAwesomeIcon icon={faCheck} color='#19c84b' />
+              <p>Official</p>
             </div>
-            <div
-              className='entry-info-item btntheme2'
-              onClick={async () => {
-                closePopup()
-                if (!versionsInstalled) return
-
-                const updatedList = { ...versionsList }
-
-                for (const version of versionsInstalled)
-                  delete updatedList[version.id]
-
-                await versions?.set('list', updatedList)
-
-                for (const version of versionsInstalled) {
-                  const managingVersion = version.id
-
-                  if (
-                    await exists(
-                      (customDataLocation ? customDataLocation + '/' : null) +
-                        'game/' +
-                        managingVersion,
-                      {
-                        baseDir: customDataLocation
-                          ? undefined
-                          : BaseDirectory.AppLocalData
-                      }
-                    )
-                  )
-                    await remove(
-                      (customDataLocation ? customDataLocation + '/' : null) +
-                        'game/' +
-                        managingVersion,
-                      {
-                        baseDir: customDataLocation
-                          ? undefined
-                          : BaseDirectory.AppLocalData,
-                        recursive: true
-                      }
-                    )
-                }
-              }}
-              title='Click to uninstall this game. This will NOT remove any progress or any save files.'
-            >
-              Uninstall
+          ) : (
+            <div className='entry-info-item btntheme2'>
+              <FontAwesomeIcon
+                icon={gameInfo?.verified ? faShieldHalved : faWarning}
+                color={gameInfo?.verified ? '#19c84b' : '#ffc800'}
+              />
+              <p>{gameInfo?.verified ? 'Verified' : 'Unverified'}</p>
             </div>
-          </>
-        )}
+          )}
+          {gameInfo?.developer != null && (
+            <div className='entry-info-item btntheme2'>
+              <FontAwesomeIcon icon={faCode} color='lightgray' />
+              <p>Developer: {gameInfo?.developer}</p>
+            </div>
+          )}
+        </div>
+        <div className='flex flex-row gap-2 justify-center'>
+          <div className='entry-info-item btntheme2'>
+            <FontAwesomeIcon icon={faDownload} color='lightgray' />
+            <p>
+              {(() => {
+                if (!serverVersionList) return 'N/A'
+
+                const gameVersions = serverVersionList.versions.filter(
+                  vf => vf.game === managingGame
+                )
+                const installed = gameVersions.filter(v =>
+                  Object.keys(versionsList).includes(v.id)
+                ).length
+                return gameVersions.length
+                  ? `${installed}/${gameVersions.length}`
+                  : 'N/A'
+              })()}{' '}
+              versions installed
+            </p>
+          </div>
+          {versionsInstalled?.length != 0 && (
+            <>
+              <div className='entry-info-item btntheme2'>
+                <FontAwesomeIcon icon={faHardDrive} color='lightgray' />
+                <p>
+                  Size on disk:{' '}
+                  {prettyBytes(gameSize, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </p>
+              </div>
+              <div
+                className='entry-info-item btntheme2'
+                onClick={async () => {
+                  closePopup()
+                  if (!versionsInstalled) return
+
+                  const updatedList = { ...versionsList }
+
+                  for (const version of versionsInstalled)
+                    delete updatedList[version.id]
+
+                  await versions?.set('list', updatedList)
+
+                  for (const version of versionsInstalled) {
+                    const managingVersion = version.id
+
+                    if (
+                      await exists(
+                        (customDataLocation ? customDataLocation + '/' : null) +
+                          'game/' +
+                          managingVersion,
+                        {
+                          baseDir: customDataLocation
+                            ? undefined
+                            : BaseDirectory.AppLocalData
+                        }
+                      )
+                    )
+                      await remove(
+                        (customDataLocation ? customDataLocation + '/' : null) +
+                          'game/' +
+                          managingVersion,
+                        {
+                          baseDir: customDataLocation
+                            ? undefined
+                            : BaseDirectory.AppLocalData,
+                          recursive: true
+                        }
+                      )
+                  }
+                }}
+                title='Click to uninstall this game. This will NOT remove any progress or any save files.'
+              >
+                Uninstall
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </>
   )
