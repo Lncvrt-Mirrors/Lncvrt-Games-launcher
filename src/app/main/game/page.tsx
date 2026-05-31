@@ -81,8 +81,8 @@ export default function Installs () {
                     url: `https://games.lncvrt.xyz/game/berry-dash/chatroom?launcher=1&theme=${theme}&accountToken=${accountSession}&accountId=${accountId}&accountName=${accountName}`,
                     width: 800,
                     height: 600,
-                    resizable: false,
-                    maximizable: false
+                    minWidth: 800,
+                    minHeight: 600
                   })
                 }}
                 title='View the chatroom for this game.'
@@ -106,8 +106,8 @@ export default function Installs () {
                       theme,
                     width: 800,
                     height: 600,
-                    resizable: false,
-                    maximizable: false
+                    minWidth: 800,
+                    minHeight: 600
                   })
                 }}
                 title='View the leaderboards for this game.'
@@ -155,8 +155,8 @@ export default function Installs () {
                     theme,
                   width: 800,
                   height: 600,
-                  resizable: false,
-                  maximizable: false
+                  minWidth: 800,
+                  minHeight: 600
                 })
               }}
               title='View the chatroom for this game.'
