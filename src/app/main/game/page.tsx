@@ -31,7 +31,10 @@ export default function Installs () {
     needsRevisionUpdate,
     launchGame,
     developerMode,
-    theme
+    theme,
+    accountSession,
+    accountId,
+    accountName
   } = useGlobal()
 
   const params = useSearchParams()
@@ -75,9 +78,7 @@ export default function Installs () {
                   }
                   new WebviewWindow('berrydashchatroom', {
                     title: 'Berry Dash Chatroom',
-                    url:
-                      'https://games.lncvrt.xyz/game/berry-dash/chatroom?launcher=1&theme=' +
-                      theme,
+                    url: `https://games.lncvrt.xyz/game/berry-dash/chatroom?launcher=1&theme=${theme}&accountToken=${accountSession}&accountId=${accountId}&accountName=${accountName}`,
                     width: 800,
                     height: 600,
                     resizable: false,
