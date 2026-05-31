@@ -792,7 +792,9 @@ pub fn run() {
         });
 
     #[cfg(target_os = "windows")]
-    builder.plugin(tauri_plugin_decorum::init());
+    {
+        builder = builder.plugin(tauri_plugin_decorum::init());
+    }
 
     builder
         .run(tauri::generate_context!())
