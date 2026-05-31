@@ -62,31 +62,58 @@ export default function Installs () {
         <p className='text-3xl truncate min-w-0 flex-1'>{game.name} Installs</p>
         <div className='flex gap-2'>
           {game.id == 1 && (
-            <button
-              className='button btntheme1'
-              onClick={async () => {
-                const window = await WebviewWindow.getByLabel(
-                  'berrydashleaderboards'
-                )
-                if (window) {
-                  await window.setFocus()
-                  return
-                }
-                new WebviewWindow('berrydashleaderboards', {
-                  title: 'Berry Dash Leaderboards',
-                  url:
-                    'https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=1&theme=' +
-                    theme,
-                  width: 800,
-                  height: 600,
-                  resizable: false,
-                  maximizable: false
-                })
-              }}
-              title='View the leaderboards for this game.'
-            >
-              Leaderboards
-            </button>
+            <>
+              <button
+                className='button btntheme1'
+                onClick={async () => {
+                  const window = await WebviewWindow.getByLabel(
+                    'berrydashchatroom'
+                  )
+                  if (window) {
+                    await window.setFocus()
+                    return
+                  }
+                  new WebviewWindow('berrydashchatroom', {
+                    title: 'Berry Dash Chatroom',
+                    url:
+                      'https://games.lncvrt.xyz/game/berry-dash/chatroom?launcher=1&theme=' +
+                      theme,
+                    width: 800,
+                    height: 600,
+                    resizable: false,
+                    maximizable: false
+                  })
+                }}
+                title='View the chatroom for this game.'
+              >
+                Chatroom
+              </button>
+              <button
+                className='button btntheme1'
+                onClick={async () => {
+                  const window = await WebviewWindow.getByLabel(
+                    'berrydashleaderboards'
+                  )
+                  if (window) {
+                    await window.setFocus()
+                    return
+                  }
+                  new WebviewWindow('berrydashleaderboards', {
+                    title: 'Berry Dash Leaderboards',
+                    url:
+                      'https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=1&theme=' +
+                      theme,
+                    width: 800,
+                    height: 600,
+                    resizable: false,
+                    maximizable: false
+                  })
+                }}
+                title='View the leaderboards for this game.'
+              >
+                Leaderboards
+              </button>
+            </>
           )}
           {game.id == 9 && category == -1 && (
             <button
@@ -122,7 +149,9 @@ export default function Installs () {
                 }
                 new WebviewWindow('georayschatroom', {
                   title: 'Geometry Rays Chatroom',
-                  url: 'https://georays.puppet57.xyz/php-code/data/chat.txt',
+                  url:
+                    'https://games.lncvrt.xyz/game/geometry-rays/chatroom?launcher=1&theme=' +
+                    theme,
                   width: 800,
                   height: 600,
                   resizable: false,
