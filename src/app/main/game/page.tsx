@@ -34,7 +34,8 @@ export default function Installs () {
     theme,
     accountSession,
     accountId,
-    accountName
+    accountName,
+    version
   } = useGlobal()
 
   const params = useSearchParams()
@@ -78,7 +79,7 @@ export default function Installs () {
                   }
                   new WebviewWindow('berrydashchatroom', {
                     title: 'Berry Dash Chatroom',
-                    url: `https://games.lncvrt.xyz/game/berry-dash/chatroom?launcher=1&theme=${theme}&accountToken=${accountSession}&accountId=${accountId}&accountName=${accountName}`,
+                    url: `https://games.lncvrt.xyz/game/berry-dash/chatroom?launcher=${version}&theme=${theme}&accountToken=${accountSession}&accountId=${accountId}&accountName=${accountName}`,
                     width: 800,
                     height: 600,
                     minWidth: 800,
@@ -101,9 +102,7 @@ export default function Installs () {
                   }
                   new WebviewWindow('berrydashleaderboards', {
                     title: 'Berry Dash Leaderboards',
-                    url:
-                      'https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=1&theme=' +
-                      theme,
+                    url: `https://games.lncvrt.xyz/game/berry-dash/leaderboards?launcher=${version}&theme=${theme}`,
                     width: 800,
                     height: 600,
                     minWidth: 800,
@@ -150,9 +149,7 @@ export default function Installs () {
                 }
                 new WebviewWindow('georayschatroom', {
                   title: 'Geometry Rays Chatroom',
-                  url:
-                    'https://games.lncvrt.xyz/game/geometry-rays/chatroom?launcher=1&theme=' +
-                    theme,
+                  url: `https://games.lncvrt.xyz/game/geometry-rays/chatroom?launcher=${version}&theme=${theme}`,
                   width: 800,
                   height: 600,
                   minWidth: 800,
