@@ -14,7 +14,7 @@ import {
   faUserShield
 } from '@fortawesome/free-solid-svg-icons'
 import { faDiscord } from '@fortawesome/free-brands-svg-icons'
-import { platform } from '@tauri-apps/plugin-os'
+import { platform, version } from '@tauri-apps/plugin-os'
 import { useGlobal } from '@/providers/GlobalProvider'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -73,7 +73,11 @@ export default function Sidebar () {
         className={
           'flex items-center h-10 w-60 ' +
           (platform() == 'windows' ? 'pl-1 pt-1' : 'pl-2 pt-2') +
-          (platform() == 'macos' ? ' mt-5' : '')
+          (platform() == 'macos'
+            ? Number(version().split('.')[0]) >= 26
+              ? ' mt-6'
+              : ' mt-5'
+            : '')
         }
         onMouseDown={async e => {
           if (platform() != 'macos') return

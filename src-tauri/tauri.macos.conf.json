@@ -37,7 +37,7 @@
     "icon": ["icons/icon.icns"],
     "createUpdaterArtifacts": true,
     "macOS": {
-      "minimumSystemVersion": "14.5"
+      "minimumSystemVersion": "14.0"
     }
   },
   "plugins": {
