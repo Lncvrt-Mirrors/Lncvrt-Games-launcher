@@ -13,7 +13,7 @@ import { BaseDirectory, exists, readDir, remove } from '@tauri-apps/plugin-fs'
 import { openPath } from '@tauri-apps/plugin-opener'
 import { appLocalDataDir } from '@tauri-apps/api/path'
 
-export default function Settings () {
+export default function SettingsPage () {
   const {
     settings,
     versions,

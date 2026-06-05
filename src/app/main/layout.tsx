@@ -354,7 +354,7 @@ export default function RootLayout ({
   }
 
   const closePopup = useCallback(() => {
-    if (popupMode == 0 && selectedGame && pathname === '/main') {
+    if (popupMode == 0 && selectedGame && pathname === '/main/games') {
       setSelectedGame(null)
       setSelectedVersionList([])
     } else if (viewingInfoFromDownloads) {
@@ -938,7 +938,7 @@ export default function RootLayout ({
                           icon={
                             (popupMode == 0 &&
                               selectedGame &&
-                              pathname === '/main') ||
+                              pathname === '/main/games') ||
                             viewingInfoFromDownloads ||
                             (popupMode == 3 && showModInfo) ||
                             popupMode == 4

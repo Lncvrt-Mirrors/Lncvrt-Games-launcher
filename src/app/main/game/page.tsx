@@ -1,6 +1,5 @@
 'use client'
 
-import '../Installs.css'
 import { useEffect } from 'react'
 import { useGlobal } from '@/providers/GlobalProvider'
 import { useSearchParams } from 'next/navigation'
@@ -11,7 +10,7 @@ import { ask } from '@tauri-apps/plugin-dialog'
 import { BaseDirectory, exists } from '@tauri-apps/plugin-fs'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 
-export default function Installs () {
+export default function GamePage () {
   const {
     versionsList,
     serverVersionList,
@@ -186,211 +185,204 @@ export default function Installs () {
           </button>
         </div>
       </div>
-      <div className='downloads-container'>
-        <div
-          className={`downloads-scroll ${
-            platform() == 'windows'
-              ? 'h-[calc(100vh-116px)]'
-              : 'h-[calc(100vh-84px)]'
-          }`}
-        >
-          {category == -1 &&
-            Object.entries(game.categoryNames)
-              .filter(([key]) => {
-                const count = Object.keys(versionsList).filter(v => {
-                  const info = serverVersionList?.versions.find(
-                    vf => vf.id == v
-                  )
-                  if (!info) return false
-
-                  if (platform() == 'linux' && info.wine && !linuxUseWine)
-                    return false
-
-                  return info.game === id && info.category === Number(key)
-                }).length
-
-                return count >= 1
-              })
-              .sort(([a], [b]) => Number(b) - Number(a))
-              .map(([key, value]) => {
-                return (
-                  <div
-                    key={key}
-                    className='downloads-entry'
-                    title='Click to view category.'
-                    onClick={() => setCategory(Number(key))}
-                  >
-                    <div className='h-18 w-screen relative'>
-                      {developerMode && (
-                        <p className='absolute bottom-0 right-0 text-sm'>
-                          {key}
-                        </p>
-                      )}
-                      <p className='text-2xl'>{value}</p>
-
-                      <div
-                        className='entry-info-item flex absolute left-0 bottom-0'
-                        title='The amount of versions installed of this game in installed/installable format.'
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <p>
-                          {(() => {
-                            const count =
-                              Object.keys(versionsList).filter(v => {
-                                const info = serverVersionList?.versions.find(
-                                  vf => vf.id == v
-                                )
-                                if (!info) return false
-                                if (
-                                  platform() == 'linux' &&
-                                  info.wine &&
-                                  !linuxUseWine
-                                )
-                                  return false
-                                return (
-                                  info.game === id &&
-                                  info.category == Number(key)
-                                )
-                              }).length ?? 0
-                            return `${count} install${count === 1 ? '' : 's'}`
-                          })()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-          {filteredVersions.length === 0 &&
-            (category !== -1 ||
-              Object.keys(versionsList).filter(v => {
+      <div
+        className={`main-container main-flex ${
+          platform() == 'windows'
+            ? 'h-[calc(100vh-116px)]'
+            : 'h-[calc(100vh-84px)]'
+        }`}
+      >
+        {category == -1 &&
+          Object.entries(game.categoryNames)
+            .filter(([key]) => {
+              const count = Object.keys(versionsList).filter(v => {
                 const info = serverVersionList?.versions.find(vf => vf.id == v)
                 if (!info) return false
 
                 if (platform() == 'linux' && info.wine && !linuxUseWine)
                   return false
 
-                return info.game === id
-              }).length === 0) && (
-              <div className='flex justify-center items-center h-full'>
-                <p className='text-3xl'>No versions installed</p>
-              </div>
-            )}
-          {filteredVersions
-            .sort((a, b) => {
-              const infoA = serverVersionList?.versions.find(vf => vf.id == a)
-              const infoB = serverVersionList?.versions.find(vf => vf.id == b)
-              if (!infoA || !infoB) return 0
-              return infoB.place - infoA.place
-            })
-            .map(v => {
-              const versionInfo = serverVersionList?.versions.find(
-                vf => vf.id == v
-              )
-              if (!versionInfo) return
+                return info.game === id && info.category === Number(key)
+              }).length
 
+              return count >= 1
+            })
+            .sort(([a], [b]) => Number(b) - Number(a))
+            .map(([key, value]) => {
               return (
                 <div
-                  key={v}
-                  className='downloads-entry'
-                  title='Click to launch game. Right-click to manage this version install.'
-                  onClick={async () => await launchGame(versionInfo)}
-                  onContextMenu={e => {
-                    e.preventDefault()
-                    setManagingVersion(v)
-                    setPopupMode(2)
-                    setShowPopup(true)
-                    setFadeOut(false)
-                  }}
+                  key={key}
+                  className='main-entry'
+                  title='Click to view category.'
+                  onClick={() => setCategory(Number(key))}
                 >
                   <div className='h-18 w-screen relative'>
                     {developerMode && (
-                      <p className='absolute bottom-0 right-0 text-sm'>
-                        {versionInfo.id}
+                      <p className='absolute bottom-0 right-0 text-sm'>{key}</p>
+                    )}
+                    <p className='text-2xl'>{value}</p>
+
+                    <div
+                      className='entry-info-item flex absolute left-0 bottom-0'
+                      title='The amount of versions installed of this game in installed/installable format.'
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <p>
+                        {(() => {
+                          const count =
+                            Object.keys(versionsList).filter(v => {
+                              const info = serverVersionList?.versions.find(
+                                vf => vf.id == v
+                              )
+                              if (!info) return false
+                              if (
+                                platform() == 'linux' &&
+                                info.wine &&
+                                !linuxUseWine
+                              )
+                                return false
+                              return (
+                                info.game === id && info.category == Number(key)
+                              )
+                            }).length ?? 0
+                          return `${count} install${count === 1 ? '' : 's'}`
+                        })()}
                       </p>
-                    )}
-                    <p className='text-2xl'>{versionInfo.displayName}</p>
-
-                    <div className='flex gap-2 absolute left-0 bottom-0'>
-                      <div
-                        className='entry-info-item'
-                        title='The date the game was installed.'
-                      >
-                        <p>
-                          Installed{' '}
-                          {new Intl.DateTimeFormat(undefined).format(
-                            versionsList[v]
-                          )}
-                        </p>
-                      </div>
-                      {platform() == 'linux' &&
-                        versionInfo.wine &&
-                        !needsRevisionUpdate(versionInfo.lastRevision, v) && (
-                          <div
-                            className='entry-info-item'
-                            title='This version is using wine. It cannot be guarenteed to work fully and might not work at all.'
-                          >
-                            <FontAwesomeIcon icon={faWarning} color='#ffc800' />
-                            <p>Uses wine</p>
-                          </div>
-                        )}
-                      {needsRevisionUpdate(versionInfo.lastRevision, v) && (
-                        <div className='entry-info-item'>
-                          <FontAwesomeIcon icon={faWarning} color='#ffc800' />
-                          <p>Needs revision update!</p>
-                        </div>
-                      )}
                     </div>
-                    {versionInfo.modSupportDownload && (
-                      <button
-                        className='absolute right-0 bottom-0 button'
-                        title='Click to manage mods for this game!'
-                        onClick={async e => {
-                          e.stopPropagation()
-
-                          if (
-                            !(await exists(
-                              customDataLocation
-                                ? customDataLocation + '/'
-                                : null + 'game/' + v + '/BepInEx',
-                              {
-                                baseDir: customDataLocation
-                                  ? undefined
-                                  : BaseDirectory.AppLocalData
-                              }
-                            ))
-                          ) {
-                            if (
-                              (await ask(
-                                "You don't have BepInEx (the mod loader for Unity Games), would you like to install it now? It is about 1MB in size. If you choose yes, it will download the recommended BepInEx version for " +
-                                  versionInfo.displayName +
-                                  '.',
-                                { title: 'BepInEx not found!', kind: 'error' }
-                              )) &&
-                              !downloadProgress.find(d => d.version == v)
-                            ) {
-                              await downloadVersions([
-                                {
-                                  id: v,
-                                  type: 1
-                                }
-                              ])
-                            }
-                            return
-                          }
-                          setManagingVersion(v)
-                          setPopupMode(3)
-                          setShowPopup(true)
-                          setFadeOut(false)
-                        }}
-                      >
-                        Mod Manager
-                      </button>
-                    )}
                   </div>
                 </div>
               )
             })}
-        </div>
+        {filteredVersions.length === 0 &&
+          (category !== -1 ||
+            Object.keys(versionsList).filter(v => {
+              const info = serverVersionList?.versions.find(vf => vf.id == v)
+              if (!info) return false
+
+              if (platform() == 'linux' && info.wine && !linuxUseWine)
+                return false
+
+              return info.game === id
+            }).length === 0) && (
+            <div className='flex justify-center items-center h-full'>
+              <p className='text-3xl'>No versions installed</p>
+            </div>
+          )}
+        {filteredVersions
+          .sort((a, b) => {
+            const infoA = serverVersionList?.versions.find(vf => vf.id == a)
+            const infoB = serverVersionList?.versions.find(vf => vf.id == b)
+            if (!infoA || !infoB) return 0
+            return infoB.place - infoA.place
+          })
+          .map(v => {
+            const versionInfo = serverVersionList?.versions.find(
+              vf => vf.id == v
+            )
+            if (!versionInfo) return
+
+            return (
+              <div
+                key={v}
+                className='main-entry'
+                title='Click to launch game. Right-click to manage this version install.'
+                onClick={async () => await launchGame(versionInfo)}
+                onContextMenu={e => {
+                  e.preventDefault()
+                  setManagingVersion(v)
+                  setPopupMode(2)
+                  setShowPopup(true)
+                  setFadeOut(false)
+                }}
+              >
+                <div className='h-18 w-screen relative'>
+                  {developerMode && (
+                    <p className='absolute bottom-0 right-0 text-sm'>
+                      {versionInfo.id}
+                    </p>
+                  )}
+                  <p className='text-2xl'>{versionInfo.displayName}</p>
+
+                  <div className='flex gap-2 absolute left-0 bottom-0'>
+                    <div
+                      className='entry-info-item'
+                      title='The date the game was installed.'
+                    >
+                      <p>
+                        Installed{' '}
+                        {new Intl.DateTimeFormat(undefined).format(
+                          versionsList[v]
+                        )}
+                      </p>
+                    </div>
+                    {platform() == 'linux' &&
+                      versionInfo.wine &&
+                      !needsRevisionUpdate(versionInfo.lastRevision, v) && (
+                        <div
+                          className='entry-info-item'
+                          title='This version is using wine. It cannot be guarenteed to work fully and might not work at all.'
+                        >
+                          <FontAwesomeIcon icon={faWarning} color='#ffc800' />
+                          <p>Uses wine</p>
+                        </div>
+                      )}
+                    {needsRevisionUpdate(versionInfo.lastRevision, v) && (
+                      <div className='entry-info-item'>
+                        <FontAwesomeIcon icon={faWarning} color='#ffc800' />
+                        <p>Needs revision update!</p>
+                      </div>
+                    )}
+                  </div>
+                  {versionInfo.modSupportDownload && (
+                    <button
+                      className='absolute right-0 bottom-0 button'
+                      title='Click to manage mods for this game!'
+                      onClick={async e => {
+                        e.stopPropagation()
+
+                        if (
+                          !(await exists(
+                            customDataLocation
+                              ? customDataLocation + '/'
+                              : null + 'game/' + v + '/BepInEx',
+                            {
+                              baseDir: customDataLocation
+                                ? undefined
+                                : BaseDirectory.AppLocalData
+                            }
+                          ))
+                        ) {
+                          if (
+                            (await ask(
+                              "You don't have BepInEx (the mod loader for Unity Games), would you like to install it now? It is about 1MB in size. If you choose yes, it will download the recommended BepInEx version for " +
+                                versionInfo.displayName +
+                                '.',
+                              { title: 'BepInEx not found!', kind: 'error' }
+                            )) &&
+                            !downloadProgress.find(d => d.version == v)
+                          ) {
+                            await downloadVersions([
+                              {
+                                id: v,
+                                type: 1
+                              }
+                            ])
+                          }
+                          return
+                        }
+                        setManagingVersion(v)
+                        setPopupMode(3)
+                        setShowPopup(true)
+                        setFadeOut(false)
+                      }}
+                    >
+                      Mod Manager
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
       </div>
     </div>
   )

@@ -9,6 +9,7 @@ import {
   faDownload,
   faGamepad,
   faHexagonNodes,
+  faHome,
   faLayerGroup,
   faUser,
   faUserShield
@@ -100,7 +101,16 @@ export default function Sidebar () {
           draggable={false}
           href='/main'
           className={`link relative flex items-center ${
-            pathname === '/main' || pathname.startsWith('/main/game')
+            pathname === '/main' ? 'active' : ''
+          }`}
+        >
+          <FontAwesomeIcon icon={faHome} className='mr-2' /> Home
+        </Link>
+        <Link
+          draggable={false}
+          href='/main/games'
+          className={`link relative flex items-center ${
+            pathname === '/main/games' || pathname.startsWith('/main/game')
               ? 'active'
               : ''
           }`}
@@ -147,7 +157,7 @@ export default function Sidebar () {
                     : ''
                 } ml-auto w-50 ${
                   sidebarAlwaysShowGames ||
-                  pathname === '/main' ||
+                  pathname === '/main/games' ||
                   pathname.startsWith('/main/game')
                     ? ''
                     : 'hidden'
@@ -206,7 +216,7 @@ export default function Sidebar () {
                         : ''
                     } ml-auto w-47.5 ${
                       sidebarAlwaysShowGames ||
-                      pathname === '/main' ||
+                      pathname === '/main/games' ||
                       pathname.startsWith('/main/game')
                         ? ''
                         : 'hidden'
