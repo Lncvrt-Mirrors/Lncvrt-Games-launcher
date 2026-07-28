@@ -145,7 +145,7 @@ export default function SettingsPage () {
         <div className='bg-(--col1) border border-(--col3) rounded-lg p-4 w-fit h-fit flex flex-col gap-2'>
           <button
             className='button btntheme1'
-            title="Restarts the launcher. I don't think I needed to add this description."
+            title='Restarts the launcher. This can help if the launcher is having issues.'
             onClick={async () => await relaunch()}
           >
             Restart launcher
@@ -280,7 +280,7 @@ export default function SettingsPage () {
           </button>
           <button
             className='button btntheme1'
-            title="Restarts the launcher. I don't think I needed to add this description."
+            title='This will open the directory with the app data.'
             onClick={async () => await openPath(await appLocalDataDir())}
           >
             Open app data folder
@@ -288,7 +288,7 @@ export default function SettingsPage () {
           {customDataLocation && (
             <button
               className='button btntheme1'
-              title="Restarts the launcher. I don't think I needed to add this description."
+              title='This will open the directory with the custom app data.'
               onClick={async () => await openPath(customDataLocation)}
             >
               Open custom app data folder
