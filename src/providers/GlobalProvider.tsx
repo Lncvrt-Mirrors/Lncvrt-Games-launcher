@@ -67,8 +67,6 @@ type GlobalCtxType = {
   accountId: string | null
   accountName: string | null
   accountAdmin: boolean
-  movingData: boolean
-  setMovingData: Dispatch<SetStateAction<boolean>>
   managingGame: number | null
   setManagingGame: Dispatch<SetStateAction<number | null>>
   needsRevisionUpdate: (

@@ -636,11 +636,6 @@ async fn move_game_data(app: AppHandle, destination: String) -> Result<(), Strin
 }
 
 #[tauri::command]
-fn restart_app(app: AppHandle) {
-    app.restart();
-}
-
-#[tauri::command]
 fn open_game_folder(app: AppHandle, version: String) -> Result<(), String> {
     let dir = data_dir(&app)?;
     let path = dir.join("game").join(&version);
@@ -718,7 +713,6 @@ pub fn run() {
             verify_signature,
             cancel_download,
             move_game_data,
-            restart_app,
             open_game_folder,
             remove_stale_executable
         ])

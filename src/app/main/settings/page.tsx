@@ -4,14 +4,15 @@ import { Setting } from '@/components/Setting'
 import { useGlobal } from '@/providers/GlobalProvider'
 import { copyToClipboard } from '@/lib/clipboard'
 import { platform } from '@tauri-apps/plugin-os'
-import { message, open } from '@tauri-apps/plugin-dialog'
+import { confirm, message, open } from '@tauri-apps/plugin-dialog'
 import { invoke } from '@tauri-apps/api/core'
 import Dropdown from '@/components/Dropdown'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
-import { relaunch } from '@tauri-apps/plugin-process'
+import { exit, relaunch } from '@tauri-apps/plugin-process'
 import { BaseDirectory, exists, readDir, remove } from '@tauri-apps/plugin-fs'
 import { openPath } from '@tauri-apps/plugin-opener'
 import { appLocalDataDir } from '@tauri-apps/api/path'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 
 export default function SettingsPage () {
   const {
@@ -25,8 +26,7 @@ export default function SettingsPage () {
     linuxWineCommand,
     theme,
     customDataLocation,
-    downloadProgress,
-    setMovingData
+    downloadProgress
   } = useGlobal()
 
   return (
@@ -73,12 +73,19 @@ export default function SettingsPage () {
             onChange={async () => {
               if (customDataLocation) {
                 try {
-                  setMovingData(true)
+                  const confirmation = await confirm(
+                    'Data will be moved back to the original location. The launcher will restart when completed and will not be visible until the restart.',
+                    { title: 'Moving data', kind: 'warning' }
+                  )
+                  if (!confirmation) return
+
+                  const window = getCurrentWindow()
+                  await window.hide()
                   await invoke('move_game_data', { destination: '' })
                   await settings?.set('customDataLocation', '')
-                  await invoke('restart_app')
+                  await relaunch()
                 } catch {
-                  setMovingData(false)
+                  await exit(1)
                 }
               } else {
                 const selected = await open({
@@ -87,12 +94,20 @@ export default function SettingsPage () {
                 })
                 if (!selected || typeof selected !== 'string') return
                 try {
-                  setMovingData(true)
+                  const confirmation = await confirm(
+                    `Data will be moved to the directory "${selected}". The launcher will restart when completed and will not be visible until the restart.`,
+                    { title: 'Moving data', kind: 'warning' }
+                  )
+                  if (!confirmation) return
+
+                  const window = getCurrentWindow()
+                  await window.hide()
                   await invoke('move_game_data', { destination: selected })
                   await settings?.set('customDataLocation', selected)
-                  await invoke('restart_app')
+                  await relaunch()
                 } catch {
-                  setMovingData(false)
+                  await exit(1)
+                  await exit(1)
                 }
               }
             }}

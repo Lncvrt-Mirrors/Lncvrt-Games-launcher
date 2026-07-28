@@ -56,7 +56,6 @@ export default function RootLayout ({
   const [loading, setLoading] = useState(true)
   const [version, setVersion] = useState<string | null>(null)
   const [platformName, setPlatformName] = useState<string | null>(null)
-  const [movingData, setMovingData] = useState(false)
 
   const [serverVersionList, setServerVersionList] =
     useState<null | ServerVersionsResponse>(null)
@@ -906,8 +905,6 @@ export default function RootLayout ({
                 accountId,
                 accountName,
                 accountAdmin,
-                movingData,
-                setMovingData,
                 managingGame,
                 setManagingGame,
                 needsRevisionUpdate,
@@ -978,11 +975,6 @@ export default function RootLayout ({
                         <ManageGamePopup />
                       ) : null}
                     </div>
-                  </div>
-                )}
-                {movingData && (
-                  <div className='fixed inset-0 z-999999 bg-(--col0) flex items-center justify-center'>
-                    <p className='text-5xl text-center'>Moving data...</p>
                   </div>
                 )}
               </div>
