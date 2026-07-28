@@ -100,6 +100,9 @@ export default function RootLayout ({
   const [modsList, setModsList] = useState<
     Record<string, Record<string, number>>
   >({})
+  const [launchesList, setLaunchesList] = useState<
+    Record<string, Record<string, number>>
+  >({})
 
   const [accountSession, setAccountSession] = useState<string | null>(null)
   const [accountId, setAccountId] = useState<string | null>(null)
@@ -458,6 +461,13 @@ export default function RootLayout ({
       useWine: !!(platform() == 'linux' && versionInfo.wine && linuxUseWine),
       wineCommand: linuxWineCommand
     })
+    await versions?.set('launches', {
+      ...launchesList,
+      [versionInfo.game]: {
+        ...launchesList[versionInfo.game],
+        [versionInfo.id]: Date.now()
+      }
+    })
   }
 
   useEffect(() => {
@@ -632,7 +642,8 @@ export default function RootLayout ({
         defaults: {
           version: client,
           list: {},
-          mods: {}
+          mods: {},
+          launches: {}
         }
       })
       const accountLocal = await load('account.json', {
@@ -830,6 +841,9 @@ export default function RootLayout ({
     watchVersions<Record<string, Record<string, number>>>('mods', v =>
       setModsList(v ?? {})
     )
+    watchVersions<Record<string, Record<string, number>>>('launches', v =>
+      setLaunchesList(v ?? {})
+    )
 
     watchAccount<string | null>('session', v => setAccountSession(v ?? null))
     watchAccount<string | null>('id', v => setAccountId(v ?? null))
@@ -887,6 +901,7 @@ export default function RootLayout ({
                 developerMode,
                 versionsList,
                 modsList,
+                launchesList,
                 accountSession,
                 accountId,
                 accountName,

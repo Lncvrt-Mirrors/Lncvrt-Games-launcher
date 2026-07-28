@@ -62,6 +62,7 @@ type GlobalCtxType = {
   developerMode: boolean
   versionsList: Record<string, number>
   modsList: Record<string, Record<string, number>>
+  launchesList: Record<string, Record<string, number>>
   accountSession: string | null
   accountId: string | null
   accountName: string | null
