@@ -9,7 +9,6 @@ import { useGlobal } from '@/providers/GlobalProvider'
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
 import prettyBytes from 'pretty-bytes'
-import { BaseDirectory, exists, remove } from '@tauri-apps/plugin-fs'
 import { openFolder } from '@/lib/util'
 
 export default function ManageVersionPopup () {
@@ -23,8 +22,9 @@ export default function ManageVersionPopup () {
     setPopupMode,
     setSelectedVersionList,
     downloadVersions,
+    uninstallVersion,
     versions,
-    customDataLocation
+    launchesList
   } = useGlobal()
   const [versionSize, setVersionSize] = useState<number>(0)
 
@@ -114,39 +114,16 @@ export default function ManageVersionPopup () {
               className='entry-info-item btntheme2'
               onClick={async () => {
                 closePopup()
+                uninstallVersion(managingVersion)
+                if (!versionInfo) return
 
-                await versions?.set(
-                  'list',
-                  Object.fromEntries(
-                    Object.entries(versionsList).filter(
-                      ([k]) => k !== managingVersion
-                    )
-                  )
-                )
+                const gameLaunches = { ...launchesList[versionInfo.game] }
+                delete gameLaunches[versionInfo.id]
 
-                if (
-                  await exists(
-                    (customDataLocation ? customDataLocation + '/' : null) +
-                      'game/' +
-                      managingVersion,
-                    {
-                      baseDir: customDataLocation
-                        ? undefined
-                        : BaseDirectory.AppLocalData
-                    }
-                  )
-                )
-                  await remove(
-                    (customDataLocation ? customDataLocation + '/' : null) +
-                      'game/' +
-                      managingVersion,
-                    {
-                      baseDir: customDataLocation
-                        ? undefined
-                        : BaseDirectory.AppLocalData,
-                      recursive: true
-                    }
-                  )
+                await versions?.set('launches', {
+                  ...launchesList,
+                  [versionInfo.game]: gameLaunches
+                })
               }}
               title='Click to uninstall this game. This will NOT remove any progress or any save files.'
             >
@@ -160,38 +137,7 @@ export default function ManageVersionPopup () {
                 setPopupMode(1)
 
                 //uninstall
-                await versions?.set(
-                  'list',
-                  Object.fromEntries(
-                    Object.entries(versionsList).filter(
-                      ([k]) => k !== managingVersion
-                    )
-                  )
-                )
-
-                if (
-                  await exists(
-                    (customDataLocation ? customDataLocation + '/' : null) +
-                      'game/' +
-                      managingVersion,
-                    {
-                      baseDir: customDataLocation
-                        ? undefined
-                        : BaseDirectory.AppLocalData
-                    }
-                  )
-                )
-                  await remove(
-                    (customDataLocation ? customDataLocation + '/' : null) +
-                      'game/' +
-                      managingVersion,
-                    {
-                      baseDir: customDataLocation
-                        ? undefined
-                        : BaseDirectory.AppLocalData,
-                      recursive: true
-                    }
-                  )
+                uninstallVersion(managingVersion)
 
                 //reinstall
                 setSelectedVersionList([managingVersion])

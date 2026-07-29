@@ -73,6 +73,7 @@ type GlobalCtxType = {
     lastRevision: number | undefined,
     version: string
   ) => boolean
+  uninstallVersion: (version: string, updateList?: boolean) => Promise<void>
   launchGame: (versionInfo: GameVersion) => Promise<void>
 }
 

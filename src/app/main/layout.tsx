@@ -384,6 +384,39 @@ export default function RootLayout ({
     )
   }
 
+  const uninstallVersion = async (
+    version: string,
+    updateList: boolean = true
+  ) => {
+    if (updateList)
+      await versions?.set(
+        'list',
+        Object.fromEntries(
+          Object.entries(versionsList).filter(([k]) => k !== version)
+        )
+      )
+
+    if (
+      await exists(
+        (customDataLocation ? customDataLocation + '/' : null) +
+          'game/' +
+          version,
+        {
+          baseDir: customDataLocation ? undefined : BaseDirectory.AppLocalData
+        }
+      )
+    )
+      await remove(
+        (customDataLocation ? customDataLocation + '/' : null) +
+          'game/' +
+          version,
+        {
+          baseDir: customDataLocation ? undefined : BaseDirectory.AppLocalData,
+          recursive: true
+        }
+      )
+  }
+
   const launchGame = async (versionInfo: GameVersion) => {
     if (needsRevisionUpdate(versionInfo.lastRevision, versionInfo.id)) {
       const answer = await ask(
@@ -409,36 +442,7 @@ export default function RootLayout ({
         setFadeOut(false)
 
         //uninstall
-        await versions?.set(
-          'list',
-          Object.fromEntries(
-            Object.entries(versionsList).filter(([k]) => k !== versionInfo.id)
-          )
-        )
-
-        if (
-          await exists(
-            customDataLocation
-              ? customDataLocation + '/'
-              : null + 'game/' + versionInfo.id,
-            {
-              baseDir: customDataLocation
-                ? undefined
-                : BaseDirectory.AppLocalData
-            }
-          )
-        )
-          await remove(
-            customDataLocation
-              ? customDataLocation + '/'
-              : null + 'game/' + versionInfo.id,
-            {
-              baseDir: customDataLocation
-                ? undefined
-                : BaseDirectory.AppLocalData,
-              recursive: true
-            }
-          )
+        await uninstallVersion(versionInfo.id)
 
         //reinstall
         setSelectedVersionList([versionInfo.id])
@@ -912,6 +916,7 @@ export default function RootLayout ({
                 managingGame,
                 setManagingGame,
                 needsRevisionUpdate,
+                uninstallVersion,
                 launchGame
               }}
             >
