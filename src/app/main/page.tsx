@@ -62,7 +62,7 @@ export default function HomePage () {
                     {versionInfo?.displayName}
                   </p>
                   <p className='truncate text-gray-300'>
-                    Last played:{' '}
+                    Last played{' '}
                     {formatDistanceToNow(new Date(timestamp), {
                       addSuffix: true
                     })}
