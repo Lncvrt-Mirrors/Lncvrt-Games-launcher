@@ -20,6 +20,7 @@ export default function HomePage () {
   const {
     launchesList,
     serverVersionList,
+    versionsList,
     accountName,
     launchGame,
     setManagingVersion,
@@ -31,7 +32,12 @@ export default function HomePage () {
   const filteredLaunchesList = Object.fromEntries(
     Object.entries(launchesList)
       .flatMap(([gameId, launches]) => {
-        const entries = Object.entries(launches)
+        const entries = Object.entries(launches).filter(([version]) => {
+          return (
+            serverVersionList?.versions.find(v => version == v.id) &&
+            Object.entries(versionsList).find(([v]) => v == version)
+          )
+        })
 
         if (entries.length === 0) return []
 
