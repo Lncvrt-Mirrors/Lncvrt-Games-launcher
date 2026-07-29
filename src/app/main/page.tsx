@@ -14,7 +14,7 @@ import {
   faEllipsis,
   faPlay
 } from '@fortawesome/free-solid-svg-icons'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function HomePage () {
   const {
@@ -48,6 +48,19 @@ export default function HomePage () {
   const prevRef = useRef<HTMLButtonElement>(null)
   const nextRef = useRef<HTMLButtonElement>(null)
 
+  const [recentSlidesPerView, setRecentSlidesPerView] = useState(1)
+
+  useEffect(() => {
+    const update = () => {
+      setRecentSlidesPerView(Math.floor(window.innerWidth / 400))
+    }
+
+    update()
+    window.addEventListener('resize', update)
+
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
   return (
     <div className='mx-4 mt-4'>
       <div className='flex flex-col gap-1 mb-4'>
@@ -63,7 +76,7 @@ export default function HomePage () {
             <Swiper
               modules={[Navigation]}
               spaceBetween={16}
-              slidesPerView={2}
+              slidesPerView={recentSlidesPerView}
               autoHeight={false}
               className='w-full'
               onSwiper={swiper => {
