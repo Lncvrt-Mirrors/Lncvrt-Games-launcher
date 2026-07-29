@@ -22,9 +22,7 @@ export default function ManageVersionPopup () {
     setPopupMode,
     setSelectedVersionList,
     downloadVersions,
-    uninstallVersion,
-    versions,
-    launchesList
+    uninstallVersion
   } = useGlobal()
   const [versionSize, setVersionSize] = useState<number>(0)
 
@@ -115,15 +113,6 @@ export default function ManageVersionPopup () {
               onClick={async () => {
                 closePopup()
                 uninstallVersion(managingVersion)
-                if (!versionInfo) return
-
-                const gameLaunches = { ...launchesList[versionInfo.game] }
-                delete gameLaunches[versionInfo.id]
-
-                await versions?.set('launches', {
-                  ...launchesList,
-                  [versionInfo.game]: gameLaunches
-                })
               }}
               title='Click to uninstall this game. This will NOT remove any progress or any save files.'
             >
