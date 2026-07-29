@@ -191,7 +191,7 @@ export default function Sidebar () {
                           ? faLayerGroup
                           : faGamepad
                       }
-                      className='mr-1'
+                      className='mr-2'
                     />
                     <span className='truncate max-w-full'>{i.name}</span>
                   </div>
