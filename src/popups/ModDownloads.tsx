@@ -52,7 +52,10 @@ export default function ModDownloadsPopup () {
       )
       const signature = response.headers.get('x-signature') ?? ''
       const data = await response.json()
-      if (await verifySignature(JSON.stringify(data), signature)) {
+      if (
+        response.status == 200 &&
+        (await verifySignature(JSON.stringify(data), signature))
+      ) {
         setMods(data as Mod[])
       } else {
         setMods(1)
@@ -86,7 +89,10 @@ export default function ModDownloadsPopup () {
             )
             const signature = response.headers.get('x-signature') ?? ''
             const data = await response.json()
-            if (await verifySignature(JSON.stringify(data), signature)) {
+            if (
+              response.status == 200 &&
+              (await verifySignature(JSON.stringify(data), signature))
+            ) {
               setMods(data as Mod[])
             } else {
               setMods(1)

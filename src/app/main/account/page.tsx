@@ -38,7 +38,10 @@ function AccountLoggedOut () {
             )
             const signature = response.headers.get('x-signature') ?? ''
             const data = await response.json()
-            if (!(await verifySignature(JSON.stringify(data), signature))) {
+            if (
+              response.status != 200 ||
+              !(await verifySignature(JSON.stringify(data), signature))
+            ) {
               await message(
                 "Failed to login, there was an issue validating the data wasn't tampered with.",
                 { title: 'Request tampered', kind: 'error' }
@@ -59,7 +62,10 @@ function AccountLoggedOut () {
               )
               const signature2 = response2.headers.get('x-signature') ?? ''
               const data2 = await response2.json()
-              if (await verifySignature(JSON.stringify(data2), signature2)) {
+              if (
+                response2.status == 200 &&
+                (await verifySignature(JSON.stringify(data2), signature2))
+              ) {
                 setServerVersionList(data2)
               }
 
@@ -170,7 +176,10 @@ function AccountChangeUsername ({
             )
             const signature = response.headers.get('x-signature') ?? ''
             const data = await response.json()
-            if (!(await verifySignature(JSON.stringify(data), signature))) {
+            if (
+              response.status != 200 ||
+              !(await verifySignature(JSON.stringify(data), signature))
+            ) {
               await message(
                 "Failed to change username, there was an issue validating the data wasn't tampered with.",
                 { title: 'Request tampered', kind: 'error' }
@@ -257,7 +266,10 @@ function AccountChangePassword ({
             )
             const signature = response.headers.get('x-signature') ?? ''
             const data = await response.json()
-            if (!(await verifySignature(JSON.stringify(data), signature))) {
+            if (
+              response.status != 200 ||
+              !(await verifySignature(JSON.stringify(data), signature))
+            ) {
               await message(
                 "Failed to change password, there was an issue validating the data wasn't tampered with.",
                 { title: 'Request tampered', kind: 'error' }
@@ -278,7 +290,10 @@ function AccountChangePassword ({
               )
               const signature2 = response2.headers.get('x-signature') ?? ''
               const data2 = await response2.json()
-              if (await verifySignature(JSON.stringify(data2), signature2)) {
+              if (
+                response2.status == 200 &&
+                (await verifySignature(JSON.stringify(data2), signature2))
+              ) {
                 setServerVersionList(data2)
               }
 
@@ -374,7 +389,10 @@ function AccountLoggedIn () {
               )
               const signature = response.headers.get('x-signature') ?? ''
               const data = await response.json()
-              if (await verifySignature(JSON.stringify(data), signature)) {
+              if (
+                response.status == 200 &&
+                (await verifySignature(JSON.stringify(data), signature))
+              ) {
                 setServerVersionList(data)
               }
 

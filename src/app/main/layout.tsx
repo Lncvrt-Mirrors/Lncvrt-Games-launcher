@@ -221,6 +221,7 @@ export default function RootLayout ({
       const signature = downloadInfoRequest.headers.get('x-signature') ?? ''
       const data = await downloadInfoRequest.json()
       if (
+        downloadInfoRequest.status != 200 ||
         !(await verifySignature(JSON.stringify(data), signature)) ||
         !data.success
       ) {
@@ -732,9 +733,13 @@ export default function RootLayout ({
             }
           }
         )
+
         const signature = response.headers.get('x-signature') ?? ''
         const data = await response.json()
-        if (await verifySignature(JSON.stringify(data), signature)) {
+        if (
+          response.status == 200 &&
+          (await verifySignature(JSON.stringify(data), signature))
+        ) {
           setServerVersionList(data)
         } else {
           await message(
