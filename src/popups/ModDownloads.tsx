@@ -320,7 +320,7 @@ export default function ModDownloadsPopup () {
                       showModInfo.id
                     if (
                       await exists(
-                        (customDataLocation ? customDataLocation + '/' : null) +
+                        (customDataLocation ? customDataLocation + '/' : '') +
                           path,
                         {
                           baseDir: customDataLocation
@@ -330,7 +330,7 @@ export default function ModDownloadsPopup () {
                       )
                     )
                       await remove(
-                        (customDataLocation ? customDataLocation + '/' : null) +
+                        (customDataLocation ? customDataLocation + '/' : '') +
                           path,
                         {
                           baseDir: customDataLocation

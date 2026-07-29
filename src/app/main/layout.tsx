@@ -398,7 +398,7 @@ export default function RootLayout ({
 
     if (
       await exists(
-        (customDataLocation ? customDataLocation + '/' : null) +
+        (customDataLocation ? customDataLocation + '/' : '') +
           'game/' +
           version,
         {
@@ -407,7 +407,7 @@ export default function RootLayout ({
       )
     )
       await remove(
-        (customDataLocation ? customDataLocation + '/' : null) +
+        (customDataLocation ? customDataLocation + '/' : '') +
           'game/' +
           version,
         {

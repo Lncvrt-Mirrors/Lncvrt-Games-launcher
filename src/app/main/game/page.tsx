@@ -344,7 +344,7 @@ export default function GamePage () {
                           !(await exists(
                             customDataLocation
                               ? customDataLocation + '/'
-                              : null + 'game/' + v + '/BepInEx',
+                              : '' + 'game/' + v + '/BepInEx',
                             {
                               baseDir: customDataLocation
                                 ? undefined

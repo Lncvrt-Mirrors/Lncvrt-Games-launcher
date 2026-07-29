@@ -159,8 +159,7 @@ export default function SettingsPage () {
             onClick={async () => {
               if (
                 await exists(
-                  (customDataLocation ? customDataLocation + '/' : null) +
-                    'game',
+                  (customDataLocation ? customDataLocation + '/' : '') + 'game',
                   {
                     baseDir: customDataLocation
                       ? undefined
@@ -169,8 +168,7 @@ export default function SettingsPage () {
                 )
               )
                 await remove(
-                  (customDataLocation ? customDataLocation + '/' : null) +
-                    'game',
+                  (customDataLocation ? customDataLocation + '/' : '') + 'game',
                   {
                     baseDir: customDataLocation
                       ? undefined
@@ -181,7 +179,7 @@ export default function SettingsPage () {
 
               if (
                 await exists(
-                  (customDataLocation ? customDataLocation + '/' : null) +
+                  (customDataLocation ? customDataLocation + '/' : '') +
                     'downloads',
                   {
                     baseDir: customDataLocation
@@ -191,7 +189,7 @@ export default function SettingsPage () {
                 )
               )
                 await remove(
-                  (customDataLocation ? customDataLocation + '/' : null) +
+                  (customDataLocation ? customDataLocation + '/' : '') +
                     'downloads',
                   {
                     baseDir: customDataLocation
@@ -215,7 +213,7 @@ export default function SettingsPage () {
             onClick={async () => {
               if (
                 await exists(
-                  (customDataLocation ? customDataLocation + '/' : null) +
+                  (customDataLocation ? customDataLocation + '/' : '') +
                     'downloads',
                   {
                     baseDir: customDataLocation
@@ -225,7 +223,7 @@ export default function SettingsPage () {
                 )
               )
                 await remove(
-                  (customDataLocation ? customDataLocation + '/' : null) +
+                  (customDataLocation ? customDataLocation + '/' : '') +
                     'downloads',
                   {
                     baseDir: customDataLocation
@@ -243,7 +241,7 @@ export default function SettingsPage () {
             title='If you had a game that was downloaded before it was taken down after you downloaded it, it will get removed here.'
             onClick={async () => {
               const items = await readDir(
-                (customDataLocation ? customDataLocation + '/' : null) + 'game',
+                (customDataLocation ? customDataLocation + '/' : '') + 'game',
                 {
                   baseDir: customDataLocation
                     ? undefined
@@ -259,7 +257,7 @@ export default function SettingsPage () {
                 ) {
                   removed.push(item.name)
                   await remove(
-                    (customDataLocation ? customDataLocation + '/' : null) +
+                    (customDataLocation ? customDataLocation + '/' : '') +
                       'game/' +
                       item.name,
                     {

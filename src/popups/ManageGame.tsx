@@ -137,7 +137,7 @@ export default function ManageGamePopup () {
 
                     if (
                       await exists(
-                        (customDataLocation ? customDataLocation + '/' : null) +
+                        (customDataLocation ? customDataLocation + '/' : '') +
                           'game/' +
                           managingVersion,
                         {
@@ -148,7 +148,7 @@ export default function ManageGamePopup () {
                       )
                     )
                       await remove(
-                        (customDataLocation ? customDataLocation + '/' : null) +
+                        (customDataLocation ? customDataLocation + '/' : '') +
                           'game/' +
                           managingVersion,
                         {
