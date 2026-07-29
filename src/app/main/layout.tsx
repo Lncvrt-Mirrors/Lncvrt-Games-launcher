@@ -86,6 +86,7 @@ export default function RootLayout ({
   const [versions, setVersions] = useState<Store | null>(null)
   const [account, setAccount] = useState<Store | null>(null)
 
+  const [sidebarShowGames, setSidebarShowGames] = useState<boolean>(false)
   const [linuxUseWine, setLinuxUseWine] = useState<boolean>(false)
   const [linuxWineCommand, setLinuxWineCommand] =
     useState<string>('wine %path%')
@@ -827,6 +828,9 @@ export default function RootLayout ({
     }
 
     watchSettings<string>('theme', v => setTheme(v ?? 'dark'))
+    watchSettings<boolean>('sidebarShowGames', v =>
+      setSidebarShowGames(v ?? true)
+    )
     watchSettings<boolean>('linuxUseWine', v => setLinuxUseWine(v ?? false))
     watchSettings<string>('linuxWineCommand', v =>
       setLinuxWineCommand(v ?? 'wine %path%')
@@ -892,6 +896,7 @@ export default function RootLayout ({
                 settings,
                 versions,
                 account,
+                sidebarShowGames,
                 linuxUseWine,
                 linuxWineCommand,
                 theme,

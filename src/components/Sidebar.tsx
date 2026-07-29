@@ -24,6 +24,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { Lexend } from 'next/font/google'
 import React, { useState } from 'react'
 import { message } from '@tauri-apps/plugin-dialog'
+import ExpandArrow from './ExpandArrow'
 
 const lexend = Lexend({
   subsets: ['latin']
@@ -44,7 +45,8 @@ export default function Sidebar () {
     settings,
     developerMode,
     accountName,
-    accountAdmin
+    accountAdmin,
+    sidebarShowGames
   } = useGlobal()
 
   const pathname = usePathname()
@@ -138,8 +140,21 @@ export default function Sidebar () {
           }}
         >
           <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Library
+          {(pathname === '/main/library' ||
+            pathname.startsWith('/main/game')) && (
+            <div
+              className='ml-auto w-6 h-6 flex justify-center items-center'
+              onClick={async e => {
+                e.preventDefault()
+                await settings?.set('sidebarShowGames', !sidebarShowGames)
+              }}
+            >
+              <ExpandArrow open={sidebarShowGames} />
+            </div>
+          )}
         </Link>
         {(pathname === '/main/library' || pathname.startsWith('/main/game')) &&
+          sidebarShowGames &&
           serverVersionList?.games
             .filter(g =>
               serverVersionList.versions
