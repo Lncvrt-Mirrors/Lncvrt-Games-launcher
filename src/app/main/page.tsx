@@ -120,14 +120,19 @@ export default function HomePage () {
                     key={key}
                     className='flex flex-col gap-2 bg-(--col1) border border-(--col3) rounded-lg px-3 py-2'
                   >
-                    <p className='truncate text-2xl'>
+                    <p
+                      className='truncate text-2xl'
+                      title={versionInfo?.displayName}
+                    >
                       {versionInfo?.displayName}
                     </p>
                     <p className='truncate text-gray-300'>
                       Last played{' '}
-                      {formatDistanceToNow(new Date(timestamp), {
-                        addSuffix: true
-                      })}
+                      <span title={new Date(timestamp).toString()}>
+                        {formatDistanceToNow(new Date(timestamp), {
+                          addSuffix: true
+                        })}
+                      </span>
                     </p>
                     <div className='flex flex-row gap-2 my-1'>
                       <FontAwesomeIcon
