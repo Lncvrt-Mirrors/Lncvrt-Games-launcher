@@ -82,7 +82,10 @@ export default function HomePage () {
             <Swiper
               modules={[Navigation]}
               spaceBetween={16}
-              slidesPerView={recentSlidesPerView}
+              slidesPerView={Math.min(
+                recentSlidesPerView,
+                Object.entries(filteredLaunchesList).length
+              )}
               autoHeight={false}
               className='w-full'
               onSwiper={swiper => {
