@@ -81,7 +81,7 @@ export default function VersionsDownloadPopup () {
         ) : (
           <div className='flex flex-col gap-2 justify-center text-center w-full h-full'>
             <p className='text-2xl'>No versions available to download</p>
-            <p>You may have all versions installed for this game</p>
+            <p>You may already have all versions installed for this game</p>
           </div>
         )}
       </div>
