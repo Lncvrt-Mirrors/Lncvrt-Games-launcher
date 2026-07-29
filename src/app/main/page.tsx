@@ -53,6 +53,7 @@ export default function HomePage () {
   const swiperRef = useRef<SwiperType | null>(null)
   const prevRef = useRef<HTMLButtonElement>(null)
   const nextRef = useRef<HTMLButtonElement>(null)
+  const [isLocked, setIsLocked] = useState(false)
 
   const [recentSlidesPerView, setRecentSlidesPerView] = useState(1)
 
@@ -90,6 +91,13 @@ export default function HomePage () {
               className='w-full'
               onSwiper={swiper => {
                 swiperRef.current = swiper
+                setIsLocked(swiper.isLocked)
+              }}
+              onResize={swiper => {
+                setIsLocked(swiper.isLocked)
+              }}
+              onUpdate={swiper => {
+                setIsLocked(swiper.isLocked)
               }}
               onBeforeInit={swiper => {
                 if (
@@ -142,22 +150,24 @@ export default function HomePage () {
                 )
               })}
             </Swiper>
-            <div className='flex flex-row gap-2'>
-              <button
-                ref={prevRef}
-                onClick={() => swiperRef.current?.slidePrev()}
-                className='button btntheme1 w-8 h-8 flex justify-center items-center'
-              >
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
-              <button
-                ref={nextRef}
-                onClick={() => swiperRef.current?.slideNext()}
-                className='button btntheme1 w-8 h-8 flex justify-center items-center'
-              >
-                <FontAwesomeIcon icon={faChevronRight} />
-              </button>
-            </div>
+            {!isLocked && (
+              <div className='flex flex-row gap-2'>
+                <button
+                  ref={prevRef}
+                  onClick={() => swiperRef.current?.slidePrev()}
+                  className='button btntheme1 w-8 h-8 flex justify-center items-center'
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <button
+                  ref={nextRef}
+                  onClick={() => swiperRef.current?.slideNext()}
+                  className='button btntheme1 w-8 h-8 flex justify-center items-center'
+                >
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
