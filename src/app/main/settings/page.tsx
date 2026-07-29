@@ -21,7 +21,6 @@ export default function SettingsPage () {
     account,
     version,
     versionsList,
-    sidebarAlwaysShowGames,
     linuxUseWine,
     linuxWineCommand,
     theme,
@@ -34,17 +33,6 @@ export default function SettingsPage () {
       <p className='text-3xl ml-4 mt-4'>Settings</p>
       <div className='flex flex-row p-4 gap-4'>
         <div className='bg-(--col1) border border-(--col3) rounded-lg p-4 w-fit h-fit'>
-          <Setting
-            label='Always show games in sidebar'
-            value={sidebarAlwaysShowGames}
-            onChange={async () => {
-              await settings?.set(
-                'sidebarAlwaysShowGames',
-                !sidebarAlwaysShowGames
-              )
-            }}
-            title="This setting will make it so when you are on a page like this, the games won't disappear."
-          />
           <Setting
             label='Use wine if needed'
             value={linuxUseWine}

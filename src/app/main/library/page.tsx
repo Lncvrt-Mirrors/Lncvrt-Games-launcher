@@ -11,7 +11,7 @@ import {
 import { platform } from '@tauri-apps/plugin-os'
 import { useRouter } from 'next/navigation'
 
-export default function GamesPage () {
+export default function LibraryPage () {
   const {
     versionsList,
     serverVersionList,

@@ -86,8 +86,6 @@ export default function RootLayout ({
   const [versions, setVersions] = useState<Store | null>(null)
   const [account, setAccount] = useState<Store | null>(null)
 
-  const [sidebarAlwaysShowGames, setSidebarAlwaysShowGames] =
-    useState<boolean>(false)
   const [linuxUseWine, setLinuxUseWine] = useState<boolean>(false)
   const [linuxWineCommand, setLinuxWineCommand] =
     useState<string>('wine %path%')
@@ -357,7 +355,7 @@ export default function RootLayout ({
   }
 
   const closePopup = useCallback(() => {
-    if (popupMode == 0 && selectedGame && pathname === '/main/games') {
+    if (popupMode == 0 && selectedGame && pathname === '/main/library') {
       setSelectedGame(null)
       setSelectedVersionList([])
     } else if (viewingInfoFromDownloads) {
@@ -829,9 +827,6 @@ export default function RootLayout ({
     }
 
     watchSettings<string>('theme', v => setTheme(v ?? 'dark'))
-    watchSettings<boolean>('sidebarAlwaysShowGames', v =>
-      setSidebarAlwaysShowGames(v ?? true)
-    )
     watchSettings<boolean>('linuxUseWine', v => setLinuxUseWine(v ?? false))
     watchSettings<string>('linuxWineCommand', v =>
       setLinuxWineCommand(v ?? 'wine %path%')
@@ -897,7 +892,6 @@ export default function RootLayout ({
                 settings,
                 versions,
                 account,
-                sidebarAlwaysShowGames,
                 linuxUseWine,
                 linuxWineCommand,
                 theme,
@@ -955,7 +949,7 @@ export default function RootLayout ({
                           icon={
                             (popupMode == 0 &&
                               selectedGame &&
-                              pathname === '/main/games') ||
+                              pathname === '/main/library') ||
                             viewingInfoFromDownloads ||
                             (popupMode == 3 && showModInfo) ||
                             popupMode == 4

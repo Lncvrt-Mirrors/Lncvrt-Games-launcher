@@ -39,7 +39,6 @@ export default function Sidebar () {
     downloadProgress,
     category,
     setCategory,
-    sidebarAlwaysShowGames,
     linuxUseWine,
     setManagingGame,
     settings,
@@ -108,9 +107,9 @@ export default function Sidebar () {
         </Link>
         <Link
           draggable={false}
-          href='/main/games'
+          href='/main/library'
           className={`link relative flex items-center ${
-            pathname === '/main/games' || pathname.startsWith('/main/game')
+            pathname === '/main/library' || pathname.startsWith('/main/game')
               ? 'active'
               : ''
           }`}
@@ -138,103 +137,92 @@ export default function Sidebar () {
             }
           }}
         >
-          <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Games
+          <FontAwesomeIcon icon={faHexagonNodes} className='mr-2' /> Library
         </Link>
-        {serverVersionList?.games
-          .filter(g =>
-            serverVersionList.versions
-              .filter(v => v.game === g.id)
-              .some(v => Object.keys(versionsList).includes(v.id))
-          )
-          .map(i => (
-            <React.Fragment key={i.id}>
-              <div
-                draggable={false}
-                className={`link ${
-                  pathname === '/main/game' &&
-                  Number(params.get('id') || 0) == i.id
-                    ? 'active'
-                    : ''
-                } ml-auto w-50 ${
-                  sidebarAlwaysShowGames ||
-                  pathname === '/main/games' ||
-                  pathname.startsWith('/main/game')
-                    ? ''
-                    : 'hidden'
-                }`}
-                onClick={() => {
-                  setCategory(-1)
-                  router.push('/main/game?id=' + i.id)
-                }}
-                onContextMenu={e => {
-                  e.preventDefault()
-                  setManagingGame(i.id)
-                  setPopupMode(5)
-                  setShowPopup(true)
-                  setFadeOut(false)
-                }}
-                title='Click to view game installs.'
-              >
-                <div className='flex items-center'>
-                  <FontAwesomeIcon
-                    icon={
-                      Object.entries(i.categoryNames).length > 0
-                        ? faLayerGroup
-                        : faGamepad
-                    }
-                    className='mr-1'
-                  />
-                  <span className='truncate max-w-full'>{i.name}</span>
-                </div>
-              </div>
-              {Object.entries(i.categoryNames)
-                .sort(([a], [b]) => Number(b) - Number(a))
-                .filter(([key]) => {
-                  const count = Object.keys(versionsList).filter(v => {
-                    const info = serverVersionList.versions.find(
-                      vf => vf.id == v
-                    )
-                    if (!info) return false
-
-                    if (platform() == 'linux' && info.wine && !linuxUseWine)
-                      return false
-
-                    return info.game === i.id && info.category === Number(key)
-                  }).length
-
-                  return count >= 1
-                })
-                .map(([key, value]) => (
-                  <div
-                    key={`${i.id}-${key}`}
-                    draggable={false}
-                    className={`link ${
-                      pathname === '/main/game' &&
-                      Number(params.get('id') || 0) == i.id &&
-                      category == Number(key)
-                        ? 'active'
-                        : ''
-                    } ml-auto w-47.5 ${
-                      sidebarAlwaysShowGames ||
-                      pathname === '/main/games' ||
-                      pathname.startsWith('/main/game')
-                        ? ''
-                        : 'hidden'
-                    }`}
-                    onClick={() => {
-                      setCategory(Number(key))
-                      router.push('/main/game?id=' + i.id)
-                    }}
-                    title="Click to view this game's category."
-                  >
-                    <div className='flex items-center'>
-                      <FontAwesomeIcon icon={faGamepad} className='mr-1' />
-                      <span className='truncate max-w-full'>{value}</span>
-                    </div>
+        {(pathname === '/main/library' || pathname.startsWith('/main/game')) &&
+          serverVersionList?.games
+            .filter(g =>
+              serverVersionList.versions
+                .filter(v => v.game === g.id)
+                .some(v => Object.keys(versionsList).includes(v.id))
+            )
+            .map(i => (
+              <React.Fragment key={i.id}>
+                <div
+                  draggable={false}
+                  className={`link ${
+                    pathname === '/main/game' &&
+                    Number(params.get('id') || 0) == i.id
+                      ? 'active'
+                      : ''
+                  } ml-auto w-50`}
+                  onClick={() => {
+                    setCategory(-1)
+                    router.push('/main/game?id=' + i.id)
+                  }}
+                  onContextMenu={e => {
+                    e.preventDefault()
+                    setManagingGame(i.id)
+                    setPopupMode(5)
+                    setShowPopup(true)
+                    setFadeOut(false)
+                  }}
+                  title='Click to view game installs.'
+                >
+                  <div className='flex items-center'>
+                    <FontAwesomeIcon
+                      icon={
+                        Object.entries(i.categoryNames).length > 0
+                          ? faLayerGroup
+                          : faGamepad
+                      }
+                      className='mr-1'
+                    />
+                    <span className='truncate max-w-full'>{i.name}</span>
                   </div>
-                ))}
-            </React.Fragment>
-          ))}
+                </div>
+                {Object.entries(i.categoryNames)
+                  .sort(([a], [b]) => Number(b) - Number(a))
+                  .filter(([key]) => {
+                    const count = Object.keys(versionsList).filter(v => {
+                      const info = serverVersionList.versions.find(
+                        vf => vf.id == v
+                      )
+                      if (!info) return false
+
+                      if (platform() == 'linux' && info.wine && !linuxUseWine)
+                        return false
+
+                      return info.game === i.id && info.category === Number(key)
+                    }).length
+
+                    return count >= 1
+                  })
+                  .map(([key, value]) => (
+                    <div
+                      key={`${i.id}-${key}`}
+                      draggable={false}
+                      className={`link ${
+                        pathname === '/main/game' &&
+                        Number(params.get('id') || 0) == i.id &&
+                        category == Number(key)
+                          ? 'active'
+                          : ''
+                      } ml-auto w-47.5`}
+                      onClick={() => {
+                        setCategory(Number(key))
+                        router.push('/main/game?id=' + i.id)
+                      }}
+                      title="Click to view this game's category."
+                    >
+                      <div className='flex items-center'>
+                        <FontAwesomeIcon icon={faGamepad} className='mr-1' />
+                        <span className='truncate max-w-full'>{value}</span>
+                      </div>
+                    </div>
+                  ))}
+              </React.Fragment>
+            ))}
         <Link
           draggable={false}
           href='/main/settings'

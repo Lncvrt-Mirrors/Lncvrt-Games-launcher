@@ -54,7 +54,6 @@ type GlobalCtxType = {
   settings: Store | null
   versions: Store | null
   account: Store | null
-  sidebarAlwaysShowGames: boolean
   linuxUseWine: boolean
   linuxWineCommand: string
   theme: string
