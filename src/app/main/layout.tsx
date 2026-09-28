@@ -766,10 +766,6 @@ export default function RootLayout ({
       }
 
       setLoading(false)
-
-      const window = getCurrentWindow()
-      await window.show()
-      await window.setFocus()
     })()
   }, [])
 
